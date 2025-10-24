@@ -1,0 +1,18 @@
+[project]
+name = "myfy"
+version = "0.1.0"
+description = "Opinionated Python framework with modularity, ergonomics, and power"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "myfy-core>=0.1.0",
+    "myfy-cli>=0.1.0",
+]
+
+[project.optional-dependencies]
+web = ["myfy-web>=0.1.0"]
+all = ["myfy-web>=0.1.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

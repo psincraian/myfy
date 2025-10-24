@@ -1,0 +1,19 @@
+[project]
+name = "myfy-workspace"
+version = "0.1.0"
+description = "myfy framework workspace"
+requires-python = ">=3.12"
+
+[tool.uv.workspace]
+members = [
+  "packages/myfy-core",
+  "packages/myfy-web",
+  "packages/myfy-cli",
+  "packages/myfy",
+]
+
+[tool.uv.sources]
+myfy-core = { workspace = true }
+myfy-web = { workspace = true }
+myfy-cli = { workspace = true }
+myfy = { workspace = true }
