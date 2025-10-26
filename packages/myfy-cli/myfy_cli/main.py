@@ -7,17 +7,17 @@ Provides commands for development and operations:
 - myfy modules: Show loaded modules
 """
 
-import sys
-import os
-import subprocess
-from pathlib import Path
-from typing import Optional
 import importlib.util
+import subprocess
+import sys
+from pathlib import Path
 
 import typer
+import uvicorn
 from rich.console import Console
 from rich.table import Table
-import uvicorn
+
+from myfy.core import Application
 
 app = typer.Typer(
     name="myfy",
@@ -46,7 +46,7 @@ def find_application():
         file_path = Path(filename)
         if file_path.exists() and file_path.is_file():
             # Validate it's actually a Python file
-            if not filename.endswith('.py'):
+            if not filename.endswith(".py"):
                 continue
 
             result = _load_app_from_file(str(file_path))
@@ -56,7 +56,9 @@ def find_application():
                 return app_instance, filename, var_name
 
     console.print("[red]Error: Could not find Application instance[/red]")
-    console.print("Create an app.py, main.py, or application.py with an Application instance")
+    console.print(
+        "Create an app.py, main.py, or application.py with an Application instance"
+    )
     sys.exit(1)
 
 
@@ -75,8 +77,6 @@ def _load_app_from_file(filepath: str):
             spec.loader.exec_module(module)
 
             # Look for Application instance
-            from myfy.core import Application
-
             for name in dir(module):
                 obj = getattr(module, name)
                 if isinstance(obj, Application):
@@ -87,7 +87,7 @@ def _load_app_from_file(filepath: str):
     return None
 
 
-def _setup_reload_module(filename: str, var_name: str, asgi_app):
+def _setup_reload_module(filename: str, var_name: str) -> str:
     """
     Set up a reloadable module for uvicorn by writing a helper file.
 
@@ -97,7 +97,7 @@ def _setup_reload_module(filename: str, var_name: str, asgi_app):
     Returns the import path string (e.g., "_myfy_server:app")
     """
     # Get the module name from filename (e.g., "app.py" -> "app")
-    module_name = filename.replace('.py', '')
+    module_name = filename.replace(".py", "")
 
     # Create a helper file with application reload logic
     # This file will be imported by uvicorn's worker subprocess
@@ -143,7 +143,7 @@ def run(
     host: str = typer.Option("127.0.0.1", help="Server host"),
     port: int = typer.Option(8000, help="Server port"),
     reload: bool = typer.Option(True, help="Enable auto-reload"),
-    app_path: Optional[str] = typer.Option(None, help="Path to app (e.g., main:app)"),
+    app_path: str | None = typer.Option(None, help="Path to app (e.g., main:app)"),
 ):
     """
     Start the development server.
@@ -185,12 +185,9 @@ def run(
         console.print(f"📦 Loaded {len(application._modules)} module(s)")
 
         if reload:
-            # Get ASGI app first (needed for helper setup)
-            asgi_app = web_module.get_asgi_app(application.container)
-
             # Set up reloadable module for uvicorn
-            import_path = _setup_reload_module(filename, var_name, asgi_app)
-            console.print(f"🔄 Reload enabled - watching for file changes")
+            import_path = _setup_reload_module(filename, var_name)
+            console.print("🔄 Reload enabled - watching for file changes")
 
             try:
                 # Use subprocess to call uvicorn CLI for proper reload support
@@ -198,14 +195,17 @@ def run(
                 cmd = [
                     "uvicorn",
                     import_path,
-                    "--host", host,
-                    "--port", str(port),
+                    "--host",
+                    host,
+                    "--port",
+                    str(port),
                     "--reload",
-                    "--log-level", "info",
+                    "--log-level",
+                    "info",
                 ]
 
                 # Run uvicorn via subprocess (uv will handle the environment)
-                subprocess.run(cmd)
+                subprocess.run(cmd, check=True)
             finally:
                 # Clean up the temporary helper file
                 helper_file = Path("_myfy_server.py")
@@ -213,6 +213,7 @@ def run(
                     helper_file.unlink()
         else:
             # When reload is disabled, we can pass the app object directly
+            assert web_module is not None  # Already checked above
             asgi_app = web_module.get_asgi_app(application.container)
             uvicorn.run(
                 asgi_app.app,  # Use the underlying Starlette app
@@ -318,7 +319,9 @@ def doctor():
         if has_web:
             console.print("[green]✓[/green] Web module configured")
         else:
-            console.print("[yellow]![/yellow] No web module (add WebModule() if you need HTTP)")
+            console.print(
+                "[yellow]![/yellow] No web module (add WebModule() if you need HTTP)"
+            )
 
         console.print("\n[green]✨ All checks passed![/green]")
 

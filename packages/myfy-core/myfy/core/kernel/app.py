@@ -4,14 +4,12 @@ Application kernel - the heart of myfy.
 Coordinates DI, modules, configuration, and lifecycle.
 """
 
-from typing import List, Type, Optional, Any
-import asyncio
 from importlib.metadata import entry_points
 
-from ..di import Container, register_providers_in_container
 from ..config import BaseSettings, CoreSettings, load_settings
-from .module import Module
+from ..di import Container, register_providers_in_container
 from .lifecycle import LifecycleManager
+from .module import Module
 
 
 class Application:
@@ -34,7 +32,7 @@ class Application:
 
     def __init__(
         self,
-        settings_class: Type[BaseSettings] = CoreSettings,
+        settings_class: type[BaseSettings] = CoreSettings,
         auto_discover: bool = True,
     ):
         """
@@ -52,7 +50,7 @@ class Application:
         self.lifecycle = LifecycleManager(timeout=shutdown_timeout)
 
         self._initialized = False
-        self._modules: List[Module] = []
+        self._modules: list[Module] = []
         self._auto_discover = auto_discover
 
     def add_module(self, module: Module) -> None:
@@ -131,17 +129,12 @@ class Application:
                 try:
                     module_factory = ep.load()
                     # Entry point should be a Module instance or a callable that returns one
-                    if callable(module_factory):
-                        module = module_factory()
-                    else:
-                        module = module_factory
+                    module = module_factory() if callable(module_factory) else module_factory
 
                     if isinstance(module, Module):
                         self.add_module(module)
                 except Exception as e:
-                    print(
-                        f"Warning: Failed to load module '{ep.name}' from {ep.value}: {e}"
-                    )
+                    print(f"Warning: Failed to load module '{ep.name}' from {ep.value}: {e}")
         except Exception as e:
             # Entry points discovery failed - not critical
             print(f"Warning: Module discovery failed: {e}")
@@ -180,7 +173,9 @@ class Application:
 
         async with self.lifecycle.lifespan():
             print(f"🚀 {self.settings.app_name} started")
-            print(f"📦 Loaded {len(self._modules)} module(s): {', '.join(m.name for m in self._modules)}")
+            print(
+                f"📦 Loaded {len(self._modules)} module(s): {', '.join(m.name for m in self._modules)}"
+            )
 
             # Wait for shutdown signal
             await self.lifecycle.wait_for_shutdown()
@@ -188,7 +183,4 @@ class Application:
         print(f"👋 {self.settings.app_name} stopped")
 
     def __repr__(self) -> str:
-        return (
-            f"Application(modules={len(self._modules)}, "
-            f"initialized={self._initialized})"
-        )
+        return f"Application(modules={len(self._modules)}, initialized={self._initialized})"

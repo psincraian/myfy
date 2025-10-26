@@ -21,26 +21,21 @@ Usage:
     await app.run()
 """
 
-from .routing import Router, route, Route, HTTPMethod
-from .module import WebModule, web_module
-from .context import RequestContext, get_request_context
 from .asgi import ASGIApp
 from .config import WebSettings
+from .context import RequestContext, get_request_context
+from .module import WebModule, web_module
+from .routing import HTTPMethod, Route, Router, route
 
 __all__ = [
-    # Routing
-    "Router",
-    "route",
-    "Route",
-    "HTTPMethod",
-    # Module
-    "WebModule",
-    "web_module",
-    # Context
-    "RequestContext",
-    "get_request_context",
-    # ASGI
     "ASGIApp",
-    # Config
+    "HTTPMethod",
+    "RequestContext",
+    "Route",
+    "Router",
+    "WebModule",
     "WebSettings",
+    "get_request_context",
+    "route",
+    "web_module",
 ]

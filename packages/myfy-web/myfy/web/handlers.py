@@ -4,19 +4,24 @@ Handler execution with dependency injection.
 Compiles injection plans for routes at startup.
 """
 
-from typing import Any, Callable, Dict, get_type_hints
-from inspect import signature, iscoroutinefunction
 import json
 import logging
 import traceback
+from inspect import iscoroutinefunction
+from typing import TYPE_CHECKING, Any, get_type_hints
 
-from starlette.requests import Request
-from starlette.responses import Response, JSONResponse
-from starlette.exceptions import HTTPException
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
 from pydantic import ValidationError
+from starlette.exceptions import HTTPException
+from starlette.requests import Request
+from starlette.responses import JSONResponse, Response
 
-from .routing import Route
+from myfy.core.config import CoreSettings
+
 from .context import RequestContext, get_request_context
+from .routing import Route
 
 
 class HandlerExecutor:
@@ -29,7 +34,7 @@ class HandlerExecutor:
 
     def __init__(self, container: Any):
         self.container = container
-        self._execution_plans: Dict[str, Callable] = {}
+        self._execution_plans: dict[str, Callable] = {}
         self._logger = logging.getLogger(__name__)
 
     def compile_route(self, route: Route) -> None:
@@ -38,11 +43,10 @@ class HandlerExecutor:
 
         Analyzes the handler signature and builds a fast execution path.
         """
-        sig = signature(route.handler)
         hints = get_type_hints(route.handler)
 
         # Build execution plan
-        async def execute(request: Request, path_params: Dict[str, Any]) -> Response:
+        async def execute(request: Request, path_params: dict[str, Any]) -> Response:
             kwargs = {}
 
             # 1. Inject path parameters
@@ -50,13 +54,16 @@ class HandlerExecutor:
                 param_type = hints.get(param_name, str)
                 raw_value = path_params.get(param_name)
                 # Convert to appropriate type with validation
-                kwargs[param_name] = self._convert_param(raw_value, param_type, param_name)
+                kwargs[param_name] = self._convert_param(
+                    raw_value, param_type, param_name
+                )
 
             # 2. Inject request body if needed
             if route.body_param:
                 body_type = hints.get(route.body_param)
-                body_data = await self._parse_body(request, body_type)
-                kwargs[route.body_param] = body_data
+                if body_type is not None:
+                    body_data = await self._parse_body(request, body_type)
+                    kwargs[route.body_param] = body_data
 
             # 3. Inject dependencies from container
             for param_name in route.dependencies:
@@ -73,7 +80,7 @@ class HandlerExecutor:
                             kwargs[param_name] = self.container.get(param_type)
                     except Exception as e:
                         return JSONResponse(
-                            {"error": f"Failed to inject {param_name}: {str(e)}"},
+                            {"error": f"Failed to inject {param_name}: {e!s}"},
                             status_code=500,
                         )
 
@@ -100,7 +107,7 @@ class HandlerExecutor:
         self._execution_plans[self._route_key(route)] = execute
 
     async def execute_route(
-        self, route: Route, request: Request, path_params: Dict[str, Any]
+        self, route: Route, request: Request, path_params: dict[str, Any]
     ) -> Response:
         """Execute a route handler."""
         plan = self._execution_plans.get(self._route_key(route))
@@ -118,61 +125,58 @@ class HandlerExecutor:
             return None
 
         try:
-            if type_hint == int:
+            if type_hint is int:
                 return int(value)
-            elif type_hint == float:
+            if type_hint is float:
                 return float(value)
-            elif type_hint == bool:
+            if type_hint is bool:
                 return value.lower() in ("true", "1", "yes")
             return str(value)
         except (ValueError, AttributeError) as e:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid value for parameter '{param_name}': expected {type_hint.__name__}, got '{value}'"
-            )
+                detail=f"Invalid value for parameter '{param_name}': expected {type_hint.__name__}, got '{value}'",
+            ) from e
 
     async def _parse_body(self, request: Request, body_type: type) -> Any:
         """Parse request body with proper error handling."""
         try:
-            if body_type in (dict, Dict):
+            if body_type in (dict, dict):
                 return await request.json()
-            elif body_type in (str,):
+            if body_type in (str,):
                 body = await request.body()
                 return body.decode()
-            elif hasattr(body_type, "model_validate"):
+            if hasattr(body_type, "model_validate"):
                 # Pydantic model
                 try:
                     data = await request.json()
                 except json.JSONDecodeError as e:
                     raise HTTPException(
-                        status_code=400,
-                        detail=f"Invalid JSON: {str(e)}"
-                    )
+                        status_code=400, detail=f"Invalid JSON: {e!s}"
+                    ) from e
 
                 try:
-                    return body_type.model_validate(data)
+                    # Type checker doesn't know about Pydantic's model_validate
+                    return body_type.model_validate(data)  # type: ignore[attr-defined]
                 except ValidationError as e:
                     raise HTTPException(
-                        status_code=422,
-                        detail={"errors": e.errors(), "body": data}
-                    )
+                        status_code=422, detail={"errors": e.errors(), "body": data}
+                    ) from e
             elif hasattr(body_type, "__dataclass_fields__"):
                 # Dataclass
                 try:
                     data = await request.json()
                 except json.JSONDecodeError as e:
                     raise HTTPException(
-                        status_code=400,
-                        detail=f"Invalid JSON: {str(e)}"
-                    )
+                        status_code=400, detail=f"Invalid JSON: {e!s}"
+                    ) from e
 
                 try:
                     return body_type(**data)
                 except TypeError as e:
                     raise HTTPException(
-                        status_code=422,
-                        detail=f"Invalid request body: {str(e)}"
-                    )
+                        status_code=422, detail=f"Invalid request body: {e!s}"
+                    ) from e
             else:
                 # Try JSON by default
                 return await request.json()
@@ -181,28 +185,26 @@ class HandlerExecutor:
             raise  # Re-raise HTTP exceptions
         except Exception as e:
             raise HTTPException(
-                status_code=400,
-                detail=f"Failed to parse request body: {str(e)}"
-            )
+                status_code=400, detail=f"Failed to parse request body: {e!s}"
+            ) from e
 
     def _make_response(self, result: Any) -> Response:
         """Convert handler result to HTTP response."""
         if isinstance(result, Response):
             return result
-        elif isinstance(result, dict) or isinstance(result, list):
+        if isinstance(result, (dict, list)):
             return JSONResponse(result)
-        elif hasattr(result, "model_dump"):
+        if hasattr(result, "model_dump"):
             # Pydantic model
             return JSONResponse(result.model_dump())
-        elif result is None:
+        if result is None:
             return Response(status_code=204)
-        else:
-            # Try to serialize as JSON
-            try:
-                return JSONResponse(result)
-            except (TypeError, ValueError):
-                # Fallback to string
-                return Response(content=str(result), media_type="text/plain")
+        # Try to serialize as JSON
+        try:
+            return JSONResponse(result)
+        except (TypeError, ValueError):
+            # Fallback to string
+            return Response(content=str(result), media_type="text/plain")
 
     def _make_error_response(self, error: Exception) -> JSONResponse:
         """Create error response with appropriate detail level based on debug mode."""
@@ -212,7 +214,6 @@ class HandlerExecutor:
         # Get debug mode from settings if available
         debug_mode = False
         try:
-            from myfy.core.config import CoreSettings
             settings = self.container.get(CoreSettings)
             debug_mode = settings.debug
         except Exception:
@@ -230,14 +231,13 @@ class HandlerExecutor:
                 },
                 status_code=500,
             )
-        else:
-            # In production: hide details
-            return JSONResponse(
-                {
-                    "type": "about:blank",
-                    "title": "Internal Server Error",
-                    "status": 500,
-                    "detail": "An unexpected error occurred. Please contact support.",
-                },
-                status_code=500,
-            )
+        # In production: hide details
+        return JSONResponse(
+            {
+                "type": "about:blank",
+                "title": "Internal Server Error",
+                "status": 500,
+                "detail": "An unexpected error occurred. Please contact support.",
+            },
+            status_code=500,
+        )

@@ -4,10 +4,10 @@ Lifecycle management for modules and providers.
 Handles startup/shutdown order, error recovery, and graceful termination.
 """
 
-from typing import List, Set, Dict, Any, Optional
 import asyncio
-import signal
+import contextlib
 import logging
+import signal
 from contextlib import asynccontextmanager
 
 from .module import Module
@@ -26,10 +26,10 @@ class LifecycleManager:
 
     def __init__(self, timeout: float = 10.0):
         self.timeout = timeout
-        self._modules: List[Module] = []
-        self._started_modules: List[Module] = []
+        self._modules: list[Module] = []
+        self._started_modules: list[Module] = []
         self._shutdown_event = asyncio.Event()
-        self._loop: Optional[asyncio.AbstractEventLoop] = None
+        self._loop: asyncio.AbstractEventLoop | None = None
         self._logger = logging.getLogger(__name__)
 
     def add_module(self, module: Module) -> None:
@@ -53,9 +53,7 @@ class LifecycleManager:
             except Exception as e:
                 # Startup failed - cleanup ONLY modules we just started
                 await self._emergency_stop(started_in_this_call)
-                raise RuntimeError(
-                    f"Failed to start module '{module.name}': {e}"
-                ) from e
+                raise RuntimeError(f"Failed to start module '{module.name}': {e}") from e
 
     async def stop_all(self) -> None:
         """
@@ -71,23 +69,23 @@ class LifecycleManager:
                 self._logger.debug(f"Stopping module '{module.name}'")
                 await asyncio.wait_for(module.stop(), timeout=self.timeout)
                 self._logger.debug(f"Module '{module.name}' stopped successfully")
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 self._logger.error(
                     f"Module '{module.name}' did not stop within {self.timeout}s. "
                     f"This may indicate a resource leak or hanging operation.",
-                    extra={"module": module.name, "timeout": self.timeout}
+                    extra={"module": module.name, "timeout": self.timeout},
                 )
             except Exception as e:
                 self._logger.exception(
                     f"Error stopping module '{module.name}': {e}",
                     extra={"module": module.name},
-                    exc_info=True
+                    exc_info=True,
                 )
 
         self._started_modules.clear()
         self._logger.info("All modules stopped")
 
-    async def _emergency_stop(self, modules_to_stop: Optional[List[Module]] = None) -> None:
+    async def _emergency_stop(self, modules_to_stop: list[Module] | None = None) -> None:
         """
         Emergency stop during failed startup - no timeout.
 
@@ -97,10 +95,9 @@ class LifecycleManager:
         modules = modules_to_stop if modules_to_stop is not None else self._started_modules
 
         for module in reversed(modules):
-            try:
+            with contextlib.suppress(Exception):
+                # Best effort - ignore errors during shutdown
                 await module.stop()
-            except Exception:
-                pass  # Best effort
 
         if modules_to_stop is None:
             self._started_modules.clear()
@@ -122,8 +119,8 @@ class LifecycleManager:
                 self._loop.call_soon_threadsafe(self._shutdown_event.set)
 
         # Register handlers
-        signal.signal(signal.SIGTERM, lambda s, f: signal_handler(s))
-        signal.signal(signal.SIGINT, lambda s, f: signal_handler(s))
+        signal.signal(signal.SIGTERM, lambda s, _f: signal_handler(s))
+        signal.signal(signal.SIGINT, lambda s, _f: signal_handler(s))
 
     async def wait_for_shutdown(self) -> None:
         """Wait for a shutdown signal."""

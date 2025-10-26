@@ -4,19 +4,21 @@ ASGI adapter using Starlette.
 Integrates myfy routing and DI with ASGI protocol.
 """
 
-from typing import List, Any
-from contextlib import asynccontextmanager
+from typing import Any
 
 from starlette.applications import Starlette
-from starlette.routing import Route as StarletteRoute, Mount
-from starlette.requests import Request
-from starlette.responses import Response, JSONResponse
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
+from starlette.routing import Route as StarletteRoute
 
-from .routing import Route, Router
-from .context import RequestContext, set_request_context, clear_request_context
+from myfy.core.di import ScopeContext
+
+from .config import WebSettings
+from .context import RequestContext, clear_request_context, set_request_context
 from .handlers import HandlerExecutor
+from .routing import Route, Router
 
 
 class ASGIApp:
@@ -49,21 +51,19 @@ class ASGIApp:
     def _build_starlette_app(self, lifespan: Any = None) -> Starlette:
         """Build the underlying Starlette application."""
         # Convert myfy routes to Starlette routes
-        starlette_routes = []
-        for route in self.router.get_routes():
-            starlette_routes.append(
-                StarletteRoute(
-                    route.path,
-                    endpoint=self._make_endpoint(route),
-                    methods=[route.method.value],
-                    name=route.name,
-                )
+        starlette_routes = [
+            StarletteRoute(
+                route.path,
+                endpoint=self._make_endpoint(route),
+                methods=[route.method.value],
+                name=route.name,
             )
+            for route in self.router.get_routes()
+        ]
 
         # Get CORS settings from container
         middleware = []
         try:
-            from .config import WebSettings
             web_settings = self.container.get(WebSettings)
 
             # Only enable CORS if explicitly configured
@@ -106,18 +106,13 @@ class ASGIApp:
             set_request_context(context)
 
             # Setup request scope in DI
-            from myfy.core.di import ScopeContext
-
             # Initialize request scope bag explicitly (thread-safe)
             ScopeContext.init_request_scope()
 
             try:
                 # Execute handler with DI
                 path_params = request.path_params
-                response = await self.executor.execute_route(
-                    route, request, path_params
-                )
-                return response
+                return await self.executor.execute_route(route, request, path_params)
 
             finally:
                 # Cleanup

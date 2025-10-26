@@ -21,38 +21,33 @@ Usage:
 """
 
 from .container import Container
-from .scopes import Scope, SINGLETON, REQUEST, TASK, ScopeContext
-from .types import Qualifier, ProviderKey
-from .provider import provider, register_providers_in_container
 from .errors import (
-    DIError,
-    ProviderNotFoundError,
     CircularDependencyError,
-    ScopeMismatchError,
-    DuplicateProviderError,
     ContainerFrozenError,
+    DIError,
+    DuplicateProviderError,
+    ProviderNotFoundError,
+    ScopeMismatchError,
 )
+from .provider import provider, register_providers_in_container
+from .scopes import REQUEST, SINGLETON, TASK, Scope, ScopeContext
+from .types import ProviderKey, Qualifier
 
 __all__ = [
-    # Core classes
-    "Container",
-    "ScopeContext",
-    # Scopes
-    "Scope",
-    "SINGLETON",
     "REQUEST",
+    "SINGLETON",
     "TASK",
-    # Decorators
+    "CircularDependencyError",
+    "Container",
+    "ContainerFrozenError",
+    "DIError",
+    "DuplicateProviderError",
+    "ProviderKey",
+    "ProviderNotFoundError",
+    "Qualifier",
+    "Scope",
+    "ScopeContext",
+    "ScopeMismatchError",
     "provider",
     "register_providers_in_container",
-    # Types
-    "Qualifier",
-    "ProviderKey",
-    # Errors
-    "DIError",
-    "ProviderNotFoundError",
-    "CircularDependencyError",
-    "ScopeMismatchError",
-    "DuplicateProviderError",
-    "ContainerFrozenError",
 ]

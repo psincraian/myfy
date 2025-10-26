@@ -5,22 +5,22 @@ Implements constructor injection with compile-time resolution.
 No heavy reflection on the hot path - all type analysis happens at startup.
 """
 
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, get_type_hints
-from contextlib import contextmanager
-from inspect import signature, Parameter
 import threading
+from collections.abc import Callable
+from contextlib import contextmanager
+from inspect import Parameter, signature
+from typing import Any, TypeVar, get_type_hints
 
-from .scopes import Scope, SINGLETON, ScopeContext
-from .types import ProviderKey, ProviderFactory, Qualifier
 from .errors import (
-    ProviderNotFoundError,
     CircularDependencyError,
-    ScopeMismatchError,
-    DuplicateProviderError,
     ContainerFrozenError,
     DIError,
+    DuplicateProviderError,
+    ProviderNotFoundError,
+    ScopeMismatchError,
 )
-
+from .scopes import SINGLETON, Scope, ScopeContext
+from .types import ProviderFactory, ProviderKey, Qualifier
 
 T = TypeVar("T")
 
@@ -39,8 +39,8 @@ class ProviderRegistration:
         self.factory = factory
         self.scope = scope
         self.reloadable_fields = reloadable_fields
-        self.dependencies: List[ProviderKey] = []
-        self.injection_plan: Optional[Callable] = None
+        self.dependencies: list[ProviderKey] = []
+        self.injection_plan: Callable[[], Any] | None = None
 
 
 class Container:
@@ -56,16 +56,16 @@ class Container:
     """
 
     def __init__(self):
-        self._providers: Dict[ProviderKey, ProviderRegistration] = {}
-        self._singletons: Dict[ProviderKey, Any] = {}
-        self._singleton_locks: Dict[ProviderKey, threading.Lock] = {}
+        self._providers: dict[ProviderKey, ProviderRegistration] = {}
+        self._singletons: dict[ProviderKey, Any] = {}
+        self._singleton_locks: dict[ProviderKey, threading.Lock] = {}
         self._frozen = False
-        self._override_stack: List[Dict[Type, ProviderFactory]] = []
+        self._override_stack: list[dict[type, ProviderFactory]] = []
         self._has_active_overrides = False
 
     def register(
         self,
-        type_: Type[T],
+        type_: type[T],
         factory: ProviderFactory[T],
         *,
         scope: Scope = SINGLETON,
@@ -89,7 +89,7 @@ class Container:
             DuplicateProviderError: If provider already registered
         """
         if self._frozen:
-            raise ContainerFrozenError()
+            raise ContainerFrozenError
 
         key = ProviderKey(type_, qualifier, name)
 
@@ -118,7 +118,7 @@ class Container:
             return
 
         # Analyze dependencies for each provider
-        for key, registration in self._providers.items():
+        for registration in self._providers.values():
             self._analyze_dependencies(registration)
 
         # Detect cycles
@@ -134,7 +134,7 @@ class Container:
 
         self._frozen = True
 
-    def get(self, type_: Type[T], qualifier: str | None = None) -> T:
+    def get(self, type_: type[T], qualifier: str | None = None) -> T:
         """
         Resolve and return an instance of the requested type.
 
@@ -160,7 +160,7 @@ class Container:
         return self._resolve(registration)
 
     @contextmanager
-    def override(self, overrides: Dict[Type, ProviderFactory]):
+    def override(self, overrides: dict[type, ProviderFactory]):
         """
         Temporarily override providers for testing.
 
@@ -214,11 +214,11 @@ class Container:
         except Exception as e:
             # Other errors are likely bugs - don't hide them
             raise DIError(
-                f"Failed to analyze dependencies for {registration.key}: {str(e)}. "
+                f"Failed to analyze dependencies for {registration.key}: {e!s}. "
                 f"Check that all parameters are properly typed."
             ) from e
 
-    def _check_cycles(self, key: ProviderKey, path: List[ProviderKey]) -> None:
+    def _check_cycles(self, key: ProviderKey, path: list[ProviderKey]) -> None:
         """Detect circular dependencies via depth-first search."""
         if key in path:
             cycle = [str(k) for k in path[path.index(key) :]]
@@ -228,7 +228,7 @@ class Container:
         if registration is None:
             return
 
-        new_path = path + [key]
+        new_path = [*path, key]
         for dep_key in registration.dependencies:
             self._check_cycles(dep_key, new_path)
 
@@ -263,7 +263,7 @@ class Container:
             sig = signature(registration.factory)
 
             for param_name, dep_key in zip(
-                sig.parameters.keys(), registration.dependencies
+                sig.parameters.keys(), registration.dependencies, strict=True
             ):
                 dep_registration = self._providers.get(dep_key)
                 if dep_registration:
@@ -292,11 +292,14 @@ class Container:
                 with self._singleton_locks[registration.key]:
                     # Check again inside lock
                     if registration.key not in self._singletons:
-                        self._singletons[registration.key] = registration.injection_plan()
+                        assert registration.injection_plan is not None
+                        self._singletons[registration.key] = (
+                            registration.injection_plan()
+                        )
 
             return self._singletons[registration.key]
 
-        elif registration.scope in (Scope.REQUEST, Scope.TASK):
+        if registration.scope in (Scope.REQUEST, Scope.TASK):
             # Request/Task: cache in scope bag
             bag = ScopeContext.get_bag_for_scope(registration.scope)
             if bag is None:
@@ -306,9 +309,10 @@ class Container:
 
             cache_key = str(registration.key)
             if cache_key not in bag:
+                assert registration.injection_plan is not None
                 bag[cache_key] = registration.injection_plan()
             return bag[cache_key]
 
-        else:
-            # Transient or unknown: create new instance
-            return registration.injection_plan()
+        # Transient or unknown: create new instance
+        assert registration.injection_plan is not None
+        return registration.injection_plan()

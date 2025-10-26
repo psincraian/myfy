@@ -4,8 +4,8 @@ Web module configuration.
 Each module defines its own settings for modularity.
 """
 
-from typing import List
 from pydantic import Field
+
 from myfy.core.config import BaseSettings
 
 
@@ -22,24 +22,24 @@ class WebSettings(BaseSettings):
 
     # CORS configuration
     cors_enabled: bool = Field(default=False, description="Enable CORS middleware")
-    cors_allowed_origins: List[str] = Field(
+    cors_allowed_origins: list[str] = Field(
         default_factory=list,
-        description="Allowed CORS origins (e.g., ['https://example.com']). Empty list = CORS disabled."
+        description="Allowed CORS origins (e.g., ['https://example.com']). Empty list = CORS disabled.",
     )
     cors_allow_credentials: bool = Field(default=True, description="Allow credentials in CORS")
-    cors_allowed_methods: List[str] = Field(
+    cors_allowed_methods: list[str] = Field(
         default_factory=lambda: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-        description="Allowed HTTP methods for CORS"
+        description="Allowed HTTP methods for CORS",
     )
-    cors_allowed_headers: List[str] = Field(
+    cors_allowed_headers: list[str] = Field(
         default_factory=lambda: ["Content-Type", "Authorization"],
-        description="Allowed headers for CORS"
+        description="Allowed headers for CORS",
     )
 
     # Request limits
     max_request_body_size: int = Field(
         default=10 * 1024 * 1024,  # 10 MB
-        description="Maximum request body size in bytes"
+        description="Maximum request body size in bytes",
     )
 
     class Config:

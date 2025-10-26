@@ -4,12 +4,12 @@ Web module for myfy.
 Provides HTTP/ASGI capabilities with routing and DI-powered handlers.
 """
 
-from typing import Optional
-
 from myfy.core.config import load_settings
-from .routing import Router, route as default_router
+
 from .asgi import ASGIApp
 from .config import WebSettings
+from .routing import Router
+from .routing import route as default_router
 
 
 class WebModule:
@@ -23,7 +23,7 @@ class WebModule:
     - ASGI standard (works with uvicorn, hypercorn, etc.)
     """
 
-    def __init__(self, router: Optional[Router] = None):
+    def __init__(self, router: Router | None = None):
         """
         Create web module.
 
@@ -31,7 +31,7 @@ class WebModule:
             router: Custom router (defaults to global route decorator instance)
         """
         self.router = router or default_router
-        self._asgi_app: Optional[ASGIApp] = None
+        self._asgi_app: ASGIApp | None = None
 
     @property
     def name(self) -> str:
@@ -67,11 +67,9 @@ class WebModule:
 
     async def start(self) -> None:
         """Start web module (nothing to do - ASGI server handles this)."""
-        pass
 
     async def stop(self) -> None:
         """Stop web module gracefully."""
-        pass
 
     def get_asgi_app(self, container) -> ASGIApp:
         """

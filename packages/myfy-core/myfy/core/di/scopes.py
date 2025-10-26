@@ -8,8 +8,8 @@ Scopes control the lifetime of injected dependencies:
 """
 
 from contextvars import ContextVar
-from typing import Any, Dict, Optional
 from enum import Enum
+from typing import Any
 
 
 class Scope(str, Enum):
@@ -27,10 +27,10 @@ TASK = Scope.TASK
 
 
 # Context storage for request and task scopes
-_request_scope_bag: ContextVar[Optional[Dict[str, Any]]] = ContextVar(
-    "_request_scope_bag", default=None
-)
-_task_scope_bag: ContextVar[Optional[Dict[str, Any]]] = ContextVar(
+_request_scope_bag: ContextVar[dict[str, Any] | None] = ContextVar[
+    dict[str, Any] | None
+]("_request_scope_bag", default=None)
+_task_scope_bag: ContextVar[dict[str, Any] | None] = ContextVar[dict[str, Any] | None](
     "_task_scope_bag", default=None
 )
 
@@ -44,7 +44,7 @@ class ScopeContext:
     """
 
     @staticmethod
-    def get_request_bag() -> Dict[str, Any]:
+    def get_request_bag() -> dict[str, Any]:
         """
         Get the request scope bag for the current context.
 
@@ -60,7 +60,7 @@ class ScopeContext:
         return bag
 
     @staticmethod
-    def get_task_bag() -> Dict[str, Any]:
+    def get_task_bag() -> dict[str, Any]:
         """
         Get the task scope bag for the current context.
 
@@ -75,14 +75,14 @@ class ScopeContext:
         return bag
 
     @staticmethod
-    def init_request_scope() -> Dict[str, Any]:
+    def init_request_scope() -> dict[str, Any]:
         """Initialize a new request scope (called by ASGI adapter)."""
         bag = {}
         _request_scope_bag.set(bag)
         return bag
 
     @staticmethod
-    def init_task_scope() -> Dict[str, Any]:
+    def init_task_scope() -> dict[str, Any]:
         """Initialize a new task scope (called by task runner)."""
         bag = {}
         _task_scope_bag.set(bag)
@@ -99,11 +99,11 @@ class ScopeContext:
         _task_scope_bag.set(None)
 
     @staticmethod
-    def get_bag_for_scope(scope: Scope) -> Optional[Dict[str, Any]]:
+    def get_bag_for_scope(scope: Scope) -> dict[str, Any] | None:
         """Get the appropriate bag for the given scope."""
         if scope == Scope.REQUEST:
             return ScopeContext.get_request_bag()
-        elif scope == Scope.TASK:
+        if scope == Scope.TASK:
             return ScopeContext.get_task_bag()
         return None  # Singleton doesn't use a bag
 

@@ -5,8 +5,13 @@ Modules are the building blocks of a myfy application.
 Each module (web, data, tasks, etc.) implements this protocol.
 """
 
-from typing import Protocol, runtime_checkable
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
+
+if TYPE_CHECKING:
+    from myfy.core.di import Container
 
 
 @runtime_checkable
@@ -25,7 +30,7 @@ class Module(Protocol):
         """Unique name for this module (e.g., 'web', 'sqlalchemy')."""
         ...
 
-    def configure(self, container: "Container") -> None:  # type: ignore
+    def configure(self, container: Container) -> None:
         """
         Configure the module by registering providers in the DI container.
 
@@ -79,13 +84,12 @@ class BaseModule(ABC):
         return self._name
 
     @abstractmethod
-    def configure(self, container: "Container") -> None:  # type: ignore
+    def configure(self, container: Container) -> None:
         """
         Configure the module by registering providers.
 
         Must be implemented by subclasses.
         """
-        pass
 
     async def start(self) -> None:
         """
@@ -93,7 +97,8 @@ class BaseModule(ABC):
 
         Override if your module needs startup logic.
         """
-        pass
+        # Default no-op implementation
+        return
 
     async def stop(self) -> None:
         """
@@ -101,7 +106,8 @@ class BaseModule(ABC):
 
         Override if your module needs cleanup logic.
         """
-        pass
+        # Default no-op implementation
+        return
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(name='{self.name}')"

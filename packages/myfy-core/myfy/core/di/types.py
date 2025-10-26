@@ -2,8 +2,8 @@
 Type definitions and protocols for the DI system.
 """
 
-from typing import Any, Callable, Protocol, TypeVar, runtime_checkable
-
+from collections.abc import Callable
+from typing import Any, Protocol, TypeVar, runtime_checkable
 
 T = TypeVar("T")
 
@@ -16,8 +16,6 @@ class Qualifier(str):
         ReadDB = Annotated[Database, Qualifier("read")]
         WriteDB = Annotated[Database, Qualifier("write")]
     """
-
-    pass
 
 
 @runtime_checkable

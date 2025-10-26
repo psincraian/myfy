@@ -4,11 +4,14 @@ FastAPI-like routing with DI-powered handlers.
 Routes are compiled at startup to build injection plans.
 """
 
-from typing import Any, Callable, List, Optional, Dict, get_type_hints
+import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from inspect import signature, Parameter
-import re
+from inspect import signature
+from typing import Any, get_type_hints
+
+from myfy.core.config import BaseSettings
 
 
 class HTTPMethod(str, Enum):
@@ -34,13 +37,14 @@ class Route:
     path: str
     method: HTTPMethod
     handler: Callable
-    name: Optional[str] = None
-    dependencies: List[str] = field(default_factory=list)
-    path_params: List[str] = field(default_factory=list)
-    body_param: Optional[str] = None
+    name: str | None = None
+    dependencies: list[str] = field(default_factory=list)
+    path_params: list[str] = field(default_factory=list)
+    body_param: str | None = None
 
     def __repr__(self) -> str:
-        return f"Route({self.method.value} {self.path} -> {self.handler.__name__})"
+        handler_name = getattr(self.handler, "__name__", "<lambda>")
+        return f"Route({self.method.value} {self.path} -> {handler_name})"
 
 
 class Router:
@@ -54,14 +58,14 @@ class Router:
     """
 
     def __init__(self):
-        self._routes: List[Route] = []
+        self._routes: list[Route] = []
 
     def add_route(
         self,
         path: str,
         handler: Callable,
         method: HTTPMethod,
-        name: Optional[str] = None,
+        name: str | None = None,
     ) -> Route:
         """
         Register a route.
@@ -79,7 +83,7 @@ class Router:
             path=path,
             method=method,
             handler=handler,
-            name=name or handler.__name__,
+            name=name or getattr(handler, "__name__", None),
         )
 
         # Parse path parameters
@@ -91,28 +95,28 @@ class Router:
         self._routes.append(route)
         return route
 
-    def get(self, path: str, name: Optional[str] = None) -> Callable:
+    def get(self, path: str, name: str | None = None) -> Callable:
         """Decorator for GET routes."""
         return self._method_decorator(path, HTTPMethod.GET, name)
 
-    def post(self, path: str, name: Optional[str] = None) -> Callable:
+    def post(self, path: str, name: str | None = None) -> Callable:
         """Decorator for POST routes."""
         return self._method_decorator(path, HTTPMethod.POST, name)
 
-    def put(self, path: str, name: Optional[str] = None) -> Callable:
+    def put(self, path: str, name: str | None = None) -> Callable:
         """Decorator for PUT routes."""
         return self._method_decorator(path, HTTPMethod.PUT, name)
 
-    def delete(self, path: str, name: Optional[str] = None) -> Callable:
+    def delete(self, path: str, name: str | None = None) -> Callable:
         """Decorator for DELETE routes."""
         return self._method_decorator(path, HTTPMethod.DELETE, name)
 
-    def patch(self, path: str, name: Optional[str] = None) -> Callable:
+    def patch(self, path: str, name: str | None = None) -> Callable:
         """Decorator for PATCH routes."""
         return self._method_decorator(path, HTTPMethod.PATCH, name)
 
     def _method_decorator(
-        self, path: str, method: HTTPMethod, name: Optional[str]
+        self, path: str, method: HTTPMethod, name: str | None
     ) -> Callable:
         """Generic decorator factory for HTTP methods."""
 
@@ -122,11 +126,11 @@ class Router:
 
         return decorator
 
-    def _extract_path_params(self, path: str) -> List[str]:
+    def _extract_path_params(self, path: str) -> list[str]:
         """Extract parameter names from path template with validation."""
         params = []
         parts = path.split("/")
-        param_pattern = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
+        param_pattern = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
 
         for part in parts:
             if part.startswith("{") and part.endswith("}"):
@@ -161,7 +165,7 @@ class Router:
         sig = signature(route.handler)
         hints = get_type_hints(route.handler)
 
-        for param_name, param in sig.parameters.items():
+        for param_name in sig.parameters:
             # Skip if it's a path parameter
             if param_name in route.path_params:
                 continue
@@ -185,23 +189,20 @@ class Router:
         """
         # BaseSettings subclasses are always DI dependencies, never request bodies
         try:
-            from myfy.core.config import BaseSettings
             if isinstance(type_hint, type) and issubclass(type_hint, BaseSettings):
                 return False
-        except (ImportError, TypeError):
+        except TypeError:
             pass
 
-        if type_hint in (dict, Dict, list, List):
+        if type_hint in (dict, list):
             return True
         # Check for Pydantic models
         if hasattr(type_hint, "model_validate"):
             return True
         # Check if it's a dataclass or similar
-        if hasattr(type_hint, "__dataclass_fields__"):
-            return True
-        return False
+        return bool(hasattr(type_hint, "__dataclass_fields__"))
 
-    def get_routes(self) -> List[Route]:
+    def get_routes(self) -> list[Route]:
         """Get all registered routes."""
         return self._routes.copy()
 

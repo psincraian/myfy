@@ -4,12 +4,13 @@ Configuration system with profiles and validation.
 Built on Pydantic for type-safe, validated settings.
 """
 
-from typing import Any, Dict, List, Optional
-from pathlib import Path
 import os
+from pathlib import Path
+from typing import Any
 
 from pydantic import Field
-from pydantic_settings import BaseSettings as PydanticBaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings as PydanticBaseSettings
+from pydantic_settings import SettingsConfigDict
 
 
 class BaseSettings(PydanticBaseSettings):
@@ -38,7 +39,7 @@ class BaseSettings(PydanticBaseSettings):
         extra="ignore",
     )
 
-    def model_dump_safe(self, **kwargs: Any) -> Dict[str, Any]:
+    def model_dump_safe(self, **kwargs: Any) -> dict[str, Any]:
         """
         Dump settings with secrets redacted.
 
@@ -48,7 +49,7 @@ class BaseSettings(PydanticBaseSettings):
         dump = self.model_dump(**kwargs)
 
         # Redact fields that commonly contain secrets
-        secret_patterns = ['password', 'secret', 'token', 'key', 'api_key', 'private']
+        secret_patterns = ["password", "secret", "token", "key", "api_key", "private"]
 
         for field_name in list(dump.keys()):
             field_lower = field_name.lower()
@@ -70,7 +71,7 @@ class Profile:
     TEST = "test"
     PROD = "prod"
 
-    _current: Optional[str] = None
+    _current: str | None = None
 
     @classmethod
     def get_active(cls) -> str:
@@ -138,8 +139,8 @@ class CoreSettings(BaseSettings):
 
 def load_settings(
     settings_class: type[BaseSettings] = CoreSettings,
-    profile: Optional[str] = None,
-    env_file: Optional[Path] = None,
+    profile: str | None = None,
+    env_file: Path | None = None,
 ) -> BaseSettings:
     """
     Load settings with profile-based layering.

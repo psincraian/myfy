@@ -10,12 +10,12 @@ Usage:
 """
 
 from .app import Application
-from .module import Module, BaseModule
 from .lifecycle import LifecycleManager
+from .module import BaseModule, Module
 
 __all__ = [
     "Application",
-    "Module",
     "BaseModule",
     "LifecycleManager",
+    "Module",
 ]

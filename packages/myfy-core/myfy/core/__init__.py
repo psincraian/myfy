@@ -22,36 +22,33 @@ Usage:
     await app.run()
 """
 
-from .kernel import Application, Module, BaseModule
+from .config import BaseSettings, CoreSettings, Profile, load_settings
 from .di import (
-    Container,
-    provider,
-    SINGLETON,
     REQUEST,
+    SINGLETON,
     TASK,
+    Container,
     Qualifier,
     ScopeContext,
+    provider,
 )
-from .config import BaseSettings, CoreSettings, Profile, load_settings
+from .kernel import Application, BaseModule, Module
 
 __all__ = [
-    # Kernel
-    "Application",
-    "Module",
-    "BaseModule",
-    # DI
-    "Container",
-    "provider",
-    "SINGLETON",
     "REQUEST",
+    "SINGLETON",
     "TASK",
+    "Application",
+    "BaseModule",
+    "BaseSettings",
+    "Container",
+    "CoreSettings",
+    "Module",
+    "Profile",
     "Qualifier",
     "ScopeContext",
-    # Config
-    "BaseSettings",
-    "CoreSettings",
-    "Profile",
     "load_settings",
+    "provider",
 ]
 
 # Module instance for entry point

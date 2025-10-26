@@ -9,9 +9,10 @@ Demonstrates:
 - Request-scoped and singleton services
 """
 
-from myfy.core import Application, provider, SINGLETON, REQUEST, BaseSettings
-from myfy.web import route, WebModule
 from pydantic import Field
+
+from myfy.core import REQUEST, SINGLETON, Application, BaseSettings, provider
+from myfy.web import WebModule, route
 
 
 # 1. Configuration

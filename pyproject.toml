@@ -17,3 +17,89 @@ myfy-core = { workspace = true }
 myfy-web = { workspace = true }
 myfy-cli = { workspace = true }
 myfy = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8.0",
+    "ty>=0.0.1a24",
+]
+
+[tool.ruff]
+# Line length
+line-length = 100
+target-version = "py312"
+
+# Exclude auto-generated files
+extend-exclude = ["_myfy_server.py"]
+
+[tool.ruff.lint]
+# Enable comprehensive linting rules
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort (import sorting)
+    "N",      # pep8-naming
+    "UP",     # pyupgrade (modernize Python code)
+    "YTT",    # flake8-2020
+    "ASYNC",  # flake8-async
+    "B",      # flake8-bugbear
+    "A",      # flake8-builtins
+    "C4",     # flake8-comprehensions
+    "DTZ",    # flake8-datetimez
+    "T10",    # flake8-debugger
+    "EXE",    # flake8-executable
+    "ISC",    # flake8-implicit-str-concat
+    "ICN",    # flake8-import-conventions
+    "PIE",    # flake8-pie
+    "PT",     # flake8-pytest-style
+    "Q",      # flake8-quotes
+    "RSE",    # flake8-raise
+    "RET",    # flake8-return
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+    "ARG",    # flake8-unused-arguments
+    "PTH",    # flake8-use-pathlib
+    "ERA",    # eradicate (commented-out code)
+    "PL",     # pylint
+    "PERF",   # perflint
+    "RUF",    # Ruff-specific rules
+]
+
+# Ignore specific rules that may be too strict for this project
+ignore = [
+    "E501",    # Line too long (handled by formatter)
+    "PLR0913", # Too many arguments
+    "PLR0912", # Too many branches
+    "PLR2004", # Magic value in comparison
+    "N818",    # Exception name should end in Error
+    "A003",    # Class attribute shadows Python builtin
+]
+
+# Allow autofix for all enabled rules
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+# Allow unused imports in __init__.py files
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+# Configure import sorting
+known-first-party = ["myfy", "myfy_cli"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.format]
+# Use double quotes by default
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.ty.environment]
+# Type checking configuration
+python-version = "3.12"
+
+[tool.ty.rules]
+# Ignore unresolved-import as ty has issues with workspace packages
+# Keep other type checking rules enabled
+unresolved-import = "ignore"

@@ -5,15 +5,14 @@ Provides request-scoped context via contextvars.
 """
 
 from contextvars import ContextVar
-from typing import Any, Dict, Optional
-from starlette.requests import Request
-from starlette.responses import Response
+from typing import Any, Optional
 
+from starlette.requests import Request
 
 # Context variables for request-scoped data
-_request_context: ContextVar[Optional["RequestContext"]] = ContextVar(
-    "_request_context", default=None
-)
+_request_context: ContextVar[Optional["RequestContext"]] = ContextVar[
+    Optional["RequestContext"]
+]("_request_context", default=None)
 
 
 class RequestContext:
@@ -26,7 +25,7 @@ class RequestContext:
 
     def __init__(self, request: Request):
         self.request = request
-        self._data: Dict[str, Any] = {}
+        self._data: dict[str, Any] = {}
 
     def get(self, key: str, default: Any = None) -> Any:
         """Get a value from the context."""
@@ -52,7 +51,7 @@ class RequestContext:
         return self.request.url.path
 
     @property
-    def headers(self) -> Dict[str, str]:
+    def headers(self) -> dict[str, str]:
         """Request headers."""
         return dict(self.request.headers)
 
@@ -68,7 +67,7 @@ class RequestContext:
         return f"RequestContext({self.method} {self.path})"
 
 
-def get_request_context() -> Optional[RequestContext]:
+def get_request_context() -> RequestContext | None:
     """Get the current request context (if in a request scope)."""
     return _request_context.get()
 

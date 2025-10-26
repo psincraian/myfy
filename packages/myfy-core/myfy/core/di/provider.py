@@ -4,10 +4,11 @@ Provider decorator for ergonomic dependency registration.
 This is the "sugar" layer over the explicit container.register() API.
 """
 
-from typing import Any, Callable, TypeVar, get_type_hints
+from collections.abc import Callable
 from functools import wraps
+from typing import Any, TypeVar, get_type_hints
 
-from .scopes import Scope, SINGLETON
+from .scopes import SINGLETON, Scope
 from .types import Qualifier
 
 T = TypeVar("T")
@@ -103,8 +104,9 @@ def register_providers_in_container(container: Any) -> None:
         return_type = hints.get("return")
 
         if return_type is None:
+            func_name = getattr(func, "__name__", "<unknown>")
             raise TypeError(
-                f"Provider function {func.__name__} must have a return type annotation"
+                f"Provider function {func_name} must have a return type annotation"
             )
 
         # Handle Annotated return types
