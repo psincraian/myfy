@@ -1,0 +1,239 @@
+# Installation
+
+Get up and running with myfy in minutes.
+
+---
+
+## Prerequisites
+
+- **Python 3.12+** (myfy uses modern Python features)
+- **uv** (recommended) or pip for package management
+
+---
+
+## Install uv (Recommended)
+
+myfy works great with [uv](https://github.com/astral-sh/uv), the fast Python package manager:
+
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Or with pip
+pip install uv
+```
+
+---
+
+## Quick Install
+
+### Option 1: Install All Modules (Easiest)
+
+```bash
+# With uv
+uv pip install myfy
+
+# With pip
+pip install myfy
+```
+
+This installs:
+- `myfy-core` - Core framework (DI, config, modules)
+- `myfy-web` - Web/ASGI support
+- `myfy-cli` - CLI tools
+
+### Option 2: Install Individual Modules
+
+```bash
+# Core only (for libraries/packages)
+uv pip install myfy-core
+
+# Core + Web (for HTTP APIs)
+uv pip install myfy-core myfy-web
+
+# Everything
+uv pip install myfy-core myfy-web myfy-cli
+```
+
+---
+
+## Create Your First App
+
+### 1. Create Project Directory
+
+```bash
+mkdir my-app
+cd my-app
+```
+
+### 2. Create `app.py`
+
+```python
+from myfy.core import Application, BaseSettings
+from myfy.web import route, WebModule
+
+
+class Settings(BaseSettings):
+    app_name: str = "My First App"
+
+
+@route.get("/")
+async def index() -> dict:
+    return {"message": "Hello, myfy!"}
+
+
+app = Application(settings_class=Settings, auto_discover=False)
+app.add_module(WebModule())
+
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(app.run())
+```
+
+### 3. Create `.env` File (Optional)
+
+```bash
+# .env
+APP_NAME=My Awesome API
+```
+
+### 4. Run It
+
+```bash
+# With myfy CLI (auto-reload enabled)
+uv run myfy run
+
+# Or directly with Python
+uv run python app.py
+```
+
+Visit `http://127.0.0.1:8000/` - you should see:
+
+```json
+{"message": "Hello, myfy!"}
+```
+
+---
+
+## Project Structure
+
+For larger applications, we recommend this structure:
+
+```
+my-app/
+├── app.py              # Application entry point
+├── .env                # Environment variables
+├── .env.dev            # Dev profile
+├── .env.prod           # Production profile
+├── config.py           # Settings classes
+├── services/           # Business logic
+│   ├── __init__.py
+│   └── users.py
+├── models/             # Data models
+│   ├── __init__.py
+│   └── user.py
+└── routes/             # HTTP handlers
+    ├── __init__.py
+    └── users.py
+```
+
+---
+
+## Verify Installation
+
+Check that everything is working:
+
+```bash
+# List available CLI commands
+uv run myfy --help
+
+# Check Python version
+python --version  # Should be 3.12+
+
+# Test imports
+python -c "from myfy.core import Application; from myfy.web import route; print('✓ All good!')"
+```
+
+---
+
+## Development Setup
+
+For active development on myfy itself:
+
+```bash
+# Clone the repo
+git clone https://github.com/petru/myfy.git
+cd myfy
+
+# Install with uv
+uv sync
+
+# Install packages in editable mode
+uv pip install -e packages/myfy-core
+uv pip install -e packages/myfy-web
+uv pip install -e packages/myfy-cli
+
+# Run example
+cd examples/hello
+uv run myfy run
+```
+
+---
+
+## Troubleshooting
+
+### Import Errors
+
+If you see `ModuleNotFoundError: No module named 'myfy'`:
+
+```bash
+# Make sure you're in the right environment
+which python
+
+# Reinstall
+uv pip install --force-reinstall myfy
+```
+
+### Port Already in Use
+
+If port 8000 is busy:
+
+```bash
+# Run on different port
+uv run myfy run --port 8001
+```
+
+### uv Not Found
+
+If `uv` command not found:
+
+```bash
+# Add to PATH (macOS/Linux)
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# Or use pip directly
+pip install myfy
+```
+
+---
+
+## Next Steps
+
+- [Tutorial](tutorial.md) - Build a complete application
+- [Quick Reference](quick-reference.md) - Common patterns
+- [Core Concepts](../core-concepts/dependency-injection.md) - Deep dive into DI
+
+---
+
+## System Requirements
+
+| Component | Requirement |
+|-----------|-------------|
+| **Python** | 3.12+ |
+| **OS** | Linux, macOS, Windows |
+| **Memory** | 512MB+ recommended |
+| **Dependencies** | pydantic, starlette, anyio |

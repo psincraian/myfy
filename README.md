@@ -1,35 +1,94 @@
 # myfy
 
-**Opinionated Python framework with modularity, ergonomics, and power.**
+**Build Python applications that feel like they wrote themselves.**
 
 ---
 
-## ( What is myfy?
+## Why Another Framework?
 
-myfy is a modern Python application framework that combines:
-- **modularity** - Clean module system with DI container
-- **ergonomics** - Decorator-based routing with type hints
-- **power** - Batteries included, ready for production
+You've built enough Python apps to know: FastAPI is brilliant for APIs but barebones for real apps. Django's too heavy and too coupled. Flask feels like duct tape.
 
-Built on our [principles](PRINCIPLES.md): opinionated defaults, pythonic code, async-native, typed & validated, zero reflection on hot path.
+What if you could have:
+- **FastAPI's ergonomics** (decorators, type hints, async-first)
+- **Spring's architecture** (DI container, module system, lifecycle)
+- **Sensible defaults** (no config files until you need them)
+
+myfy is that framework. Opinionated where it matters, flexible everywhere else.
 
 ---
 
-## = Quick Start
+## Three Things That Make myfy Different
+
+### 1. **Modules That Actually Work**
+
+Not "blueprint" modules. Real, composable modules with their own lifecycle:
+
+```python
+class DataModule(BaseModule):
+    async def start(self):
+        await self.db.connect()
+
+    async def stop(self):
+        await self.db.disconnect()
+
+app.add_module(DataModule())
+app.add_module(WebModule())
+# Modules start in order, stop in reverse
+# Add community modules via pip install myfy-auth
+```
+
+### 2. **Dependency Injection Without Magic**
+
+Type-based DI that's fast (zero reflection on hot path) and safe (compile-time validation):
+
+```python
+@provider(scope=SINGLETON)
+def database(settings: Settings) -> Database:
+    return Database(settings.db_url)
+
+@route.post("/users")
+async def create_user(body: CreateUserDTO, db: Database):
+    # db automatically injected, body automatically parsed
+    return await db.create_user(body)
+```
+
+No decorating classes. No magic. Just functions and types.
+
+### 3. **Defaults That Make Sense**
+
+One file. No config. Just run:
+
+```python
+from myfy.core import Application
+from myfy.web import route, WebModule
+
+@route.get("/hello/{name}")
+async def hello(name: str) -> dict:
+    return {"message": f"Hello {name}!"}
+
+app = Application(auto_discover=False)
+app.add_module(WebModule())
+```
+
+Save as `app.py`, run `uv run myfy run`. That's it.
+
+---
+
+## 60-Second Example
+
+**Build a real API with DI, validation, and clean architecture:**
 
 ```python
 from myfy.core import Application, provider, SINGLETON, BaseSettings
 from myfy.web import route, WebModule
 from pydantic import Field
 
-
-# 1. Define settings
+# 1. Settings (auto-loads from .env)
 class Settings(BaseSettings):
     app_name: str = Field(default="My App")
     api_key: str
 
-
-# 2. Create services with DI
+# 2. Services (constructor-injected)
 class UserService:
     def __init__(self, settings: Settings):
         self.settings = settings
@@ -37,66 +96,94 @@ class UserService:
     def greet(self, name: str) -> str:
         return f"Hello {name} from {self.settings.app_name}!"
 
-
 @provider(scope=SINGLETON)
 def user_service(settings: Settings) -> UserService:
     return UserService(settings)
 
-
-# 3. Create routes
+# 3. Routes (DI + path params + type conversion)
 @route.get("/greet/{name}")
 async def greet_user(name: str, service: UserService) -> dict:
     return {"message": service.greet(name)}
 
-
-# 4. Run the app
+# 4. Run
 app = Application(settings_class=Settings, auto_discover=False)
 app.add_module(WebModule())
-
 
 if __name__ == "__main__":
     import asyncio
     asyncio.run(app.run())
 ```
 
-Run it:
+**Run it:**
 ```bash
+echo "API_KEY=secret123" > .env
 uv run myfy run
 ```
 
 Visit http://127.0.0.1:8000/greet/World
 
+**That's it.** Settings, DI, validation, routing, and ASGI server. In 30 lines.
+
 ---
 
-## = Architecture
+## Install + Quickstart
 
-### Monorepo with Namespace Packages
+### Installation
 
-```
-myfy/
- packages/
-   myfy-core/       # Kernel, DI, config, lifecycle
-   myfy-web/        # HTTP/ASGI, routing, handlers
-   myfy-cli/        # CLI tools (myfy run, routes, etc.)
- examples/
-    hello/           # Example application
-```
-
-Install modules individually:
 ```bash
+# Install with uv (recommended)
+uv pip install myfy-core myfy-web myfy-cli
+
+# Or with pip
 pip install myfy-core myfy-web myfy-cli
 ```
 
----
-
-## < Core Features
-
-### 1. Dependency Injection (Zero Reflection on Hot Path)
+### Create Your First App
 
 ```python
-from myfy.core import provider, SINGLETON, REQUEST
+# app.py
+from myfy.core import Application
+from myfy.web import route, WebModule
 
-# Constructor injection with compile-time resolution
+@route.get("/")
+async def home() -> dict:
+    return {"message": "Welcome to myfy!"}
+
+app = Application(auto_discover=False)
+app.add_module(WebModule())
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(app.run())
+```
+
+### Run It
+
+```bash
+uv run myfy run
+# Server running at http://127.0.0.1:8000
+```
+
+### Next Steps
+
+- **[Full Tutorial](https://psincraian.github.io/myfy/getting-started/tutorial/)** - Build a complete app step-by-step
+- **[Core Concepts](https://psincraian.github.io/myfy/core-concepts/dependency-injection/)** - Understand DI, modules, and lifecycle
+- **[Examples](examples/)** - See working applications
+
+---
+
+## What You Get
+
+### Clean Module System
+```python
+app.add_module(WebModule())      # HTTP routing
+app.add_module(DataModule())     # Database
+app.add_module(AuthModule())     # JWT, sessions
+# Modules have lifecycle, DI integration, and clean boundaries
+```
+
+### Type-Safe DI
+```python
 @provider(scope=SINGLETON)
 def database(settings: Settings) -> Database:
     return Database(settings.db_url)
@@ -104,230 +191,124 @@ def database(settings: Settings) -> Database:
 @provider(scope=REQUEST)
 def unit_of_work(db: Database) -> UnitOfWork:
     return UnitOfWork(db)
-
-# Handlers get automatic DI
-@route.post("/orders")
-async def create_order(uow: UnitOfWork, body: dict) -> dict:
-    order = await uow.create_order(body)
-    return {"id": order.id}
 ```
 
-**Scopes:**
-- `SINGLETON` - One instance per application
-- `REQUEST` - One instance per HTTP request (via contextvars)
-- `TASK` - One instance per background task
+**Scopes:** `SINGLETON` (one per app), `REQUEST` (one per HTTP request), `TASK` (one per background task)
 
-**Compile-time guarantees:**
-- Cycle detection
-- Missing provider errors
-- Scope mismatch validation
+**Compile-time checks:** Cycle detection, missing providers, scope mismatches
 
-### 2. Configuration with Profiles
-
+### FastAPI-Style Routes
 ```python
-from myfy.core.config import BaseSettings, Profile
-
-class AppSettings(BaseSettings):
-    db_url: str
-    debug: bool = False
-
-# Environment-based profiles
-# MYFY_PROFILE=dev  .env.dev
-# MYFY_PROFILE=prod  .env.prod
-
-app = Application(settings_class=AppSettings)
-```
-
-### 3. Web Module (FastAPI-like)
-
-```python
-from myfy.web import route
-
 @route.get("/users/{user_id}")
 async def get_user(user_id: int, db: Database) -> User:
     return await db.get_user(user_id)
 
 @route.post("/users")
 async def create_user(body: CreateUserDTO, db: Database) -> User:
-    # body automatically parsed and validated
     return await db.create_user(body)
 ```
 
-**Features:**
-- Path parameters with type conversion
-- Auto JSON body parsing (Pydantic models supported)
-- DI in handlers (mixed with request params)
-- ASGI standard (works with uvicorn, hypercorn)
+Mix DI services with path params and body parsing. Type hints do the work.
 
-### 4. Module System
-
+### Environment-Based Configuration
 ```python
-from myfy.core import BaseModule, Container
+class Settings(BaseSettings):
+    db_url: str
+    debug: bool = False
 
-class DataModule(BaseModule):
-    def __init__(self):
-        super().__init__("data")
-
-    def configure(self, container: Container) -> None:
-        # Register providers
-        container.register(Database, factory=create_db, scope=SINGLETON)
-
-    async def start(self) -> None:
-        # Connect to database
-        await self.db.connect()
-
-    async def stop(self) -> None:
-        # Clean up
-        await self.db.disconnect()
-
-app.add_module(DataModule())
+# MYFY_PROFILE=dev → loads .env.dev
+# MYFY_PROFILE=prod → loads .env.prod
 ```
 
-Modules auto-discovered via entry points:
-```toml
-[project.entry-points."myfy.modules"]
-data = "myfy_data:data_module"
-```
-
-### 5. Lifecycle Management
-
-```python
-app = Application()
-app.add_module(WebModule())
-app.add_module(DataModule())
-
-# Automatic lifecycle:
-# 1. Initialize (compile DI, discover modules)
-# 2. Start modules in order
-# 3. Run
-# 4. Graceful shutdown (SIGTERM, SIGINT)
-# 5. Stop modules in reverse order
-
-await app.run()
-```
-
-### 6. CLI Tools
-
+### CLI Tools
 ```bash
-# Start dev server (with auto-reload)
-uv run myfy run
-
-# List all routes
-uv run myfy routes
-
-# Show loaded modules
-uv run myfy modules
-
-# Validate configuration
-uv run myfy doctor
+uv run myfy run       # Start server (auto-reload in dev)
+uv run myfy routes    # List all routes
+uv run myfy modules   # Show loaded modules
+uv run myfy doctor    # Validate configuration
 ```
 
 ---
 
-## < Implementation Details
+## Architecture
 
-### Dependency Injection
+### Namespace Package Structure
 
-**Compile-time resolution** (no `inspect.signature()` on requests):
-1. Parse type hints once at startup
+```
+myfy/
+├── packages/
+│   ├── myfy-core/      # DI, config, lifecycle, kernel
+│   ├── myfy-web/       # ASGI, routing, HTTP handlers
+│   ├── myfy-cli/       # CLI tools (run, routes, etc.)
+│   └── myfy/           # Meta-package (installs all)
+└── examples/
+    └── hello/          # Working example app
+```
+
+Install what you need:
+```bash
+pip install myfy-core              # Just the kernel
+pip install myfy-core myfy-web     # Add web support
+pip install myfy                   # Everything
+```
+
+### How It Works
+
+**Compile-time DI resolution:**
+1. Parse type hints at startup (once)
 2. Build injection plans per handler
 3. Cache plans in dict (O(1) lookup)
 4. Request time = dict lookup + function call
 
-**Request scopes** via contextvars:
+**No reflection during requests.** All analysis happens at startup.
+
+**Request scopes via contextvars:**
 ```python
-_request_scope_bag: ContextVar[Dict[str, Any]] = ContextVar(...)
-
-# Set on request start
-ScopeContext.get_request_bag()["service"] = instance
-
-# Clear on request end
-ScopeContext.clear_request_bag()
-```
-
-**Cycle detection** via DFS at compile time.
-
-### Web Module
-
-**Handler execution:**
-1. Starlette ASGI adapter captures request
-2. Create request context (contextvar)
-3. Resolve DI dependencies from container
-4. Parse path params + body
-5. Call handler with injected args
-6. Serialize response (JSON by default)
-7. Clear request scope
-
-**Routing compilation:**
-- Routes compiled to Starlette routes at startup
-- Injection plan built per route
-- No reflection during request handling
-
----
-
-## = Examples
-
-See `examples/hello/` for a complete working application demonstrating:
-- Settings with Pydantic
-- Singleton and request-scoped services
-- Multiple route types (GET, POST)
-- Path parameters and body parsing
-- Dependency injection in handlers
-
-Run it:
-```bash
-cd examples/hello
-uv run --with ../../packages/myfy-core --with ../../packages/myfy-web python app.py
+@route.get("/data")
+async def handler(service: RequestScopedService):
+    # service created once per request, shared across DI calls
+    # automatically cleaned up when request completes
+    pass
 ```
 
 ---
 
-## > Development
+## Why myfy?
 
-```bash
-# Clone the repo
-git clone <repo-url>
-cd myfy
+### Opinionated, Not Rigid
+Strong defaults (JSON, auto-DI, ASGI) but swap anything (router, serializer, container).
 
-# Install workspace in editable mode
-uv sync
-uv pip install -e packages/myfy-core -e packages/myfy-web -e packages/myfy-cli
+### Pythonic, Not Ceremonial
+Type hints, decorators, async/await. No XML. No boilerplate classes.
 
-# Run the example
-uv run python examples/hello/app.py
+### Modular by Design
+Tiny kernel (`myfy-core`). Add modules as you need them. Build your own.
 
-# Test imports
-uv run python -c "from myfy.core import Application; from myfy.web import route; print(' Works!')"
-```
+### Typed, Validated, Safe
+Pydantic everywhere. Compile-time DI validation. Type-safe routing.
 
----
-
-##  Principles in Action
-
-Your [PRINCIPLES.md](PRINCIPLES.md) realized:
-
-1. **Opinionated, not rigid** - Strong defaults (JSON, auto-DI) but fully customizable
-2. **Defaults by default** - Works with zero config, sensible conventions
-3. **Sugar with substance** - `@route`, `@provider` compile to explicit code
-4. **Pythonic over ceremonial** - Type hints, no XML, clean imports
-5. **Predictable lifecycle** - Clear init  start  stop, deterministic order
-6. **Modular by design** - Tiny kernel, modules auto-wire, replace anything
-7. **Replace anything** - Swap routers, ORMs, DI providers without breaking core
-8. **Typed, validated, safe** - Pydantic everywhere, compile-time DI validation
-9. **Async-native, context-aware** - ASGI + AnyIO, contextvars for scopes
-10. **Observability built-in** - (TODO: add telemetry module)
-11. **Profiles over env chaos** - dev/test/prod with layered config
-12. **Runtime reconfig is deliberate** - Marked fields only, restart otherwise
-13. **Dependency injection with scopes** - singleton, request, task
-14. **Zero heavy reflection on hot path** - All analysis at startup
-15. **Safe by default** - Type validation, scope checks, cycle detection
+### Zero Heavy Reflection on Hot Path
+All introspection at startup. Hot path is just function calls.
 
 ---
 
-## = Roadmap
+## Principles
+
+Read our full design philosophy in **[PRINCIPLES.md](PRINCIPLES.md)**.
+
+Highlights:
+- **Defaults by default** - Zero config to start, infinite config to scale
+- **Sugar with substance** - Decorators compile to explicit code
+- **Predictable lifecycle** - Clear init → start → stop, deterministic order
+- **Replace anything** - Swap routers, ORMs, DI providers without breaking core
+- **Profiles over env chaos** - dev/test/prod with layered config
+- **Dependency injection with scopes** - Singleton, request, task
+
+---
+
+## Roadmap
 
 Future modules (following the same architecture):
-
 - **myfy-sqlalchemy** - ORM integration, migrations
 - **myfy-auth** - JWT, OAuth, session management
 - **myfy-telemetry** - Structured logging, tracing, metrics
@@ -339,24 +320,54 @@ All as separate `myfy-*` packages, installable independently.
 
 ---
 
-## 📚 Documentation
+## Documentation
 
-- **[PRINCIPLES.md](PRINCIPLES.md)** - Core philosophy and design principles
-- **[MODULAR_CONFIG.md](MODULAR_CONFIG.md)** - Guide to modular configuration design
-- **[Architecture Decision Records](docs/adr/)** - Documented architectural decisions
-  - [ADR-0001: Record Architecture Decisions](docs/adr/0001-record-architecture-decisions.md)
-  - [ADR-0002: Modular Configuration Design](docs/adr/0002-modular-configuration-design.md)
-  - [ADR-0003: Dependency Injection with Scopes](docs/adr/0003-dependency-injection-with-scopes.md)
+**[📖 Read the Full Documentation →](https://psincraian.github.io/myfy/)**
 
----
-
-## = License
-
-MIT
+- **[Getting Started](https://psincraian.github.io/myfy/getting-started/installation/)** - Installation, tutorial, quick reference
+- **[Core Concepts](https://psincraian.github.io/myfy/core-concepts/dependency-injection/)** - DI, modules, configuration deep dive
+- **[Guides](https://psincraian.github.io/myfy/guides/building-modules/)** - Building modules, testing, deployment
+- **[API Reference](https://psincraian.github.io/myfy/api-reference/core/)** - Complete API docs
 
 ---
 
-## =O Acknowledgments
+## Examples
+
+See `examples/hello/` for a complete working application:
+- Settings with Pydantic
+- Singleton and request-scoped services
+- Multiple route types (GET, POST)
+- Path parameters and body parsing
+- Dependency injection in handlers
+
+**Run it:**
+```bash
+cd examples/hello
+uv run --with ../../packages/myfy-core --with ../../packages/myfy-web python app.py
+```
+
+---
+
+## Development
+
+```bash
+# Clone the repo
+git clone <repo-url>
+cd myfy
+
+# Install workspace
+uv sync
+
+# Run the example
+uv run python examples/hello/app.py
+
+# Test imports
+uv run python -c "from myfy.core import Application; print('✓ Works!')"
+```
+
+---
+
+## Acknowledgments
 
 Inspired by:
 - **Spring Framework** - Module system, DI architecture
@@ -369,4 +380,9 @@ Built with:
 - **Starlette** - ASGI toolkit
 - **uvicorn** - ASGI server
 - **typer** - CLI framework
-- **uv** - Package management
+
+---
+
+## License
+
+MIT

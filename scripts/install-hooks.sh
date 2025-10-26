@@ -9,12 +9,13 @@
 set -e
 
 # Colors for output
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
+# Brand colors for myfy
+EMERALD='\033[38;2;16;185;129m'  # #10B981 - Primary
+GRAY='\033[38;2;17;24;39m'        # #111827 - Accent
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}📦 Installing git hooks for myfy...${NC}"
+echo -e "${GRAY}📦 Installing git hooks for myfy...${NC}"
 echo ""
 
 # Check if we're in a git repository
@@ -39,13 +40,13 @@ fi
 cp "$HOOK_SOURCE" "$HOOK_DEST"
 chmod +x "$HOOK_DEST"
 
-echo -e "${GREEN}✓ Installed pre-commit hook${NC}"
+echo -e "${EMERALD}✓ Installed pre-commit hook${NC}"
 echo ""
-echo -e "${BLUE}The hook will run automatically before each commit and will:${NC}"
+echo -e "${GRAY}The hook will run automatically before each commit and will:${NC}"
 echo "  1. 🎨 Format code with ruff"
 echo "  2. 🔍 Check linting with ruff"
 echo "  3. 🔬 Check types with ty"
 echo ""
-echo -e "${GREEN}✅ Git hooks installed successfully!${NC}"
+echo -e "${EMERALD}✅ Git hooks installed successfully!${NC}"
 echo ""
 echo -e "${YELLOW}💡 To skip hooks for a specific commit, use: git commit --no-verify${NC}"

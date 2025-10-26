@@ -23,6 +23,12 @@ dev = [
     "ruff>=0.8.0",
     "ty>=0.0.1a24",
 ]
+docs = [
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings[python]>=0.24.0",
+    "pymdown-extensions>=10.7.0",
+]
 
 [tool.ruff]
 # Line length
