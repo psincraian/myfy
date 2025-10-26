@@ -54,9 +54,7 @@ class HandlerExecutor:
                 param_type = hints.get(param_name, str)
                 raw_value = path_params.get(param_name)
                 # Convert to appropriate type with validation
-                kwargs[param_name] = self._convert_param(
-                    raw_value, param_type, param_name
-                )
+                kwargs[param_name] = self._convert_param(raw_value, param_type, param_name)
 
             # 2. Inject request body if needed
             if route.body_param:
@@ -151,9 +149,7 @@ class HandlerExecutor:
                 try:
                     data = await request.json()
                 except json.JSONDecodeError as e:
-                    raise HTTPException(
-                        status_code=400, detail=f"Invalid JSON: {e!s}"
-                    ) from e
+                    raise HTTPException(status_code=400, detail=f"Invalid JSON: {e!s}") from e
 
                 try:
                     # Type checker doesn't know about Pydantic's model_validate
@@ -167,9 +163,7 @@ class HandlerExecutor:
                 try:
                     data = await request.json()
                 except json.JSONDecodeError as e:
-                    raise HTTPException(
-                        status_code=400, detail=f"Invalid JSON: {e!s}"
-                    ) from e
+                    raise HTTPException(status_code=400, detail=f"Invalid JSON: {e!s}") from e
 
                 try:
                     return body_type(**data)

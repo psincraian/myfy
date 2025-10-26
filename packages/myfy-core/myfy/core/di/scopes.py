@@ -27,9 +27,9 @@ TASK = Scope.TASK
 
 
 # Context storage for request and task scopes
-_request_scope_bag: ContextVar[dict[str, Any] | None] = ContextVar[
-    dict[str, Any] | None
-]("_request_scope_bag", default=None)
+_request_scope_bag: ContextVar[dict[str, Any] | None] = ContextVar[dict[str, Any] | None](
+    "_request_scope_bag", default=None
+)
 _task_scope_bag: ContextVar[dict[str, Any] | None] = ContextVar[dict[str, Any] | None](
     "_task_scope_bag", default=None
 )

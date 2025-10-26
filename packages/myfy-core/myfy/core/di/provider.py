@@ -105,9 +105,7 @@ def register_providers_in_container(container: Any) -> None:
 
         if return_type is None:
             func_name = getattr(func, "__name__", "<unknown>")
-            raise TypeError(
-                f"Provider function {func_name} must have a return type annotation"
-            )
+            raise TypeError(f"Provider function {func_name} must have a return type annotation")
 
         # Handle Annotated return types
         if hasattr(return_type, "__metadata__"):
@@ -117,9 +115,7 @@ def register_providers_in_container(container: Any) -> None:
                     metadata["qualifier"] = str(meta)
             # Extract actual type
             return_type = (
-                return_type.__origin__
-                if hasattr(return_type, "__origin__")
-                else return_type
+                return_type.__origin__ if hasattr(return_type, "__origin__") else return_type
             )
 
         container.register(

@@ -10,9 +10,9 @@ from typing import Any, Optional
 from starlette.requests import Request
 
 # Context variables for request-scoped data
-_request_context: ContextVar[Optional["RequestContext"]] = ContextVar[
-    Optional["RequestContext"]
-]("_request_context", default=None)
+_request_context: ContextVar[Optional["RequestContext"]] = ContextVar[Optional["RequestContext"]](
+    "_request_context", default=None
+)
 
 
 class RequestContext:

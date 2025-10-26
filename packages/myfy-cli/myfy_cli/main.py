@@ -56,9 +56,7 @@ def find_application():
                 return app_instance, filename, var_name
 
     console.print("[red]Error: Could not find Application instance[/red]")
-    console.print(
-        "Create an app.py, main.py, or application.py with an Application instance"
-    )
+    console.print("Create an app.py, main.py, or application.py with an Application instance")
     sys.exit(1)
 
 
@@ -319,9 +317,7 @@ def doctor():
         if has_web:
             console.print("[green]✓[/green] Web module configured")
         else:
-            console.print(
-                "[yellow]![/yellow] No web module (add WebModule() if you need HTTP)"
-            )
+            console.print("[yellow]![/yellow] No web module (add WebModule() if you need HTTP)")
 
         console.print("\n[green]✨ All checks passed![/green]")
 

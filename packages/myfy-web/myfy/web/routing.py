@@ -115,9 +115,7 @@ class Router:
         """Decorator for PATCH routes."""
         return self._method_decorator(path, HTTPMethod.PATCH, name)
 
-    def _method_decorator(
-        self, path: str, method: HTTPMethod, name: str | None
-    ) -> Callable:
+    def _method_decorator(self, path: str, method: HTTPMethod, name: str | None) -> Callable:
         """Generic decorator factory for HTTP methods."""
 
         def decorator(handler: Callable) -> Callable:
@@ -145,9 +143,7 @@ class Router:
 
                 # Prevent duplicates
                 if param_name in params:
-                    raise ValueError(
-                        f"Duplicate path parameter '{param_name}' in path '{path}'"
-                    )
+                    raise ValueError(f"Duplicate path parameter '{param_name}' in path '{path}'")
 
                 params.append(param_name)
 

@@ -293,9 +293,7 @@ class Container:
                     # Check again inside lock
                     if registration.key not in self._singletons:
                         assert registration.injection_plan is not None
-                        self._singletons[registration.key] = (
-                            registration.injection_plan()
-                        )
+                        self._singletons[registration.key] = registration.injection_plan()
 
             return self._singletons[registration.key]
 
