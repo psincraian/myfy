@@ -1,0 +1,64 @@
+/* Custom styles for myfy documentation */
+
+/* Brand colors - Emerald green (#10B981) primary, Rich gray-black (#111827) accent */
+:root > * {
+    --md-primary-fg-color: #10b981; /* Emerald green */
+    --md-primary-fg-color--light: #34d399;
+    --md-primary-fg-color--dark: #059669;
+    --md-accent-fg-color: #111827; /* Rich gray-black */
+    --md-accent-fg-color--transparent: rgba(17, 24, 39, 0.1);
+}
+
+[data-md-color-scheme="slate"] > * {
+    --md-primary-fg-color: #10b981; /* Emerald green */
+    --md-primary-fg-color--light: #34d399;
+    --md-primary-fg-color--dark: #059669;
+    --md-accent-fg-color: #10b981; /* Use emerald for accent in dark mode */
+    --md-accent-fg-color--transparent: rgba(16, 185, 129, 0.1);
+}
+
+/* Improve code block appearance */
+.highlight pre {
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+/* Better table styling */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table th {
+    background-color: var(--md-primary-fg-color);
+    color: var(--md-primary-bg-color);
+    font-weight: 600;
+}
+
+/* Admonition improvements */
+.admonition {
+    border-left: 4px solid var(--md-accent-fg-color);
+}
+
+/* Better inline code */
+code {
+    background-color: var(--md-code-bg-color);
+    padding: 0.1em 0.4em;
+    border-radius: 3px;
+}
+
+/* Improve spacing */
+.md-content {
+    line-height: 1.6;
+}
+
+/* Better heading spacing */
+h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
