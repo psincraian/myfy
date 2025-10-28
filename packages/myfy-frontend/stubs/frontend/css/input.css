@@ -1,0 +1,43 @@
+/* Tailwind 4 with DaisyUI 5 plugin */
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* Custom theme using Tailwind 4 @theme directive */
+@theme {
+  /* Brand colors - customize these! */
+  --color-primary: #6366f1;
+  --color-secondary: #8b5cf6;
+  --color-accent: #10b981;
+
+  /* Custom spacing */
+  --spacing-nav: 4rem;
+}
+
+/* Custom utility classes */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom components using @layer */
+@layer components {
+  /* Hero gradient background */
+  .hero-gradient {
+    background: linear-gradient(
+      to bottom right,
+      oklch(from theme(colors.primary) l c h / 0.1),
+      oklch(from theme(colors.secondary) l c h / 0.05)
+    );
+  }
+
+  /* Card with hover effect */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+  }
+
+  /* Navbar with backdrop blur */
+  .navbar-blur {
+    @apply bg-base-100/95 backdrop-blur-lg border-b border-base-300/50;
+  }
+}

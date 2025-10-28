@@ -1,0 +1,132 @@
+{% macro input(name, label=None, type="text", placeholder="", value="", required=False, class="") %}
+{#
+  DaisyUI Input Component
+
+  Args:
+    name: Input name attribute
+    label: Label text
+    type: Input type (text, email, password, etc.)
+    placeholder: Placeholder text
+    value: Default value
+    required: Whether field is required
+    class: Additional CSS classes
+#}
+<div class="form-control w-full {{ class }}">
+  {% if label %}
+  <label class="label">
+    <span class="label-text">{{ label }}{% if required %} <span class="text-error">*</span>{% endif %}</span>
+  </label>
+  {% endif %}
+  <input
+    type="{{ type }}"
+    name="{{ name }}"
+    placeholder="{{ placeholder }}"
+    value="{{ value }}"
+    class="input input-bordered w-full"
+    {% if required %}required{% endif %}
+  />
+</div>
+{% endmacro %}
+
+{% macro textarea(name, label=None, placeholder="", value="", rows=3, required=False, class="") %}
+{#
+  DaisyUI Textarea Component
+#}
+<div class="form-control w-full {{ class }}">
+  {% if label %}
+  <label class="label">
+    <span class="label-text">{{ label }}{% if required %} <span class="text-error">*</span>{% endif %}</span>
+  </label>
+  {% endif %}
+  <textarea
+    name="{{ name }}"
+    placeholder="{{ placeholder }}"
+    rows="{{ rows }}"
+    class="textarea textarea-bordered"
+    {% if required %}required{% endif %}
+  >{{ value }}</textarea>
+</div>
+{% endmacro %}
+
+{% macro select(name, options, label=None, selected=None, required=False, class="") %}
+{#
+  DaisyUI Select Component
+
+  Args:
+    name: Select name attribute
+    options: List of {value, text} dicts or simple list of strings
+    label: Label text
+    selected: Currently selected value
+    required: Whether field is required
+    class: Additional CSS classes
+#}
+<div class="form-control w-full {{ class }}">
+  {% if label %}
+  <label class="label">
+    <span class="label-text">{{ label }}{% if required %} <span class="text-error">*</span>{% endif %}</span>
+  </label>
+  {% endif %}
+  <select name="{{ name }}" class="select select-bordered w-full" {% if required %}required{% endif %}>
+    <option disabled {% if not selected %}selected{% endif %}>Choose one</option>
+    {% for option in options %}
+      {% if option is mapping %}
+        <option value="{{ option.value }}" {% if option.value == selected %}selected{% endif %}>
+          {{ option.text }}
+        </option>
+      {% else %}
+        <option value="{{ option }}" {% if option == selected %}selected{% endif %}>
+          {{ option }}
+        </option>
+      {% endif %}
+    {% endfor %}
+  </select>
+</div>
+{% endmacro %}
+
+{% macro checkbox(name, label, checked=False, class="") %}
+{#
+  DaisyUI Checkbox Component
+#}
+<div class="form-control {{ class }}">
+  <label class="label cursor-pointer justify-start gap-2">
+    <input
+      type="checkbox"
+      name="{{ name }}"
+      class="checkbox"
+      {% if checked %}checked{% endif %}
+    />
+    <span class="label-text">{{ label }}</span>
+  </label>
+</div>
+{% endmacro %}
+
+{% macro radio_group(name, options, selected=None, label=None, class="") %}
+{#
+  DaisyUI Radio Group Component
+
+  Args:
+    name: Radio group name
+    options: List of {value, text} dicts
+    selected: Currently selected value
+    label: Group label
+#}
+<div class="form-control {{ class }}">
+  {% if label %}
+  <label class="label">
+    <span class="label-text font-semibold">{{ label }}</span>
+  </label>
+  {% endif %}
+  {% for option in options %}
+  <label class="label cursor-pointer justify-start gap-2">
+    <input
+      type="radio"
+      name="{{ name }}"
+      value="{{ option.value if option is mapping else option }}"
+      class="radio"
+      {% if (option.value if option is mapping else option) == selected %}checked{% endif %}
+    />
+    <span class="label-text">{{ option.text if option is mapping else option }}</span>
+  </label>
+  {% endfor %}
+</div>
+{% endmacro %}

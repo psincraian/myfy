@@ -1,0 +1,189 @@
+"""
+Process management for external subprocesses.
+
+Provides robust lifecycle management for external processes with
+health checking, graceful shutdown, and error recovery.
+"""
+
+import asyncio
+import logging
+import subprocess
+
+logger = logging.getLogger(__name__)
+
+
+class ProcessManager:
+    """
+    Manages an external subprocess lifecycle with health checks.
+
+    Features:
+    - Graceful termination with fallback to SIGKILL
+    - Process status tracking
+    - Error handling for race conditions
+    - Configurable output capture/display
+
+    Example:
+        >>> manager = ProcessManager()
+        >>> await manager.start(["npm", "run", "dev"], stdout=None)
+        >>> await manager.stop(timeout=5.0)
+    """
+
+    def __init__(self, name: str = "process"):
+        """
+        Initialize process manager.
+
+        Args:
+            name: Name for logging purposes
+        """
+        self.name = name
+        self._process: asyncio.subprocess.Process | None = None
+        self._logger = logging.getLogger(f"{__name__}.{name}")
+
+    async def start(
+        self,
+        cmd: list[str],
+        stdout: int | None = asyncio.subprocess.PIPE,
+        stderr: int | None = asyncio.subprocess.PIPE,
+        startup_delay: float = 2.0,
+    ) -> bool:
+        """
+        Start the subprocess.
+
+        Args:
+            cmd: Command and arguments
+            stdout: stdout handling (None=inherit, PIPE=capture, DEVNULL=suppress)
+            stderr: stderr handling
+            startup_delay: Seconds to wait after starting (for initialization)
+
+        Returns:
+            True if started successfully, False otherwise
+        """
+        if self._process is not None:
+            self._logger.warning(f"{self.name} already running")
+            return False
+
+        try:
+            self._logger.info(f"Starting {self.name}...")
+            self._process = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=stdout,
+                stderr=stderr,
+            )
+
+            # Wait for process to initialize
+            if startup_delay > 0:
+                await asyncio.sleep(startup_delay)
+
+            # Check if process died immediately
+            if self._process.returncode is not None:
+                self._logger.error(
+                    f"{self.name} failed to start (exit code: {self._process.returncode})"
+                )
+
+                # Try to capture error output if available
+                if stdout == asyncio.subprocess.PIPE and self._process.stdout:
+                    output = await self._process.stdout.read()
+                    if output:
+                        self._logger.error(f"stdout: {output.decode()}")
+
+                if stderr == asyncio.subprocess.PIPE and self._process.stderr:
+                    error_output = await self._process.stderr.read()
+                    if error_output:
+                        self._logger.error(f"stderr: {error_output.decode()}")
+
+                self._process = None
+                return False
+
+            self._logger.info(f"✅ {self.name} started (PID: {self._process.pid})")
+            return True
+
+        except FileNotFoundError as e:
+            self._logger.error(f"Command not found: {cmd[0]}")
+            self._logger.error(f"Error: {e}")
+            return False
+        except Exception as e:
+            self._logger.error(f"Failed to start {self.name}: {e}")
+            return False
+
+    async def stop(self, timeout: float = 5.0) -> None:  # noqa: ASYNC109
+        """
+        Stop the subprocess gracefully.
+
+        Attempts terminate() first, then kill() if process doesn't stop.
+
+        Args:
+            timeout: Seconds to wait for graceful shutdown
+        """
+        if self._process is None:
+            return
+
+        self._logger.info(f"Stopping {self.name}...")
+
+        try:
+            # Check if process already exited
+            if self._process.returncode is not None:
+                self._logger.debug(
+                    f"{self.name} already terminated (exit code: {self._process.returncode})"
+                )
+                self._process = None
+                return
+
+            # Try graceful termination
+            self._process.terminate()
+
+            try:
+                # Wait for process to exit
+                await asyncio.wait_for(self._process.wait(), timeout=timeout)
+                self._logger.info(f"{self.name} stopped gracefully")
+            except TimeoutError:
+                # Force kill if didn't stop
+                self._logger.warning(f"{self.name} didn't stop gracefully, forcing kill...")
+                self._process.kill()
+                await self._process.wait()  # Wait for kill to complete
+                self._logger.info(f"{self.name} killed")
+
+        except ProcessLookupError:
+            # Process already terminated by external signal
+            self._logger.debug(f"{self.name} process already terminated")
+        except Exception as e:
+            self._logger.error(f"Error stopping {self.name}: {e}")
+        finally:
+            self._process = None
+
+    @property
+    def is_running(self) -> bool:
+        """Check if process is currently running."""
+        if self._process is None:
+            return False
+        return self._process.returncode is None
+
+    @property
+    def pid(self) -> int | None:
+        """Get process ID if running."""
+        if self._process is None:
+            return None
+        return self._process.pid
+
+    @property
+    def exit_code(self) -> int | None:
+        """Get exit code if process has terminated."""
+        if self._process is None:
+            return None
+        return self._process.returncode
+
+    async def wait(self) -> int:
+        """
+        Wait for process to exit and return exit code.
+
+        Raises:
+            RuntimeError: If no process is running
+        """
+        if self._process is None:
+            raise RuntimeError(f"No {self.name} process running")
+
+        return await self._process.wait()
+
+    def __repr__(self) -> str:
+        status = "running" if self.is_running else "stopped"
+        pid_info = f" (PID: {self.pid})" if self.pid else ""
+        return f"ProcessManager(name='{self.name}', status={status}{pid_info})"

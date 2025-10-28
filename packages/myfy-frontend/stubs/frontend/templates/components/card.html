@@ -1,0 +1,59 @@
+{% macro card(title=None, body=None, footer=None, image=None, class="") %}
+{#
+  DaisyUI Card Component
+
+  Args:
+    title: Card title
+    body: Card body content (can be HTML)
+    footer: Card footer content (can be HTML)
+    image: Image URL for card-top image
+    class: Additional CSS classes
+#}
+<div class="card bg-base-100 shadow-xl {{ class }}">
+  {% if image %}
+  <figure>
+    <img src="{{ image }}" alt="{{ title or 'Card image' }}" />
+  </figure>
+  {% endif %}
+  <div class="card-body">
+    {% if title %}
+    <h2 class="card-title">{{ title }}</h2>
+    {% endif %}
+    {% if body %}
+    <p>{{ body }}</p>
+    {% endif %}
+    {% if caller %}
+      {{ caller() }}
+    {% endif %}
+  </div>
+  {% if footer %}
+  <div class="card-actions justify-end p-4 pt-0">
+    {{ footer }}
+  </div>
+  {% endif %}
+</div>
+{% endmacro %}
+
+{% macro stat_card(title, value, desc=None, icon=None) %}
+{#
+  DaisyUI Stat Card Component
+
+  Args:
+    title: Stat title
+    value: Stat value (main number/text)
+    desc: Description text
+    icon: Icon HTML or class
+#}
+<div class="stat bg-base-100 shadow-md rounded-box">
+  {% if icon %}
+  <div class="stat-figure text-primary">
+    {{ icon | safe }}
+  </div>
+  {% endif %}
+  <div class="stat-title">{{ title }}</div>
+  <div class="stat-value text-primary">{{ value }}</div>
+  {% if desc %}
+  <div class="stat-desc">{{ desc }}</div>
+  {% endif %}
+</div>
+{% endmacro %}

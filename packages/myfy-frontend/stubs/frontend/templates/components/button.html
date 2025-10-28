@@ -1,0 +1,49 @@
+{% macro button(text, type="primary", size="md", href=None, onclick=None, class="") %}
+{#
+  DaisyUI Button Component
+
+  Args:
+    text: Button text
+    type: Button type (primary, secondary, accent, ghost, etc.)
+    size: Button size (xs, sm, md, lg)
+    href: If provided, renders as link instead of button
+    onclick: JavaScript onclick handler
+    class: Additional CSS classes
+#}
+{% if href %}
+<a href="{{ href }}" class="btn btn-{{ type }} btn-{{ size }} {{ class }}">
+  {{ text }}
+</a>
+{% else %}
+<button
+  type="button"
+  class="btn btn-{{ type }} btn-{{ size }} {{ class }}"
+  {% if onclick %}onclick="{{ onclick }}"{% endif %}
+>
+  {{ text }}
+</button>
+{% endif %}
+{% endmacro %}
+
+{% macro icon_button(icon, type="ghost", size="md", href=None, title=None, class="") %}
+{#
+  Icon-only button
+
+  Args:
+    icon: SVG or icon HTML
+    type: Button type
+    size: Button size
+    href: If provided, renders as link
+    title: Tooltip text
+    class: Additional CSS classes
+#}
+{% if href %}
+<a href="{{ href }}" class="btn btn-{{ type }} btn-{{ size }} btn-circle {{ class }}" {% if title %}title="{{ title }}"{% endif %}>
+  {{ icon | safe }}
+</a>
+{% else %}
+<button type="button" class="btn btn-{{ type }} btn-{{ size }} btn-circle {{ class }}" {% if title %}title="{{ title }}"{% endif %}>
+  {{ icon | safe }}
+</button>
+{% endif %}
+{% endmacro %}

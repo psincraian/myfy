@@ -4,12 +4,17 @@ Application kernel - the heart of myfy.
 Coordinates DI, modules, configuration, and lifecycle.
 """
 
+from contextlib import asynccontextmanager
 from importlib.metadata import entry_points
+from typing import TypeVar
 
 from ..config import BaseSettings, CoreSettings, load_settings
-from ..di import Container, register_providers_in_container
+from ..di import SINGLETON, Container, register_providers_in_container
+from .errors import ModuleDependencyError, MyfyModuleNotFoundError
 from .lifecycle import LifecycleManager
 from .module import Module
+
+T = TypeVar("T")
 
 
 class Application:
@@ -70,31 +75,120 @@ class Application:
         self._modules.append(module)
         self.lifecycle.add_module(module)
 
+    def get_module(self, module_type: type[T]) -> T:
+        """
+        Get a module by type.
+
+        Args:
+            module_type: The module class to find (e.g., WebModule)
+
+        Returns:
+            The module instance
+
+        Raises:
+            ModuleNotFoundError: If module not found
+
+        Example:
+            web_module = app.get_module(WebModule)
+        """
+        for module in self._modules:
+            if isinstance(module, module_type):
+                return module  # type: ignore
+        raise MyfyModuleNotFoundError(module_type)
+
+    def has_module(self, module_type: type) -> bool:
+        """
+        Check if a module type is registered.
+
+        Args:
+            module_type: The module class to check
+
+        Returns:
+            True if module is registered, False otherwise
+
+        Example:
+            if app.has_module(FrontendModule):
+                print("Frontend module is loaded")
+        """
+        return any(isinstance(m, module_type) for m in self._modules)
+
+    def get_modules_implementing(self, protocol: type[T]) -> list[T]:
+        """
+        Get all modules implementing a specific protocol.
+
+        Args:
+            protocol: The protocol type to filter by (e.g., IWebExtension)
+
+        Returns:
+            List of modules that declare they implement the protocol
+
+        Example:
+            extensions = app.get_modules_implementing(IWebExtension)
+            for ext in extensions:
+                ext.extend_asgi_app(asgi_app)
+        """
+        result = []
+        for module in self._modules:
+            provides = getattr(module, "provides", [])
+            if protocol in provides:
+                result.append(module)  # type: ignore
+        return result
+
+    def create_lifespan(self):
+        """
+        Create lifespan context manager.
+
+        Returns a lifespan context that starts/stops all modules.
+        This centralizes lifespan creation for use in CLI and factories.
+
+        Returns:
+            lifespan context manager
+
+        Example:
+            lifespan = app.create_lifespan()
+            asgi_app = web_module.get_asgi_app(container, lifespan=lifespan)
+        """
+
+        @asynccontextmanager
+        async def lifespan(app):  # noqa: ARG001
+            """lifespan that manages all module lifecycles."""
+            await self.lifecycle.start_all()
+            try:
+                yield
+            finally:
+                await self.lifecycle.stop_all()
+
+        return lifespan
+
     def initialize(self) -> None:
         """
-        Initialize the application.
+        Initialize the application with multi-phase module setup.
 
-        Steps:
-        1. Discover modules via entry points (if auto_discover enabled)
-        2. Register settings in container
-        3. Configure all modules (register providers)
-        4. Register @provider decorated functions
-        5. Compile DI container
+        Phases:
+        1. Discovery - Auto-discover modules via entry points
+        2. Dependency Validation - Validate module dependency graph
+        3. Configure - Modules register services in DI
+        4. Extend - Modules modify service registrations (optional)
+        5. Compile - DI container builds injection plans
+        6. Finalize - Modules configure singleton services (optional)
 
         This must be called before start() or run().
         """
         if self._initialized:
             return
 
-        # Auto-discover modules via entry points
+        # Phase 1: Discovery
         if self._auto_discover:
             self._discover_modules()
+
+        # Phase 2: Validate dependencies (fail-fast)
+        self._validate_dependencies()
 
         # Register core settings as singleton
         self.container.register(
             type_=type(self.settings),
             factory=lambda: self.settings,
-            scope="singleton",
+            scope=SINGLETON,
         )
 
         # Also make CoreSettings available if using a custom settings class
@@ -102,18 +196,28 @@ class Application:
             self.container.register(
                 type_=CoreSettings,
                 factory=lambda: self.settings,  # type: ignore
-                scope="singleton",
+                scope=SINGLETON,
             )
 
-        # Configure all modules (let them register providers)
+        # Phase 3: Configure (register services)
         for module in self._modules:
             module.configure(self.container)
 
         # Register any @provider decorated functions
         register_providers_in_container(self.container)
 
-        # Compile the container (build injection plans, detect cycles)
+        # Phase 4: Extend (optional - modify registrations)
+        for module in self._modules:
+            if hasattr(module, "extend"):
+                module.extend(self.container)
+
+        # Phase 5: Compile the container (build injection plans, detect cycles)
         self.container.compile()
+
+        # Phase 6: Finalize (optional - configure singletons)
+        for module in self._modules:
+            if hasattr(module, "finalize"):
+                module.finalize(self.container)
 
         self._initialized = True
 
@@ -138,6 +242,101 @@ class Application:
         except Exception as e:
             # Entry points discovery failed - not critical
             print(f"Warning: Module discovery failed: {e}")
+
+    def _validate_dependencies(self) -> None:
+        """
+        Validate module dependency graph.
+
+        Ensures:
+        - All required modules are present
+        - No circular dependencies
+        - Returns modules in dependency order (topological sort)
+
+        Raises:
+            ModuleDependencyError: If dependencies cannot be satisfied
+        """
+        # Build module type map
+        module_types = {type(m): m for m in self._modules}
+
+        # Check all requirements are met
+        for module in self._modules:
+            requires = getattr(module, "requires", [])
+            for required_type in requires:
+                if required_type not in module_types:
+                    raise ModuleDependencyError(
+                        f"Module '{module.name}' ({type(module).__name__}) requires "
+                        f"{required_type.__name__} but it is not registered. "
+                        f"Add it via app.add_module({required_type.__name__}())."
+                    )
+
+        # Check for circular dependencies using DFS
+        visited = set()
+        rec_stack = set()
+
+        def has_cycle(module_type):
+            visited.add(module_type)
+            rec_stack.add(module_type)
+
+            module = module_types[module_type]
+            requires = getattr(module, "requires", [])
+
+            for required_type in requires:
+                if required_type not in visited:
+                    if has_cycle(required_type):
+                        return True
+                elif required_type in rec_stack:
+                    # Found a cycle
+                    return True
+
+            rec_stack.remove(module_type)
+            return False
+
+        for module_type in module_types:
+            if module_type not in visited and has_cycle(module_type):
+                raise ModuleDependencyError(
+                    "Circular module dependency detected. "
+                    "Check your module 'requires' declarations."
+                )
+
+        # Sort modules by dependency order (topological sort)
+        self._modules = self._topological_sort_modules()
+
+    def _topological_sort_modules(self) -> list[Module]:
+        """
+        Sort modules in dependency order using topological sort.
+
+        Returns:
+            List of modules in dependency order (dependencies first)
+        """
+        # Build adjacency list and in-degree map
+        module_map = {type(m): m for m in self._modules}
+        in_degree = {type(m): 0 for m in self._modules}
+        adj_list = {type(m): [] for m in self._modules}
+
+        # Build graph
+        for module in self._modules:
+            module_type = type(module)
+            requires = getattr(module, "requires", [])
+            for required_type in requires:
+                # required_type -> module_type (dependency edge)
+                adj_list[required_type].append(module_type)
+                in_degree[module_type] += 1
+
+        # Kahn's algorithm for topological sort
+        queue = [mt for mt in in_degree if in_degree[mt] == 0]
+        sorted_types = []
+
+        while queue:
+            current_type = queue.pop(0)
+            sorted_types.append(current_type)
+
+            for dependent_type in adj_list[current_type]:
+                in_degree[dependent_type] -= 1
+                if in_degree[dependent_type] == 0:
+                    queue.append(dependent_type)
+
+        # Convert types back to module instances
+        return [module_map[mt] for mt in sorted_types]
 
     async def start(self) -> None:
         """
@@ -172,7 +371,8 @@ class Application:
         self.lifecycle.setup_signal_handlers()
 
         async with self.lifecycle.lifespan():
-            print(f"🚀 {self.settings.app_name} started")
+            app_name = getattr(self.settings, "app_name", "myfy-app")
+            print(f"🚀 {app_name} started")
             print(
                 f"📦 Loaded {len(self._modules)} module(s): {', '.join(m.name for m in self._modules)}"
             )
@@ -180,7 +380,7 @@ class Application:
             # Wait for shutdown signal
             await self.lifecycle.wait_for_shutdown()
 
-        print(f"👋 {self.settings.app_name} stopped")
+        print(f"👋 {app_name} stopped")
 
     def __repr__(self) -> str:
         return f"Application(modules={len(self._modules)}, initialized={self._initialized})"

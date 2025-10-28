@@ -1,0 +1,411 @@
+"""
+Tests for ADR-0005: Module Extension Points and Lifecycle Phases.
+
+Tests cover:
+- Module dependency validation
+- Multi-phase lifecycle (configure → extend → compile → finalize → start → stop)
+- Public APIs (get_module, has_module, get_modules_implementing)
+- Error handling (missing dependencies, circular dependencies)
+"""
+
+from typing import cast
+
+import pytest
+
+from myfy.core.di import SINGLETON, Container
+from myfy.core.kernel import (
+    Application,
+    Module,
+    ModuleDependencyError,
+    MyfyModuleNotFoundError,
+)
+
+
+# Helper for type checking
+def as_module(obj: object) -> Module:
+    """Cast test module to Module protocol for type checker."""
+    return cast("Module", obj)
+
+
+# Test Modules
+class SimpleModule:
+    """Simple module with no dependencies."""
+
+    @property
+    def name(self) -> str:
+        return "simple"
+
+    def configure(self, container: Container) -> None:
+        """Register a simple service."""
+        container.register(str, lambda: "simple_service", scope=SINGLETON)
+
+    async def start(self) -> None:
+        pass
+
+    async def stop(self) -> None:
+        pass
+
+
+class DependentModule:
+    """Module that depends on SimpleModule."""
+
+    @property
+    def name(self) -> str:
+        return "dependent"
+
+    @property
+    def requires(self) -> list[type]:
+        return [SimpleModule]
+
+    def configure(self, container: Container) -> None:
+        """Register a dependent service."""
+        container.register(int, lambda: 42, scope=SINGLETON)
+
+    async def start(self) -> None:
+        pass
+
+    async def stop(self) -> None:
+        pass
+
+
+class ExtendingModule:
+    """Module that uses extend() phase."""
+
+    def __init__(self):
+        self.extend_called = False
+
+    @property
+    def name(self) -> str:
+        return "extending"
+
+    def configure(self, container: Container) -> None:
+        container.register(bool, lambda: True, scope=SINGLETON)
+
+    def extend(self, container: Container) -> None:  # noqa: ARG002
+        """Modify registrations in extend phase."""
+        self.extend_called = True
+
+    async def start(self) -> None:
+        pass
+
+    async def stop(self) -> None:
+        pass
+
+
+class FinalizingModule:
+    """Module that uses finalize() phase."""
+
+    def __init__(self):
+        self.finalize_called = False
+        self.singleton_value = None
+
+    @property
+    def name(self) -> str:
+        return "finalizing"
+
+    @property
+    def requires(self) -> list[type]:
+        return [SimpleModule]
+
+    def configure(self, container: Container) -> None:
+        """Just register services."""
+
+    def finalize(self, container: Container) -> None:
+        """Access singletons in finalize phase."""
+        self.finalize_called = True
+        # Should be able to access singletons now
+        self.singleton_value = container.get(str)
+
+    async def start(self) -> None:
+        pass
+
+    async def stop(self) -> None:
+        pass
+
+
+class CircularA:
+    """Module A in circular dependency."""
+
+    @property
+    def name(self) -> str:
+        return "circular_a"
+
+    @property
+    def requires(self) -> list[type]:
+        return [type("CircularB", (), {})]  # Placeholder
+
+    def configure(self, container: Container) -> None:
+        pass
+
+    async def start(self) -> None:
+        pass
+
+    async def stop(self) -> None:
+        pass
+
+
+class CircularB:
+    """Module B in circular dependency."""
+
+    @property
+    def name(self) -> str:
+        return "circular_b"
+
+    @property
+    def requires(self) -> list[type]:
+        return [CircularA]
+
+    def configure(self, container: Container) -> None:
+        pass
+
+    async def start(self) -> None:
+        pass
+
+    async def stop(self) -> None:
+        pass
+
+
+# Protocol for testing
+class ITestProtocol:
+    """Test protocol for module extension."""
+
+
+class ProtocolImplementer:
+    """Module that implements a protocol."""
+
+    @property
+    def name(self) -> str:
+        return "protocol_impl"
+
+    @property
+    def provides(self) -> list[type]:
+        return [ITestProtocol]
+
+    def configure(self, container: Container) -> None:
+        pass
+
+    async def start(self) -> None:
+        pass
+
+    async def stop(self) -> None:
+        pass
+
+
+# Tests
+class TestModuleDependencyValidation:
+    """Test dependency validation and error handling."""
+
+    def test_missing_dependency_raises_error(self):
+        """Test that missing dependency is caught at initialization."""
+        app = Application(auto_discover=False)
+        app.add_module(as_module(DependentModule()))  # Requires SimpleModule
+        # Note: SimpleModule is intentionally not added to test error handling
+
+        with pytest.raises(ModuleDependencyError, match=r"requires.*SimpleModule"):
+            app.initialize()
+
+    def test_circular_dependency_raises_error(self):
+        """Test that circular dependency is detected."""
+        # Update CircularA to actually point to CircularB
+        CircularA.requires = property(lambda self: [CircularB])  # noqa: ARG005
+
+        app = Application(auto_discover=False)
+        app.add_module(as_module(CircularA()))
+        app.add_module(as_module(CircularB()))
+
+        with pytest.raises(ModuleDependencyError, match="Circular"):
+            app.initialize()
+
+    def test_valid_dependencies_initialize_successfully(self):
+        """Test that valid dependencies are satisfied."""
+        app = Application(auto_discover=False)
+        app.add_module(as_module(SimpleModule()))
+        app.add_module(as_module(DependentModule()))  # Depends on SimpleModule
+
+        # Should not raise
+        app.initialize()
+        assert app._initialized
+
+
+class TestLifecyclePhases:
+    """Test the multi-phase lifecycle."""
+
+    def test_extend_phase_is_called(self):
+        """Test that extend() is called after configure()."""
+        extending_module = ExtendingModule()
+
+        app = Application(auto_discover=False)
+        app.add_module(as_module(extending_module))
+
+        assert not extending_module.extend_called
+        app.initialize()
+        assert extending_module.extend_called
+
+    def test_finalize_phase_can_access_singletons(self):
+        """Test that finalize() can access compiled singletons."""
+        finalizing_module = FinalizingModule()
+
+        app = Application(auto_discover=False)
+        app.add_module(as_module(SimpleModule()))  # Provides str singleton
+        app.add_module(as_module(finalizing_module))
+
+        assert not finalizing_module.finalize_called
+        assert finalizing_module.singleton_value is None
+
+        app.initialize()
+
+        assert finalizing_module.finalize_called
+        assert finalizing_module.singleton_value == "simple_service"
+
+    def test_modules_sorted_by_dependency_order(self):
+        """Test that modules are initialized in dependency order."""
+        app = Application(auto_discover=False)
+        # Add in wrong order
+        app.add_module(as_module(DependentModule()))  # Depends on SimpleModule
+        app.add_module(as_module(SimpleModule()))
+
+        app.initialize()
+
+        # After validation, should be reordered
+        module_names = [m.name for m in app._modules]
+        simple_idx = module_names.index("simple")
+        dependent_idx = module_names.index("dependent")
+
+        # SimpleModule should come before DependentModule
+        assert simple_idx < dependent_idx
+
+
+class TestPublicAPIs:
+    """Test public module discovery APIs."""
+
+    def test_get_module_returns_correct_module(self):
+        """Test get_module() returns the right module instance."""
+        app = Application(auto_discover=False)
+        simple = SimpleModule()
+        app.add_module(as_module(simple))
+        app.initialize()
+
+        result = app.get_module(SimpleModule)
+        assert result is simple
+
+    def test_get_module_raises_on_not_found(self):
+        """Test get_module() raises MyfyModuleNotFoundError."""
+        app = Application(auto_discover=False)
+        app.add_module(as_module(SimpleModule()))
+        app.initialize()
+
+        with pytest.raises(MyfyModuleNotFoundError):
+            app.get_module(DependentModule)
+
+    def test_has_module_returns_true_for_registered(self):
+        """Test has_module() returns True for registered modules."""
+        app = Application(auto_discover=False)
+        app.add_module(as_module(SimpleModule()))
+        app.initialize()
+
+        assert app.has_module(SimpleModule)
+        assert not app.has_module(DependentModule)
+
+    def test_get_modules_implementing_returns_matching_modules(self):
+        """Test get_modules_implementing() filters by protocol."""
+        app = Application(auto_discover=False)
+        impl = ProtocolImplementer()
+        app.add_module(as_module(SimpleModule()))
+        app.add_module(as_module(impl))
+        app.initialize()
+
+        result = app.get_modules_implementing(ITestProtocol)
+        assert len(result) == 1
+        assert result[0] is impl
+
+    def test_get_modules_implementing_returns_empty_for_no_match(self):
+        """Test get_modules_implementing() returns empty list."""
+        app = Application(auto_discover=False)
+        app.add_module(as_module(SimpleModule()))
+        app.initialize()
+
+        result = app.get_modules_implementing(ITestProtocol)
+        assert result == []
+
+
+class TestLifespanCreation:
+    """Test centralized lifespan creation."""
+
+    @pytest.mark.asyncio
+    async def test_create_lifespan_returns_context_manager(self):
+        """Test create_lifespan() returns working context manager."""
+        app = Application(auto_discover=False)
+        app.add_module(as_module(SimpleModule()))
+        app.initialize()
+
+        lifespan = app.create_lifespan()
+
+        # Lifespan should be a context manager
+        async with lifespan(None):
+            # Modules should be started
+            pass
+        # Modules should be stopped after exiting
+
+
+class TestBackwardCompatibility:
+    """Test that existing modules still work without new features."""
+
+    def test_module_without_requires_works(self):
+        """Test modules without requires property work."""
+        app = Application(auto_discover=False)
+        app.add_module(as_module(SimpleModule()))  # No requires property
+
+        # Should not raise
+        app.initialize()
+
+    def test_module_without_provides_works(self):
+        """Test modules without provides property work."""
+        app = Application(auto_discover=False)
+        app.add_module(as_module(SimpleModule()))  # No provides property
+
+        # Should not raise
+        app.initialize()
+
+    def test_module_without_extend_works(self):
+        """Test modules without extend() method work."""
+        app = Application(auto_discover=False)
+        app.add_module(as_module(SimpleModule()))  # No extend() method
+
+        # Should not raise
+        app.initialize()
+
+    def test_module_without_finalize_works(self):
+        """Test modules without finalize() method work."""
+        app = Application(auto_discover=False)
+        app.add_module(as_module(SimpleModule()))  # No finalize() method
+
+        # Should not raise
+        app.initialize()
+
+
+class TestErrorMessages:
+    """Test that error messages are helpful."""
+
+    def test_missing_dependency_error_message_is_clear(self):
+        """Test that missing dependency error is actionable."""
+        app = Application(auto_discover=False)
+        app.add_module(as_module(DependentModule()))
+
+        with pytest.raises(ModuleDependencyError, match=r"Add it via app\.add_module") as exc_info:
+            app.initialize()
+
+        # Error should mention the module name
+        assert "SimpleModule" in str(exc_info.value)
+
+    def test_module_not_found_error_is_clear(self):
+        """Test that MyfyModuleNotFoundError is informative."""
+        app = Application(auto_discover=False)
+        app.add_module(as_module(SimpleModule()))
+        app.initialize()
+
+        with pytest.raises(MyfyModuleNotFoundError) as exc_info:
+            app.get_module(DependentModule)
+
+        error = cast("MyfyModuleNotFoundError", exc_info.value)
+        assert error.module_type == DependentModule
+        assert "add_module" in str(error).lower()

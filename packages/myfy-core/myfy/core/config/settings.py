@@ -6,11 +6,13 @@ Built on Pydantic for type-safe, validated settings.
 
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeVar, cast
 
 from pydantic import Field
 from pydantic_settings import BaseSettings as PydanticBaseSettings
 from pydantic_settings import SettingsConfigDict
+
+T = TypeVar("T", bound="BaseSettings")
 
 
 class BaseSettings(PydanticBaseSettings):
@@ -137,11 +139,11 @@ class CoreSettings(BaseSettings):
             self.debug = True
 
 
-def load_settings(
-    settings_class: type[BaseSettings] = CoreSettings,
+def load_settings[T: "BaseSettings"](
+    settings_class: type[T] = CoreSettings,  # type: ignore[assignment]
     profile: str | None = None,
     env_file: Path | None = None,
-) -> BaseSettings:
+) -> T:
     """
     Load settings with profile-based layering.
 
@@ -176,4 +178,4 @@ def load_settings(
 
     # Load settings (environment variables will override)
     # Pydantic loads env files in order, with later files overriding
-    return settings_class()
+    return cast("T", settings_class())

@@ -21,8 +21,11 @@ class Module(Protocol):
 
     Modules wire themselves into the application during startup:
     1. configure() - Register providers in DI container
-    2. start() - Perform startup tasks (connect to DB, etc.)
-    3. stop() - Cleanup resources gracefully
+    2. extend() - Modify other modules' service registrations (optional)
+    3. [Container compilation happens here]
+    4. finalize() - Configure singleton services after compilation (optional)
+    5. start() - Perform startup tasks (connect to DB, etc.)
+    6. stop() - Cleanup resources gracefully
     """
 
     @property
@@ -30,23 +33,93 @@ class Module(Protocol):
         """Unique name for this module (e.g., 'web', 'sqlalchemy')."""
         ...
 
+    @property
+    def requires(self) -> list[type]:
+        """
+        Module types this module depends on.
+
+        The framework validates that all required modules are registered
+        before initialization. Modules are initialized in dependency order.
+
+        Returns:
+            List of module types (e.g., [WebModule, DataModule])
+            Default: [] (no dependencies)
+
+        Example:
+            @property
+            def requires(self) -> list[type]:
+                return [WebModule]  # FrontendModule requires WebModule
+        """
+        return []
+
+    @property
+    def provides(self) -> list[type]:
+        """
+        Extension protocols this module implements.
+
+        Allows other modules to discover extensions via type-safe protocols.
+
+        Returns:
+            List of protocol types (e.g., [IWebExtension, IAuthProvider])
+            Default: [] (no protocols)
+
+        Example:
+            @property
+            def provides(self) -> list[type]:
+                return [IWebExtension]  # Implements web extension protocol
+        """
+        return []
+
     def configure(self, container: Container) -> None:
         """
         Configure the module by registering providers in the DI container.
 
         This is called during application initialization, before compilation.
+        Services are registered but not yet instantiated.
 
         Args:
             container: The DI container to register providers in
         """
         ...
 
+    def extend(self, container: Container) -> None:
+        """
+        Extend other modules' service registrations (optional).
+
+        Called after all modules have configured but before container compilation.
+        Use this to:
+        - Modify service registrations (e.g., wrap with middleware)
+        - Add callbacks/hooks to other modules
+        - Decorate existing service factories
+
+        Default: no-op (most modules don't need this)
+
+        Args:
+            container: The DI container (services registered but not built)
+        """
+
+    def finalize(self, container: Container) -> None:
+        """
+        Finalize module configuration after container compilation (optional).
+
+        Called after container is compiled and singletons can be resolved.
+        Use this to:
+        - Configure singleton services (e.g., mount static files on ASGIApp)
+        - Register routes/middleware on web apps
+        - Set up cross-module integrations
+
+        Default: no-op (most modules don't need this)
+
+        Args:
+            container: The DI container (compiled, singletons accessible)
+        """
+
     async def start(self) -> None:
         """
         Start the module.
 
-        Called after the container is compiled and singleton dependencies
-        are available. Use this to:
+        Called after finalize() to start runtime services.
+        Use this to:
         - Connect to external services
         - Initialize background tasks
         - Warm up caches
@@ -83,12 +156,50 @@ class BaseModule(ABC):
     def name(self) -> str:
         return self._name
 
+    @property
+    def requires(self) -> list[type]:
+        """
+        Module dependencies (default: none).
+
+        Override to declare dependencies:
+            @property
+            def requires(self) -> list[type]:
+                return [WebModule, DataModule]
+        """
+        return []
+
+    @property
+    def provides(self) -> list[type]:
+        """
+        Extension protocols this module implements (default: none).
+
+        Override to declare protocols:
+            @property
+            def provides(self) -> list[type]:
+                return [IWebExtension]
+        """
+        return []
+
     @abstractmethod
     def configure(self, container: Container) -> None:
         """
         Configure the module by registering providers.
 
         Must be implemented by subclasses.
+        """
+
+    def extend(self, container: Container) -> None:  # noqa: B027
+        """
+        Extend other modules' service registrations (optional).
+
+        Default no-op implementation. Override if needed.
+        """
+
+    def finalize(self, container: Container) -> None:  # noqa: B027
+        """
+        Finalize module configuration after container compilation (optional).
+
+        Default no-op implementation. Override if needed.
         """
 
     async def start(self) -> None:

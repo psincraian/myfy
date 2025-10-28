@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% from "components/navbar.html" import navbar %}
+{% from "components/card.html" import card %}
+{% from "components/button.html" import button %}
+
+{% block title %}{{ title }} - myfy Frontend{% endblock %}
+
+{% block content %}
+{{ navbar(logo="myfy") }}
+
+<div class="hero min-h-screen hero-gradient">
+  <div class="hero-content text-center">
+    <div class="max-w-2xl">
+      <h1 class="text-6xl font-bold mb-6">
+        <span class="text-primary">myfy</span> + Tailwind 4 + DaisyUI 5
+      </h1>
+      <p class="text-lg mb-8 text-base-content/80">
+        {{ description }}
+      </p>
+
+      <div class="flex gap-4 justify-center">
+        {{ button("Get Started", type="primary", size="lg", href="/components") }}
+        {{ button("About", type="ghost", size="lg", href="/about") }}
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+        {% call card(title="⚡ Fast", class="card-hover") %}
+          Vite dev server with HMR. Instant feedback on every change.
+        {% endcall %}
+
+        {% call card(title="🎨 Beautiful", class="card-hover") %}
+          DaisyUI 5 components with Tailwind 4. No custom CSS needed.
+        {% endcall %}
+
+        {% call card(title="🚀 Easy", class="card-hover") %}
+          One line: <code class="text-sm">app.add_module(FrontendModule())</code>
+        {% endcall %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
