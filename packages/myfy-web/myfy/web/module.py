@@ -59,9 +59,13 @@ class WebModule:
         )
 
         # Register ASGI app factory
+        # Note: container is captured from closure, router is the dependency
+        def create_asgi_app(router: Router) -> ASGIApp:
+            return ASGIApp(container, router)
+
         container.register(
             type_=ASGIApp,
-            factory=lambda r=self.router: ASGIApp(container, r),
+            factory=create_asgi_app,
             scope="singleton",
         )
 
@@ -71,14 +75,24 @@ class WebModule:
     async def stop(self) -> None:
         """Stop web module gracefully."""
 
-    def get_asgi_app(self, container) -> ASGIApp:
+    def get_asgi_app(self, container, lifespan=None) -> ASGIApp:
         """
         Get the ASGI application.
 
         Called by the CLI to start the server.
+
+        Args:
+            container: DI container
+            lifespan: Optional lifespan context manager for module startup/shutdown
         """
         if self._asgi_app is None:
-            self._asgi_app = container.get(ASGIApp)
+            if lifespan is not None:
+                # Create new ASGI app with lifespan
+                router = container.get(Router)
+                self._asgi_app = ASGIApp(container, router, lifespan=lifespan)
+            else:
+                # Get from DI container (no lifespan)
+                self._asgi_app = container.get(ASGIApp)
         return self._asgi_app
 
     def __repr__(self) -> str:

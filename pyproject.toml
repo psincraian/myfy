@@ -9,6 +9,7 @@ members = [
   "packages/myfy-core",
   "packages/myfy-web",
   "packages/myfy-cli",
+  "packages/myfy-frontend",
   "packages/myfy",
 ]
 
@@ -16,12 +17,15 @@ members = [
 myfy-core = { workspace = true }
 myfy-web = { workspace = true }
 myfy-cli = { workspace = true }
+myfy-frontend = { workspace = true }
 myfy = { workspace = true }
 
 [dependency-groups]
 dev = [
     "ruff>=0.8.0",
     "ty>=0.0.1a24",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
 ]
 docs = [
     "mkdocs>=1.5.0",

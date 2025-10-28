@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}My App{% endblock %}</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="{% block description %}Built with myfy framework{% endblock %}">
+  <meta name="author" content="{% block author %}{% endblock %}">
+
+  {# Vite dev mode: HMR client #}
+  {% if get_vite_client_url() %}
+  <script type="module" src="{{ get_vite_client_url() }}"></script>
+  {% endif %}
+
+  {# CSS: dev server or hashed production file #}
+  <link rel="stylesheet" href="{{ get_css_url('styles') }}">
+
+  {# Theme switcher JS (loads immediately to prevent flash) #}
+  <script type="module" src="{{ get_asset_url('theme-switcher') }}"></script>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  {% block content %}{% endblock %}
+
+  {# Main JS #}
+  <script type="module" src="{{ get_asset_url('main') }}"></script>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -73,12 +73,12 @@ class LifecycleManager:
                 self._logger.error(
                     f"Module '{module.name}' did not stop within {self.timeout}s. "
                     f"This may indicate a resource leak or hanging operation.",
-                    extra={"module": module.name, "timeout": self.timeout},
+                    extra={"module_name": module.name, "timeout": self.timeout},
                 )
             except Exception as e:
                 self._logger.exception(
                     f"Error stopping module '{module.name}': {e}",
-                    extra={"module": module.name},
+                    extra={"module_name": module.name},
                     exc_info=True,
                 )
 
@@ -92,15 +92,16 @@ class LifecycleManager:
         Args:
             modules_to_stop: Specific modules to stop, or None to stop all started modules
         """
-        modules = modules_to_stop if modules_to_stop is not None else self._started_modules
+        modules = modules_to_stop if modules_to_stop is not None else self._started_modules.copy()
 
         for module in reversed(modules):
             with contextlib.suppress(Exception):
                 # Best effort - ignore errors during shutdown
                 await module.stop()
 
-        if modules_to_stop is None:
-            self._started_modules.clear()
+            # Remove from started modules to prevent double cleanup
+            if module in self._started_modules:
+                self._started_modules.remove(module)
 
     def setup_signal_handlers(self) -> None:
         """

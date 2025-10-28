@@ -6,14 +6,14 @@
 **myfy** comes with strong defaults so you can start fast — but everything can be replaced or extended.
 	2.	Defaults by default.
 The fastest path is the golden path. Convention wins, but configuration is always possible.
-	3.	Sugar with substance.
-The framework provides ergonomic decorators and helpers — they’re sugar over explicit, well-defined mechanics.
-	4.	Pythonic over ceremonial.
-Clean, readable code — no XML, no annotations, no hidden globals. Simplicity beats abstraction.
-	5.	Predictable lifecycle.
-Clear startup/shutdown order, explicit hooks, graceful recovery. Apps are deterministic and introspectable.
-	6.	Modular by design.
+	3.	Modular by design.
 Every feature (web, data, telemetry, tasks) is just a module. The kernel stays tiny; modules wire themselves in.
+	4.	Sugar with substance.
+The framework provides ergonomic decorators and helpers — they’re sugar over explicit, well-defined mechanics.
+	5.	Pythonic over ceremonial.
+Clean, readable code — no XML, no annotations, no hidden globals. Simplicity beats abstraction.
+	6.	Predictable lifecycle.
+Clear startup/shutdown order, explicit hooks, graceful recovery. Apps are deterministic and introspectable.
 	7.	Replace anything.
 Defaults are composable — swap routers, ORMs, or DI providers without breaking the core.
 	8.	Typed, validated, safe.

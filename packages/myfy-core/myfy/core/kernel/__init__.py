@@ -10,6 +10,7 @@ Usage:
 """
 
 from .app import Application
+from .errors import ModuleDependencyError, ModuleError, MyfyModuleNotFoundError
 from .lifecycle import LifecycleManager
 from .module import BaseModule, Module
 
@@ -18,4 +19,7 @@ __all__ = [
     "BaseModule",
     "LifecycleManager",
     "Module",
+    "ModuleDependencyError",
+    "ModuleError",
+    "MyfyModuleNotFoundError",
 ]

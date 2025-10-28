@@ -24,12 +24,15 @@ Usage:
 from .asgi import ASGIApp
 from .config import WebSettings
 from .context import RequestContext, get_request_context
+from .extensions import IMiddlewareProvider, IWebExtension
 from .module import WebModule, web_module
 from .routing import HTTPMethod, Route, Router, route
 
 __all__ = [
     "ASGIApp",
     "HTTPMethod",
+    "IMiddlewareProvider",
+    "IWebExtension",
     "RequestContext",
     "Route",
     "Router",

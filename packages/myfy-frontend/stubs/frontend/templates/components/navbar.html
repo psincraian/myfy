@@ -1,0 +1,70 @@
+{% macro navbar(logo="MyApp", user=None, links=None) %}
+{#
+  DaisyUI Navbar Component
+
+  Args:
+    logo: Brand name/logo text
+    user: User object with .email attribute (optional)
+    links: List of {url, text, icon} dicts for navigation (optional)
+#}
+<div class="navbar navbar-blur fixed top-0 z-50 w-full shadow-sm">
+  <div class="navbar-start">
+    <a href="/" class="btn btn-ghost text-xl font-bold">
+      {{ logo }}
+    </a>
+  </div>
+
+  {% if links %}
+  <div class="navbar-center hidden lg:flex">
+    <ul class="menu menu-horizontal px-1">
+      {% for link in links %}
+      <li>
+        <a href="{{ link.url }}">
+          {% if link.icon %}<i class="{{ link.icon }}"></i>{% endif %}
+          {{ link.text }}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="navbar-end gap-2">
+    {# Theme toggle button #}
+    <button
+      data-theme-toggle
+      class="btn btn-ghost btn-circle"
+      title="Toggle theme"
+    >
+      <svg class="theme-icon-sun hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+      </svg>
+      <svg class="theme-icon-moon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+      </svg>
+    </button>
+
+    {% if user %}
+      {# User dropdown #}
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+          <div class="w-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-semibold">
+            {{ user.email[0].upper() }}
+          </div>
+        </div>
+        <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow-xl border border-base-300">
+          <li class="menu-title px-3 pb-2">
+            <span class="text-xs">{{ user.email }}</span>
+          </li>
+          <li><a href="/settings">Settings</a></li>
+          <li><a href="/logout">Logout</a></li>
+        </ul>
+      </div>
+    {% else %}
+      {# Guest buttons #}
+      <a href="/login" class="btn btn-ghost">Login</a>
+      <a href="/register" class="btn btn-primary">Sign Up</a>
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}

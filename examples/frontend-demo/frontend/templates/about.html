@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% from "components/navbar.html" import navbar %}
+{% from "components/card.html" import card, stat_card %}
+
+{% block title %}{{ title }} - myfy Frontend{% endblock %}
+
+{% block content %}
+{{ navbar(logo="myfy") }}
+
+<div class="container mx-auto px-4 py-16">
+  <h1 class="text-5xl font-bold text-center mb-12">About This Demo</h1>
+
+  <div class="prose lg:prose-xl mx-auto mb-12">
+    <p class="text-lg">
+      This is a demonstration of the <strong>myfy-frontend</strong> module,
+      which brings modern frontend development to the myfy framework.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
+    {{ stat_card("Tailwind", "4.0", desc="Native CSS engine") }}
+    {{ stat_card("DaisyUI", "5.0", desc="Component library") }}
+    {{ stat_card("Vite", "7.1", desc="Dev server + bundler") }}
+    {{ stat_card("Jinja2", "3.1+", desc="Template engine") }}
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {% call card(title="🎯 Features") %}
+      <ul class="list-disc list-inside space-y-2">
+        <li>Zero-config setup</li>
+        <li>Hot module replacement</li>
+        <li>Dark mode built-in</li>
+        <li>Component macros</li>
+        <li>Production-ready builds</li>
+      </ul>
+    {% endcall %}
+
+    {% call card(title="📚 Tech Stack") %}
+      <ul class="list-disc list-inside space-y-2">
+        <li>Python 3.12+ with myfy framework</li>
+        <li>Tailwind CSS 4 with native engine</li>
+        <li>DaisyUI 5 for components</li>
+        <li>Vite for asset bundling</li>
+        <li>Jinja2 for server-side templates</li>
+      </ul>
+    {% endcall %}
+  </div>
+</div>
+{% endblock %}
