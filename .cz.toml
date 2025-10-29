@@ -1,0 +1,97 @@
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+tag_format = "v$version"
+version_scheme = "pep440"
+version_provider = "commitizen"
+update_changelog_on_bump = true
+major_version_zero = true
+
+# Files to update on version bump
+version_files = [
+    "pyproject.toml:version",
+    "packages/myfy-core/pyproject.toml:version",
+    "packages/myfy-web/pyproject.toml:version",
+    "packages/myfy-cli/pyproject.toml:version",
+    "packages/myfy-frontend/pyproject.toml:version",
+    "packages/myfy/pyproject.toml:version",
+    "packages/myfy-core/myfy/core/version.py:__version__",
+    "packages/myfy-web/myfy/web/version.py:__version__",
+    "packages/myfy-cli/myfy_cli/version.py:__version__",
+    "packages/myfy-frontend/myfy/frontend/version.py:__version__",
+    "packages/myfy/myfy/version.py:__version__",
+]
+
+# Changelog configuration
+[tool.commitizen.changelog]
+file = "CHANGELOG.md"
+template = "CHANGELOG.md.j2"
+start_rev = "0.1.0"
+
+# Commit message template
+[tool.commitizen.customize]
+message_template = "{{change_type}}{% if scope %}({{scope}}){% endif %}: {{message}}"
+example = "feat(core): add dependency injection container"
+schema = """
+<type>(<scope>): <subject>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+<footer>
+"""
+
+schema_pattern = "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\\(\\w+\\))?(!)?:( )(.+)$"
+
+bump_pattern = "^(feat|fix|refactor|perf|BREAKING CHANGE)"
+bump_map = { "BREAKING CHANGE" = "MAJOR", "feat" = "MINOR", "fix" = "PATCH", "refactor" = "PATCH", "perf" = "PATCH" }
+
+change_type_order = ["BREAKING CHANGE", "feat", "fix", "refactor", "perf", "docs", "style", "test", "build", "ci", "chore"]
+
+# Scope options for monorepo packages
+[[tool.commitizen.customize.questions]]
+type = "list"
+name = "change_type"
+message = "Select the type of change you are committing:"
+choices = [
+    { value = "feat", name = "feat: A new feature" },
+    { value = "fix", name = "fix: A bug fix" },
+    { value = "docs", name = "docs: Documentation only changes" },
+    { value = "style", name = "style: Code style changes (formatting, etc.)" },
+    { value = "refactor", name = "refactor: Code refactoring" },
+    { value = "perf", name = "perf: Performance improvements" },
+    { value = "test", name = "test: Adding or updating tests" },
+    { value = "build", name = "build: Build system or dependencies" },
+    { value = "ci", name = "ci: CI/CD changes" },
+    { value = "chore", name = "chore: Other changes" },
+    { value = "revert", name = "revert: Revert a previous commit" },
+]
+
+[[tool.commitizen.customize.questions]]
+type = "list"
+name = "scope"
+message = "Select the scope of this change (package):"
+choices = [
+    { value = "core", name = "core: myfy-core package" },
+    { value = "web", name = "web: myfy-web package" },
+    { value = "cli", name = "cli: myfy-cli package" },
+    { value = "frontend", name = "frontend: myfy-frontend package" },
+    { value = "meta", name = "meta: myfy meta-package" },
+    { value = "workspace", name = "workspace: monorepo/workspace changes" },
+    { value = "docs", name = "docs: documentation" },
+    { value = "ci", name = "ci: CI/CD workflows" },
+]
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "message"
+message = "Write a short, imperative description of the change:\n"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "body"
+message = "Provide additional context (press enter to skip):\n"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "footer"
+message = "Footer (e.g., 'BREAKING CHANGE: ...', 'Closes #123', press enter to skip):\n"

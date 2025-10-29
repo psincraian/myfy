@@ -28,25 +28,45 @@ fi
 # Create hooks directory if it doesn't exist
 mkdir -p .git/hooks
 
-# Copy pre-commit hook
-HOOK_SOURCE="scripts/hooks/pre-commit"
-HOOK_DEST=".git/hooks/pre-commit"
+# Install pre-commit hook
+PRECOMMIT_SOURCE="scripts/hooks/pre-commit"
+PRECOMMIT_DEST=".git/hooks/pre-commit"
 
-if [ ! -f "$HOOK_SOURCE" ]; then
-    echo -e "${YELLOW}⚠️  Warning: Hook source file not found: $HOOK_SOURCE${NC}"
+if [ ! -f "$PRECOMMIT_SOURCE" ]; then
+    echo -e "${YELLOW}⚠️  Warning: Hook source file not found: $PRECOMMIT_SOURCE${NC}"
     exit 1
 fi
 
-cp "$HOOK_SOURCE" "$HOOK_DEST"
-chmod +x "$HOOK_DEST"
-
+cp "$PRECOMMIT_SOURCE" "$PRECOMMIT_DEST"
+chmod +x "$PRECOMMIT_DEST"
 echo -e "${EMERALD}✓ Installed pre-commit hook${NC}"
+
+# Install commit-msg hook
+COMMITMSG_SOURCE="scripts/hooks/commit-msg"
+COMMITMSG_DEST=".git/hooks/commit-msg"
+
+if [ ! -f "$COMMITMSG_SOURCE" ]; then
+    echo -e "${YELLOW}⚠️  Warning: Hook source file not found: $COMMITMSG_SOURCE${NC}"
+    exit 1
+fi
+
+cp "$COMMITMSG_SOURCE" "$COMMITMSG_DEST"
+chmod +x "$COMMITMSG_DEST"
+echo -e "${EMERALD}✓ Installed commit-msg hook${NC}"
+
 echo ""
-echo -e "${GRAY}The hook will run automatically before each commit and will:${NC}"
+echo -e "${GRAY}Git hooks installed:${NC}"
+echo ""
+echo -e "${GRAY}Pre-commit hook will:${NC}"
 echo "  1. 🎨 Format code with ruff"
 echo "  2. 🔍 Check linting with ruff"
 echo "  3. 🔬 Check types with ty"
 echo ""
+echo -e "${GRAY}Commit-msg hook will:${NC}"
+echo "  1. ✅ Validate conventional commit format"
+echo "  2. 📏 Check message length"
+echo ""
 echo -e "${EMERALD}✅ Git hooks installed successfully!${NC}"
 echo ""
 echo -e "${YELLOW}💡 To skip hooks for a specific commit, use: git commit --no-verify${NC}"
+echo -e "${YELLOW}💡 Use 'cz commit' for interactive conventional commits${NC}"

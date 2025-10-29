@@ -1,0 +1,234 @@
+name: Publish to PyPI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/**'
+      - '.github/workflows/publish.yml'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (leave empty for auto alpha version)'
+        required: false
+        type: string
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.13']
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for version calculation
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install dependencies
+        run: |
+          uv sync --all-extras --dev
+
+      - name: Run linting
+        run: |
+          uv run ruff check packages/
+          uv run ruff format --check packages/
+
+      - name: Run type checking
+        run: |
+          uv run ty check packages/
+
+      - name: Run tests
+        run: |
+          uv run pytest
+
+  build-and-publish:
+    name: Build and Publish
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for PyPI trusted publishing
+      contents: write  # Required for git operations
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for version calculation
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install commitizen
+        run: uv pip install --system commitizen
+
+      - name: Calculate version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            echo "Using manual version: $VERSION"
+          else
+            # Auto-generate alpha version based on commit count
+            TOTAL_COMMITS=$(git rev-list --count HEAD)
+            CURRENT_VERSION=$(grep -o 'version = "[^"]*"' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+            BASE_VERSION=$(echo $CURRENT_VERSION | sed 's/a.*//')
+            VERSION="${BASE_VERSION}a${TOTAL_COMMITS}"
+            echo "Auto-generated alpha version: $VERSION"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Update versions in all files
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          echo "Updating to version: $VERSION"
+
+          # Update all pyproject.toml files
+          sed -i "s/^version = .*/version = \"$VERSION\"/" pyproject.toml
+          sed -i "s/^version = .*/version = \"$VERSION\"/" packages/myfy-core/pyproject.toml
+          sed -i "s/^version = .*/version = \"$VERSION\"/" packages/myfy-web/pyproject.toml
+          sed -i "s/^version = .*/version = \"$VERSION\"/" packages/myfy-cli/pyproject.toml
+          sed -i "s/^version = .*/version = \"$VERSION\"/" packages/myfy-frontend/pyproject.toml
+          sed -i "s/^version = .*/version = \"$VERSION\"/" packages/myfy/pyproject.toml
+
+          # Update all version.py files
+          sed -i "s/__version__ = .*/__version__ = \"$VERSION\"/" packages/myfy-core/myfy/core/version.py
+          sed -i "s/__version__ = .*/__version__ = \"$VERSION\"/" packages/myfy-web/myfy/web/version.py
+          sed -i "s/__version__ = .*/__version__ = \"$VERSION\"/" packages/myfy-cli/myfy_cli/version.py
+          sed -i "s/__version__ = .*/__version__ = \"$VERSION\"/" packages/myfy-frontend/myfy/frontend/version.py
+          sed -i "s/__version__ = .*/__version__ = \"$VERSION\"/" packages/myfy/myfy/version.py
+
+          # Update dependency constraints to match new version
+          sed -i "s/myfy-core~=[0-9.]*/myfy-core~=$VERSION/" packages/myfy-web/pyproject.toml
+          sed -i "s/myfy-core~=[0-9.]*/myfy-core~=$VERSION/" packages/myfy-cli/pyproject.toml
+          sed -i "s/myfy-core~=[0-9.]*/myfy-core~=$VERSION/" packages/myfy-frontend/pyproject.toml
+          sed -i "s/myfy-web~=[0-9.]*/myfy-web~=$VERSION/" packages/myfy-frontend/pyproject.toml
+          sed -i "s/myfy-core~=[0-9.]*/myfy-core~=$VERSION/" packages/myfy/pyproject.toml
+          sed -i "s/myfy-cli~=[0-9.]*/myfy-cli~=$VERSION/" packages/myfy/pyproject.toml
+          sed -i "s/myfy-web~=[0-9.]*/myfy-web~=$VERSION/" packages/myfy/pyproject.toml
+
+          echo "Version updated to $VERSION in all files"
+
+      - name: Build packages
+        run: |
+          # Build in dependency order
+          echo "Building myfy-core..."
+          cd packages/myfy-core && uv build && cd ../..
+
+          echo "Building myfy-web..."
+          cd packages/myfy-web && uv build && cd ../..
+
+          echo "Building myfy-cli..."
+          cd packages/myfy-cli && uv build && cd ../..
+
+          echo "Building myfy-frontend..."
+          cd packages/myfy-frontend && uv build && cd ../..
+
+          echo "Building myfy meta-package..."
+          cd packages/myfy && uv build && cd ../..
+
+          echo "All packages built successfully"
+
+      - name: List built packages
+        run: |
+          echo "myfy-core:"
+          ls -lh packages/myfy-core/dist/
+          tar -tzf packages/myfy-core/dist/*.tar.gz | head -20
+
+          echo -e "\nmyfy-web:"
+          ls -lh packages/myfy-web/dist/
+
+          echo -e "\nmyfy-cli:"
+          ls -lh packages/myfy-cli/dist/
+
+          echo -e "\nmyfy-frontend:"
+          ls -lh packages/myfy-frontend/dist/
+
+          echo -e "\nmyfy:"
+          ls -lh packages/myfy/dist/
+
+      - name: Publish myfy-core to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/myfy-core/dist/
+          verbose: true
+
+      - name: Publish myfy-web to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/myfy-web/dist/
+          verbose: true
+
+      - name: Publish myfy-cli to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/myfy-cli/dist/
+          verbose: true
+
+      - name: Publish myfy-frontend to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/myfy-frontend/dist/
+          verbose: true
+
+      - name: Publish myfy to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/myfy/dist/
+          verbose: true
+
+  validate-install:
+    name: Validate Installation
+    needs: build-and-publish
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.13']
+
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Wait for PyPI propagation
+        run: sleep 30
+
+      - name: Install and test myfy-core
+        run: |
+          pip install myfy-core --no-cache-dir
+          python -c "import myfy.core; print(f'myfy-core version: {myfy.core.__version__}')"
+
+      - name: Install and test myfy-web
+        run: |
+          pip install myfy-web --no-cache-dir
+          python -c "import myfy.web; print(f'myfy-web version: {myfy.web.__version__}')"
+
+      - name: Install and test myfy-cli
+        run: |
+          pip install myfy-cli --no-cache-dir
+          python -c "import myfy_cli; print(f'myfy-cli version: {myfy_cli.__version__}')"
+          myfy --help
+
+      - name: Install and test myfy-frontend
+        run: |
+          pip install myfy-frontend --no-cache-dir
+          python -c "import myfy.frontend; print(f'myfy-frontend version: {myfy.frontend.__version__}')"
+
+      - name: Install and test myfy meta-package
+        run: |
+          pip install myfy[all] --no-cache-dir --upgrade
+          python -c "import myfy; print(f'myfy version: {myfy.__version__}')"

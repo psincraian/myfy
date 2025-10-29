@@ -1,0 +1,246 @@
+name: Release to PyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      prerelease:
+        description: 'Is this a pre-release? (e.g., beta, rc)'
+        required: false
+        type: string
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for PyPI trusted publishing
+      contents: write  # Required for creating releases and pushing tags
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install commitizen
+        run: uv pip install --system commitizen
+
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version with commitizen
+        id: bump
+        run: |
+          # Run commitizen bump
+          cz bump --increment ${{ github.event.inputs.bump_type }} --yes
+
+          # Get the new version from .cz.toml or pyproject.toml
+          NEW_VERSION=$(grep -o 'version = "[^"]*"' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+
+          # Add prerelease suffix if specified
+          if [ -n "${{ github.event.inputs.prerelease }}" ]; then
+            NEW_VERSION="${NEW_VERSION}${{ github.event.inputs.prerelease }}"
+            echo "Adding prerelease suffix: $NEW_VERSION"
+
+            # Update all version files with prerelease
+            sed -i "s/^version = .*/version = \"$NEW_VERSION\"/" pyproject.toml
+            sed -i "s/^version = .*/version = \"$NEW_VERSION\"/" packages/myfy-core/pyproject.toml
+            sed -i "s/^version = .*/version = \"$NEW_VERSION\"/" packages/myfy-web/pyproject.toml
+            sed -i "s/^version = .*/version = \"$NEW_VERSION\"/" packages/myfy-cli/pyproject.toml
+            sed -i "s/^version = .*/version = \"$NEW_VERSION\"/" packages/myfy-frontend/pyproject.toml
+            sed -i "s/^version = .*/version = \"$NEW_VERSION\"/" packages/myfy/pyproject.toml
+
+            sed -i "s/__version__ = .*/__version__ = \"$NEW_VERSION\"/" packages/myfy-core/myfy/core/version.py
+            sed -i "s/__version__ = .*/__version__ = \"$NEW_VERSION\"/" packages/myfy-web/myfy/web/version.py
+            sed -i "s/__version__ = .*/__version__ = \"$NEW_VERSION\"/" packages/myfy-cli/myfy_cli/version.py
+            sed -i "s/__version__ = .*/__version__ = \"$NEW_VERSION\"/" packages/myfy-frontend/myfy/frontend/version.py
+            sed -i "s/__version__ = .*/__version__ = \"$NEW_VERSION\"/" packages/myfy/myfy/version.py
+          fi
+
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+
+      - name: Update dependency constraints
+        run: |
+          VERSION="${{ steps.bump.outputs.version }}"
+
+          # Update internal dependency constraints
+          sed -i "s/myfy-core~=[0-9.]*/myfy-core~=$VERSION/" packages/myfy-web/pyproject.toml
+          sed -i "s/myfy-core~=[0-9.]*/myfy-core~=$VERSION/" packages/myfy-cli/pyproject.toml
+          sed -i "s/myfy-core~=[0-9.]*/myfy-core~=$VERSION/" packages/myfy-frontend/pyproject.toml
+          sed -i "s/myfy-web~=[0-9.]*/myfy-web~=$VERSION/" packages/myfy-frontend/pyproject.toml
+          sed -i "s/myfy-core~=[0-9.]*/myfy-core~=$VERSION/" packages/myfy/pyproject.toml
+          sed -i "s/myfy-cli~=[0-9.]*/myfy-cli~=$VERSION/" packages/myfy/pyproject.toml
+          sed -i "s/myfy-web~=[0-9.]*/myfy-web~=$VERSION/" packages/myfy/pyproject.toml
+
+      - name: Commit version bump
+        run: |
+          git add .
+          git commit -m "chore(release): bump version to ${{ steps.bump.outputs.version }}" || true
+          git tag -a "v${{ steps.bump.outputs.version }}" -m "Release v${{ steps.bump.outputs.version }}"
+
+      - name: Run tests
+        run: |
+          uv sync --all-extras --dev
+          uv run ruff check packages/
+          uv run ruff format --check packages/
+          uv run ty check packages/
+          uv run pytest
+
+      - name: Build packages
+        run: |
+          # Build in dependency order
+          echo "Building myfy-core..."
+          cd packages/myfy-core && uv build && cd ../..
+
+          echo "Building myfy-web..."
+          cd packages/myfy-web && uv build && cd ../..
+
+          echo "Building myfy-cli..."
+          cd packages/myfy-cli && uv build && cd ../..
+
+          echo "Building myfy-frontend..."
+          cd packages/myfy-frontend && uv build && cd ../..
+
+          echo "Building myfy meta-package..."
+          cd packages/myfy && uv build && cd ../..
+
+          echo "All packages built successfully"
+
+      - name: Push changes and tags
+        run: |
+          git push origin main
+          git push origin "v${{ steps.bump.outputs.version }}"
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          # Extract changelog for this version
+          VERSION="${{ steps.bump.outputs.version }}"
+
+          # Create release notes from CHANGELOG
+          echo "## What's Changed" > release_notes.md
+          echo "" >> release_notes.md
+
+          # Get commits since last tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREVIOUS_TAG" ]; then
+            git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s (%h)" >> release_notes.md
+          else
+            echo "Initial release" >> release_notes.md
+          fi
+
+          echo "" >> release_notes.md
+          echo "## Packages" >> release_notes.md
+          echo "- myfy-core $VERSION" >> release_notes.md
+          echo "- myfy-web $VERSION" >> release_notes.md
+          echo "- myfy-cli $VERSION" >> release_notes.md
+          echo "- myfy-frontend $VERSION" >> release_notes.md
+          echo "- myfy $VERSION" >> release_notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.bump.outputs.version }}
+          name: Release v${{ steps.bump.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ github.event.inputs.prerelease != '' }}
+          files: |
+            packages/myfy-core/dist/*
+            packages/myfy-web/dist/*
+            packages/myfy-cli/dist/*
+            packages/myfy-frontend/dist/*
+            packages/myfy/dist/*
+
+      - name: Publish myfy-core to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/myfy-core/dist/
+          verbose: true
+
+      - name: Publish myfy-web to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/myfy-web/dist/
+          verbose: true
+
+      - name: Publish myfy-cli to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/myfy-cli/dist/
+          verbose: true
+
+      - name: Publish myfy-frontend to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/myfy-frontend/dist/
+          verbose: true
+
+      - name: Publish myfy to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/myfy/dist/
+          verbose: true
+
+  validate-release:
+    name: Validate Release
+    needs: release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.13']
+
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Wait for PyPI propagation
+        run: sleep 60
+
+      - name: Install and validate all packages
+        run: |
+          pip install myfy[all] --no-cache-dir
+          python -c "
+          import myfy
+          import myfy.core
+          import myfy.web
+          import myfy_cli
+          import myfy.frontend
+
+          print(f'myfy version: {myfy.__version__}')
+          print(f'myfy-core version: {myfy.core.__version__}')
+          print(f'myfy-web version: {myfy.web.__version__}')
+          print(f'myfy-cli version: {myfy_cli.__version__}')
+          print(f'myfy-frontend version: {myfy.frontend.__version__}')
+
+          # Verify all versions match
+          versions = [myfy.__version__, myfy.core.__version__, myfy.web.__version__, myfy_cli.__version__, myfy.frontend.__version__]
+          assert len(set(versions)) == 1, f'Version mismatch: {versions}'
+          print('✓ All versions match')
+          "
+
+      - name: Test CLI
+        run: |
+          myfy --help
+          echo "✓ CLI works"

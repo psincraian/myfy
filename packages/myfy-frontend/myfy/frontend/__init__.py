@@ -7,5 +7,6 @@ and zero-config setup for rapid development.
 
 from .module import FrontendModule
 from .templates import render_template
+from .version import __version__
 
-__all__ = ["FrontendModule", "render_template"]
+__all__ = ["FrontendModule", "__version__", "render_template"]

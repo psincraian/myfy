@@ -33,6 +33,7 @@ from .di import (
     provider,
 )
 from .kernel import Application, BaseModule, Module
+from .version import __version__
 
 __all__ = [
     "REQUEST",
@@ -47,6 +48,7 @@ __all__ = [
     "Profile",
     "Qualifier",
     "ScopeContext",
+    "__version__",
     "load_settings",
     "provider",
 ]

@@ -1,0 +1,95 @@
+#!/bin/bash
+#
+# Commit message hook for myfy project
+# Validates conventional commit format
+#
+
+set -e
+
+# Brand colors for myfy
+EMERALD='\033[38;2;16;185;129m'  # #10B981 - Primary (success, info)
+GRAY='\033[38;2;17;24;39m'        # #111827 - Accent (headers)
+RED='\033[0;31m'                  # Errors
+YELLOW='\033[1;33m'               # Warnings/hints
+NC='\033[0m'                      # No Color
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Skip validation for merge commits, revert commits, and fixup/squash commits
+if echo "$COMMIT_MSG" | grep -qE "^(Merge|Revert|fixup!|squash!)"; then
+    exit 0
+fi
+
+# Conventional commit pattern
+# Format: <type>(<scope>): <subject>
+# Optional: ! for breaking changes, optional body and footer
+PATTERN="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z]+\))?(!)?: .+$"
+
+if ! echo "$COMMIT_MSG" | head -1 | grep -qE "$PATTERN"; then
+    echo -e "${RED}✗ Invalid commit message format${NC}"
+    echo ""
+    echo -e "${YELLOW}Commit message must follow Conventional Commits format:${NC}"
+    echo ""
+    echo "  <type>(<scope>): <subject>"
+    echo ""
+    echo -e "${YELLOW}Types:${NC}"
+    echo "  feat     - New feature"
+    echo "  fix      - Bug fix"
+    echo "  docs     - Documentation changes"
+    echo "  style    - Code style changes"
+    echo "  refactor - Code refactoring"
+    echo "  perf     - Performance improvements"
+    echo "  test     - Test changes"
+    echo "  build    - Build system changes"
+    echo "  ci       - CI/CD changes"
+    echo "  chore    - Other changes"
+    echo "  revert   - Revert a commit"
+    echo ""
+    echo -e "${YELLOW}Scopes:${NC}"
+    echo "  core      - myfy-core package"
+    echo "  web       - myfy-web package"
+    echo "  cli       - myfy-cli package"
+    echo "  frontend  - myfy-frontend package"
+    echo "  meta      - myfy meta-package"
+    echo "  workspace - monorepo changes"
+    echo "  docs      - documentation"
+    echo "  ci        - CI/CD workflows"
+    echo ""
+    echo -e "${YELLOW}Examples:${NC}"
+    echo "  feat(core): add async provider support"
+    echo "  fix(web): resolve middleware ordering issue"
+    echo "  docs: update contributing guide"
+    echo "  feat(core)!: remove deprecated API"
+    echo ""
+    echo -e "${YELLOW}Your commit message:${NC}"
+    echo "  $COMMIT_MSG" | head -1
+    echo ""
+    echo -e "${YELLOW}💡 Hint: Use 'cz commit' for interactive commit creation${NC}"
+    echo ""
+    exit 1
+fi
+
+# Check if subject line is too short
+SUBJECT=$(echo "$COMMIT_MSG" | head -1 | sed 's/^[^:]*: //')
+if [ ${#SUBJECT} -lt 10 ]; then
+    echo -e "${YELLOW}⚠ Warning: Commit subject is very short (${#SUBJECT} chars)${NC}"
+    echo -e "${YELLOW}Consider adding more detail to your commit message.${NC}"
+    echo ""
+fi
+
+# Check if subject line is too long
+FIRST_LINE=$(echo "$COMMIT_MSG" | head -1)
+if [ ${#FIRST_LINE} -gt 100 ]; then
+    echo -e "${RED}✗ Commit subject line is too long (${#FIRST_LINE} chars, max 100)${NC}"
+    echo ""
+    echo -e "${YELLOW}Your commit message:${NC}"
+    echo "  $FIRST_LINE"
+    echo ""
+    echo -e "${YELLOW}💡 Hint: Keep the first line under 100 characters${NC}"
+    echo ""
+    exit 1
+fi
+
+echo -e "${EMERALD}✓ Commit message format is valid${NC}"
+exit 0

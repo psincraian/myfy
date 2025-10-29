@@ -27,6 +27,7 @@ from .context import RequestContext, get_request_context
 from .extensions import IMiddlewareProvider, IWebExtension
 from .module import WebModule, web_module
 from .routing import HTTPMethod, Route, Router, route
+from .version import __version__
 
 __all__ = [
     "ASGIApp",
@@ -38,6 +39,7 @@ __all__ = [
     "Router",
     "WebModule",
     "WebSettings",
+    "__version__",
     "get_request_context",
     "route",
     "web_module",

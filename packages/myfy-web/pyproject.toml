@@ -5,7 +5,7 @@ description = "Web/ASGI module for myfy framework"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "myfy-core>=0.1.0",
+    "myfy-core~=0.1.0",
     "starlette>=0.40",
 ]
 
