@@ -65,19 +65,19 @@ jobs:
             NEW_VERSION="${NEW_VERSION}${{ github.event.inputs.prerelease }}"
             echo "Adding prerelease suffix: $NEW_VERSION"
 
-            # Update all version files with prerelease
-            sed -i "s/^version = .*/version = \"$NEW_VERSION\"/" pyproject.toml
-            sed -i "s/^version = .*/version = \"$NEW_VERSION\"/" packages/myfy-core/pyproject.toml
-            sed -i "s/^version = .*/version = \"$NEW_VERSION\"/" packages/myfy-web/pyproject.toml
-            sed -i "s/^version = .*/version = \"$NEW_VERSION\"/" packages/myfy-cli/pyproject.toml
-            sed -i "s/^version = .*/version = \"$NEW_VERSION\"/" packages/myfy-frontend/pyproject.toml
-            sed -i "s/^version = .*/version = \"$NEW_VERSION\"/" packages/myfy/pyproject.toml
+            # Update all version files with prerelease - match only 'version = "...'
+            sed -i 's/^version = "[^"]*"/version = "'"$NEW_VERSION"'"/' pyproject.toml
+            sed -i 's/^version = "[^"]*"/version = "'"$NEW_VERSION"'"/' packages/myfy-core/pyproject.toml
+            sed -i 's/^version = "[^"]*"/version = "'"$NEW_VERSION"'"/' packages/myfy-web/pyproject.toml
+            sed -i 's/^version = "[^"]*"/version = "'"$NEW_VERSION"'"/' packages/myfy-cli/pyproject.toml
+            sed -i 's/^version = "[^"]*"/version = "'"$NEW_VERSION"'"/' packages/myfy-frontend/pyproject.toml
+            sed -i 's/^version = "[^"]*"/version = "'"$NEW_VERSION"'"/' packages/myfy/pyproject.toml
 
-            sed -i "s/__version__ = .*/__version__ = \"$NEW_VERSION\"/" packages/myfy-core/myfy/core/version.py
-            sed -i "s/__version__ = .*/__version__ = \"$NEW_VERSION\"/" packages/myfy-web/myfy/web/version.py
-            sed -i "s/__version__ = .*/__version__ = \"$NEW_VERSION\"/" packages/myfy-cli/myfy_cli/version.py
-            sed -i "s/__version__ = .*/__version__ = \"$NEW_VERSION\"/" packages/myfy-frontend/myfy/frontend/version.py
-            sed -i "s/__version__ = .*/__version__ = \"$NEW_VERSION\"/" packages/myfy/myfy/version.py
+            sed -i 's/__version__ = "[^"]*"/__version__ = "'"$NEW_VERSION"'"/' packages/myfy-core/myfy/core/version.py
+            sed -i 's/__version__ = "[^"]*"/__version__ = "'"$NEW_VERSION"'"/' packages/myfy-web/myfy/web/version.py
+            sed -i 's/__version__ = "[^"]*"/__version__ = "'"$NEW_VERSION"'"/' packages/myfy-cli/myfy_cli/version.py
+            sed -i 's/__version__ = "[^"]*"/__version__ = "'"$NEW_VERSION"'"/' packages/myfy-frontend/myfy/frontend/version.py
+            sed -i 's/__version__ = "[^"]*"/__version__ = "'"$NEW_VERSION"'"/' packages/myfy/myfy/version.py
           fi
 
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
@@ -90,13 +90,13 @@ jobs:
           BASE_VERSION=$(echo $VERSION | sed 's/[a-z].*//')
 
           # Update internal dependency constraints
-          sed -i "s/myfy-core~=[0-9a-z.]*/myfy-core~=$BASE_VERSION/" packages/myfy-web/pyproject.toml
-          sed -i "s/myfy-core~=[0-9a-z.]*/myfy-core~=$BASE_VERSION/" packages/myfy-cli/pyproject.toml
-          sed -i "s/myfy-core~=[0-9a-z.]*/myfy-core~=$BASE_VERSION/" packages/myfy-frontend/pyproject.toml
-          sed -i "s/myfy-web~=[0-9a-z.]*/myfy-web~=$BASE_VERSION/" packages/myfy-frontend/pyproject.toml
-          sed -i "s/myfy-core~=[0-9a-z.]*/myfy-core~=$BASE_VERSION/" packages/myfy/pyproject.toml
-          sed -i "s/myfy-cli~=[0-9a-z.]*/myfy-cli~=$BASE_VERSION/" packages/myfy/pyproject.toml
-          sed -i "s/myfy-web~=[0-9a-z.]*/myfy-web~=$BASE_VERSION/" packages/myfy/pyproject.toml
+          sed -i 's/myfy-core~=[0-9a-z.]*/myfy-core~='"$BASE_VERSION"'/' packages/myfy-web/pyproject.toml
+          sed -i 's/myfy-core~=[0-9a-z.]*/myfy-core~='"$BASE_VERSION"'/' packages/myfy-cli/pyproject.toml
+          sed -i 's/myfy-core~=[0-9a-z.]*/myfy-core~='"$BASE_VERSION"'/' packages/myfy-frontend/pyproject.toml
+          sed -i 's/myfy-web~=[0-9a-z.]*/myfy-web~='"$BASE_VERSION"'/' packages/myfy-frontend/pyproject.toml
+          sed -i 's/myfy-core~=[0-9a-z.]*/myfy-core~='"$BASE_VERSION"'/' packages/myfy/pyproject.toml
+          sed -i 's/myfy-cli~=[0-9a-z.]*/myfy-cli~='"$BASE_VERSION"'/' packages/myfy/pyproject.toml
+          sed -i 's/myfy-web~=[0-9a-z.]*/myfy-web~='"$BASE_VERSION"'/' packages/myfy/pyproject.toml
 
       - name: Commit version bump
         run: |
