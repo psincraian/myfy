@@ -119,8 +119,8 @@ class FrontendModule:
         if self.auto_init and not check_frontend_initialized(self.templates_dir):
             logger.info("Frontend not initialized, scaffolding...")
             scaffold_frontend(
-                templates_dir=self.templates_dir,
-                static_dir=self.static_dir,
+                _templates_dir=self.templates_dir,
+                _static_dir=self.static_dir,
             )
 
         # Verify templates directory exists
