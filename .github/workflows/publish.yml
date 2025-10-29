@@ -14,46 +14,13 @@ on:
         type: string
 
 jobs:
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.12', '3.13']
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Need full history for version calculation
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
-
-      - name: Install dependencies
-        run: |
-          uv sync --all-extras --dev
-
-      - name: Run linting
-        run: |
-          uv run ruff check packages/
-          uv run ruff format --check packages/
-
-      - name: Run type checking
-        run: |
-          uv run ty check packages/
-
-      - name: Run tests
-        run: |
-          uv run pytest
+  # Run all CI checks first
+  ci:
+    uses: ./.github/workflows/ci.yml
 
   build-and-publish:
     name: Build and Publish
-    needs: test
+    needs: ci
     runs-on: ubuntu-latest
     permissions:
       id-token: write  # Required for PyPI trusted publishing
@@ -70,10 +37,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
-
-      - name: Install commitizen
-        run: uv pip install --system commitizen
+        uses: astral-sh/setup-uv@v4
 
       - name: Calculate version
         id: version
@@ -111,14 +75,15 @@ jobs:
           sed -i "s/__version__ = .*/__version__ = \"$VERSION\"/" packages/myfy-frontend/myfy/frontend/version.py
           sed -i "s/__version__ = .*/__version__ = \"$VERSION\"/" packages/myfy/myfy/version.py
 
-          # Update dependency constraints to match new version
-          sed -i "s/myfy-core~=[0-9.]*/myfy-core~=$VERSION/" packages/myfy-web/pyproject.toml
-          sed -i "s/myfy-core~=[0-9.]*/myfy-core~=$VERSION/" packages/myfy-cli/pyproject.toml
-          sed -i "s/myfy-core~=[0-9.]*/myfy-core~=$VERSION/" packages/myfy-frontend/pyproject.toml
-          sed -i "s/myfy-web~=[0-9.]*/myfy-web~=$VERSION/" packages/myfy-frontend/pyproject.toml
-          sed -i "s/myfy-core~=[0-9.]*/myfy-core~=$VERSION/" packages/myfy/pyproject.toml
-          sed -i "s/myfy-cli~=[0-9.]*/myfy-cli~=$VERSION/" packages/myfy/pyproject.toml
-          sed -i "s/myfy-web~=[0-9.]*/myfy-web~=$VERSION/" packages/myfy/pyproject.toml
+          # Update dependency constraints to match new version (only base version, not alpha suffix)
+          BASE_VERSION=$(echo $VERSION | sed 's/a.*//')
+          sed -i "s/myfy-core~=[0-9a-z.]*/myfy-core~=$BASE_VERSION/" packages/myfy-web/pyproject.toml
+          sed -i "s/myfy-core~=[0-9a-z.]*/myfy-core~=$BASE_VERSION/" packages/myfy-cli/pyproject.toml
+          sed -i "s/myfy-core~=[0-9a-z.]*/myfy-core~=$BASE_VERSION/" packages/myfy-frontend/pyproject.toml
+          sed -i "s/myfy-web~=[0-9a-z.]*/myfy-web~=$BASE_VERSION/" packages/myfy-frontend/pyproject.toml
+          sed -i "s/myfy-core~=[0-9a-z.]*/myfy-core~=$BASE_VERSION/" packages/myfy/pyproject.toml
+          sed -i "s/myfy-cli~=[0-9a-z.]*/myfy-cli~=$BASE_VERSION/" packages/myfy/pyproject.toml
+          sed -i "s/myfy-web~=[0-9a-z.]*/myfy-web~=$BASE_VERSION/" packages/myfy/pyproject.toml
 
           echo "Version updated to $VERSION in all files"
 
@@ -191,7 +156,7 @@ jobs:
           verbose: true
 
   validate-install:
-    name: Validate Installation
+    name: Validate Installation on Python ${{ matrix.python-version }}
     needs: build-and-publish
     runs-on: ubuntu-latest
     strategy:

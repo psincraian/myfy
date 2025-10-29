@@ -12,13 +12,18 @@ on:
           - minor
           - major
       prerelease:
-        description: 'Is this a pre-release? (e.g., beta, rc)'
+        description: 'Is this a pre-release? (e.g., b1, rc1)'
         required: false
         type: string
 
 jobs:
+  # Run all CI checks first
+  ci:
+    uses: ./.github/workflows/ci.yml
+
   release:
     name: Create Release
+    needs: ci
     runs-on: ubuntu-latest
     permissions:
       id-token: write  # Required for PyPI trusted publishing
@@ -36,7 +41,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v4
 
       - name: Install commitizen
         run: uv pip install --system commitizen
@@ -52,7 +57,7 @@ jobs:
           # Run commitizen bump
           cz bump --increment ${{ github.event.inputs.bump_type }} --yes
 
-          # Get the new version from .cz.toml or pyproject.toml
+          # Get the new version from pyproject.toml
           NEW_VERSION=$(grep -o 'version = "[^"]*"' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
 
           # Add prerelease suffix if specified
@@ -81,29 +86,23 @@ jobs:
       - name: Update dependency constraints
         run: |
           VERSION="${{ steps.bump.outputs.version }}"
+          # Extract base version without prerelease suffix for dependency constraints
+          BASE_VERSION=$(echo $VERSION | sed 's/[a-z].*//')
 
           # Update internal dependency constraints
-          sed -i "s/myfy-core~=[0-9.]*/myfy-core~=$VERSION/" packages/myfy-web/pyproject.toml
-          sed -i "s/myfy-core~=[0-9.]*/myfy-core~=$VERSION/" packages/myfy-cli/pyproject.toml
-          sed -i "s/myfy-core~=[0-9.]*/myfy-core~=$VERSION/" packages/myfy-frontend/pyproject.toml
-          sed -i "s/myfy-web~=[0-9.]*/myfy-web~=$VERSION/" packages/myfy-frontend/pyproject.toml
-          sed -i "s/myfy-core~=[0-9.]*/myfy-core~=$VERSION/" packages/myfy/pyproject.toml
-          sed -i "s/myfy-cli~=[0-9.]*/myfy-cli~=$VERSION/" packages/myfy/pyproject.toml
-          sed -i "s/myfy-web~=[0-9.]*/myfy-web~=$VERSION/" packages/myfy/pyproject.toml
+          sed -i "s/myfy-core~=[0-9a-z.]*/myfy-core~=$BASE_VERSION/" packages/myfy-web/pyproject.toml
+          sed -i "s/myfy-core~=[0-9a-z.]*/myfy-core~=$BASE_VERSION/" packages/myfy-cli/pyproject.toml
+          sed -i "s/myfy-core~=[0-9a-z.]*/myfy-core~=$BASE_VERSION/" packages/myfy-frontend/pyproject.toml
+          sed -i "s/myfy-web~=[0-9a-z.]*/myfy-web~=$BASE_VERSION/" packages/myfy-frontend/pyproject.toml
+          sed -i "s/myfy-core~=[0-9a-z.]*/myfy-core~=$BASE_VERSION/" packages/myfy/pyproject.toml
+          sed -i "s/myfy-cli~=[0-9a-z.]*/myfy-cli~=$BASE_VERSION/" packages/myfy/pyproject.toml
+          sed -i "s/myfy-web~=[0-9a-z.]*/myfy-web~=$BASE_VERSION/" packages/myfy/pyproject.toml
 
       - name: Commit version bump
         run: |
           git add .
           git commit -m "chore(release): bump version to ${{ steps.bump.outputs.version }}" || true
           git tag -a "v${{ steps.bump.outputs.version }}" -m "Release v${{ steps.bump.outputs.version }}"
-
-      - name: Run tests
-        run: |
-          uv sync --all-extras --dev
-          uv run ruff check packages/
-          uv run ruff format --check packages/
-          uv run ty check packages/
-          uv run pytest
 
       - name: Build packages
         run: |
@@ -202,7 +201,7 @@ jobs:
           verbose: true
 
   validate-release:
-    name: Validate Release
+    name: Validate Release on Python ${{ matrix.python-version }}
     needs: release
     runs-on: ubuntu-latest
     strategy:
