@@ -155,9 +155,9 @@ class HandlerExecutor:
                     # Type checker doesn't know about Pydantic's model_validate
                     return body_type.model_validate(data)  # type: ignore[attr-defined]
                 except ValidationError as e:
-                    raise HTTPException(
-                        status_code=422, detail={"errors": e.errors(), "body": data}
-                    ) from e
+                    # Convert validation errors to string for HTTPException
+                    error_detail = json.dumps({"errors": e.errors(), "body": data})
+                    raise HTTPException(status_code=422, detail=error_detail) from e
             elif hasattr(body_type, "__dataclass_fields__"):
                 # Dataclass
                 try:
