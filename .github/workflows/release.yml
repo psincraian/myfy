@@ -64,39 +64,92 @@ jobs:
           if [ -n "${{ github.event.inputs.prerelease }}" ]; then
             NEW_VERSION="${NEW_VERSION}${{ github.event.inputs.prerelease }}"
             echo "Adding prerelease suffix: $NEW_VERSION"
-
-            # Update all version files with prerelease - match only 'version = "...'
-            sed -i 's/^version = "[^"]*"/version = "'"$NEW_VERSION"'"/' pyproject.toml
-            sed -i 's/^version = "[^"]*"/version = "'"$NEW_VERSION"'"/' packages/myfy-core/pyproject.toml
-            sed -i 's/^version = "[^"]*"/version = "'"$NEW_VERSION"'"/' packages/myfy-web/pyproject.toml
-            sed -i 's/^version = "[^"]*"/version = "'"$NEW_VERSION"'"/' packages/myfy-cli/pyproject.toml
-            sed -i 's/^version = "[^"]*"/version = "'"$NEW_VERSION"'"/' packages/myfy-frontend/pyproject.toml
-            sed -i 's/^version = "[^"]*"/version = "'"$NEW_VERSION"'"/' packages/myfy/pyproject.toml
-
-            sed -i 's/__version__ = "[^"]*"/__version__ = "'"$NEW_VERSION"'"/' packages/myfy-core/myfy/core/version.py
-            sed -i 's/__version__ = "[^"]*"/__version__ = "'"$NEW_VERSION"'"/' packages/myfy-web/myfy/web/version.py
-            sed -i 's/__version__ = "[^"]*"/__version__ = "'"$NEW_VERSION"'"/' packages/myfy-cli/myfy_cli/version.py
-            sed -i 's/__version__ = "[^"]*"/__version__ = "'"$NEW_VERSION"'"/' packages/myfy-frontend/myfy/frontend/version.py
-            sed -i 's/__version__ = "[^"]*"/__version__ = "'"$NEW_VERSION"'"/' packages/myfy/myfy/version.py
           fi
 
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "New version: $NEW_VERSION"
 
-      - name: Update dependency constraints
-        run: |
-          VERSION="${{ steps.bump.outputs.version }}"
-          # Extract base version without prerelease suffix for dependency constraints
-          BASE_VERSION=$(echo $VERSION | sed 's/[a-z].*//')
+          # Use Python to safely update all version files
+          python3 << 'PYTHON_SCRIPT'
+          import re
 
-          # Update internal dependency constraints
-          sed -i 's/myfy-core~=[0-9a-z.]*/myfy-core~='"$BASE_VERSION"'/' packages/myfy-web/pyproject.toml
-          sed -i 's/myfy-core~=[0-9a-z.]*/myfy-core~='"$BASE_VERSION"'/' packages/myfy-cli/pyproject.toml
-          sed -i 's/myfy-core~=[0-9a-z.]*/myfy-core~='"$BASE_VERSION"'/' packages/myfy-frontend/pyproject.toml
-          sed -i 's/myfy-web~=[0-9a-z.]*/myfy-web~='"$BASE_VERSION"'/' packages/myfy-frontend/pyproject.toml
-          sed -i 's/myfy-core~=[0-9a-z.]*/myfy-core~='"$BASE_VERSION"'/' packages/myfy/pyproject.toml
-          sed -i 's/myfy-cli~=[0-9a-z.]*/myfy-cli~='"$BASE_VERSION"'/' packages/myfy/pyproject.toml
-          sed -i 's/myfy-web~=[0-9a-z.]*/myfy-web~='"$BASE_VERSION"'/' packages/myfy/pyproject.toml
+          version = "${{ github.event.inputs.prerelease }}"
+          if version:
+              # Extract base version and add prerelease
+              import subprocess
+              base = subprocess.check_output(['grep', '-m', '1', '-A', '5', '^\\[project\\]', 'pyproject.toml'], text=True)
+              base_version = re.search(r'version = "([^"]*)"', base).group(1)
+              version = base_version + version
+          else:
+              # Use commitizen bumped version
+              with open('pyproject.toml', 'r') as f:
+                  content = f.read()
+              match = re.search(r'\[project\][^\[]*version = "([^"]*)"', content)
+              version = match.group(1) if match else None
+
+          if not version:
+              print("Error: Could not determine version")
+              exit(1)
+
+          base_version = version.split('a')[0] if 'a' in version else version.split('b')[0] if 'b' in version else version.split('rc')[0] if 'rc' in version else version
+
+          # Update pyproject.toml files
+          toml_files = [
+              'pyproject.toml',
+              'packages/myfy-core/pyproject.toml',
+              'packages/myfy-web/pyproject.toml',
+              'packages/myfy-cli/pyproject.toml',
+              'packages/myfy-frontend/pyproject.toml',
+              'packages/myfy/pyproject.toml'
+          ]
+
+          for file in toml_files:
+              with open(file, 'r') as f:
+                  content = f.read()
+              content = re.sub(
+                  r'(\[project\][^\[]*\nname = [^\n]+\n)version = "[^"]*"',
+                  r'\1version = "' + version + '"',
+                  content,
+                  count=1
+              )
+              with open(file, 'w') as f:
+                  f.write(content)
+
+          # Update version.py files
+          version_files = [
+              'packages/myfy-core/myfy/core/version.py',
+              'packages/myfy-web/myfy/web/version.py',
+              'packages/myfy-cli/myfy_cli/version.py',
+              'packages/myfy-frontend/myfy/frontend/version.py',
+              'packages/myfy/myfy/version.py'
+          ]
+
+          for file in version_files:
+              with open(file, 'r') as f:
+                  content = f.read()
+              content = re.sub(r'__version__ = "[^"]*"', f'__version__ = "{version}"', content)
+              with open(file, 'w') as f:
+                  f.write(content)
+
+          # Update dependency constraints
+          dep_files = [
+              'packages/myfy-web/pyproject.toml',
+              'packages/myfy-cli/pyproject.toml',
+              'packages/myfy-frontend/pyproject.toml',
+              'packages/myfy/pyproject.toml'
+          ]
+
+          for file in dep_files:
+              with open(file, 'r') as f:
+                  content = f.read()
+              content = re.sub(r'myfy-core~=[0-9a-z.]+', f'myfy-core~={base_version}', content)
+              content = re.sub(r'myfy-web~=[0-9a-z.]+', f'myfy-web~={base_version}', content)
+              content = re.sub(r'myfy-cli~=[0-9a-z.]+', f'myfy-cli~={base_version}', content)
+              with open(file, 'w') as f:
+                  f.write(content)
+
+          print(f"Version updated to {version} in all files")
+          PYTHON_SCRIPT
 
       - name: Commit version bump
         run: |

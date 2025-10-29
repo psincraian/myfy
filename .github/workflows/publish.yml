@@ -48,42 +48,90 @@ jobs:
           else
             # Auto-generate alpha version based on commit count
             TOTAL_COMMITS=$(git rev-list --count HEAD)
-            CURRENT_VERSION=$(grep -o 'version = "[^"]*"' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+            # Extract version from [project] section, first match only
+            CURRENT_VERSION=$(grep -m 1 -A 5 '^\[project\]' pyproject.toml | grep 'version = ' | sed 's/version = "\(.*\)"/\1/')
             BASE_VERSION=$(echo $CURRENT_VERSION | sed 's/a.*//')
             VERSION="${BASE_VERSION}a${TOTAL_COMMITS}"
             echo "Auto-generated alpha version: $VERSION"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Calculated version: $VERSION"
 
       - name: Update versions in all files
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           echo "Updating to version: $VERSION"
 
-          # Update all pyproject.toml files - match only lines with 'version = "...'
-          sed -i 's/^version = "[^"]*"/version = "'"$VERSION"'"/' pyproject.toml
-          sed -i 's/^version = "[^"]*"/version = "'"$VERSION"'"/' packages/myfy-core/pyproject.toml
-          sed -i 's/^version = "[^"]*"/version = "'"$VERSION"'"/' packages/myfy-web/pyproject.toml
-          sed -i 's/^version = "[^"]*"/version = "'"$VERSION"'"/' packages/myfy-cli/pyproject.toml
-          sed -i 's/^version = "[^"]*"/version = "'"$VERSION"'"/' packages/myfy-frontend/pyproject.toml
-          sed -i 's/^version = "[^"]*"/version = "'"$VERSION"'"/' packages/myfy/pyproject.toml
+          # Use Python to safely update TOML files
+          python3 << 'PYTHON_SCRIPT'
+          import re
+          import sys
 
-          # Update all version.py files
-          sed -i 's/__version__ = "[^"]*"/__version__ = "'"$VERSION"'"/' packages/myfy-core/myfy/core/version.py
-          sed -i 's/__version__ = "[^"]*"/__version__ = "'"$VERSION"'"/' packages/myfy-web/myfy/web/version.py
-          sed -i 's/__version__ = "[^"]*"/__version__ = "'"$VERSION"'"/' packages/myfy-cli/myfy_cli/version.py
-          sed -i 's/__version__ = "[^"]*"/__version__ = "'"$VERSION"'"/' packages/myfy-frontend/myfy/frontend/version.py
-          sed -i 's/__version__ = "[^"]*"/__version__ = "'"$VERSION"'"/' packages/myfy/myfy/version.py
+          version = "${{ steps.version.outputs.version }}"
+          base_version = version.split('a')[0] if 'a' in version else version.split('b')[0] if 'b' in version else version.split('rc')[0] if 'rc' in version else version
 
-          # Update dependency constraints to match new version (only base version, not alpha suffix)
-          BASE_VERSION=$(echo $VERSION | sed 's/a.*//')
-          sed -i 's/myfy-core~=[0-9a-z.]*/myfy-core~='"$BASE_VERSION"'/' packages/myfy-web/pyproject.toml
-          sed -i 's/myfy-core~=[0-9a-z.]*/myfy-core~='"$BASE_VERSION"'/' packages/myfy-cli/pyproject.toml
-          sed -i 's/myfy-core~=[0-9a-z.]*/myfy-core~='"$BASE_VERSION"'/' packages/myfy-frontend/pyproject.toml
-          sed -i 's/myfy-web~=[0-9a-z.]*/myfy-web~='"$BASE_VERSION"'/' packages/myfy-frontend/pyproject.toml
-          sed -i 's/myfy-core~=[0-9a-z.]*/myfy-core~='"$BASE_VERSION"'/' packages/myfy/pyproject.toml
-          sed -i 's/myfy-cli~=[0-9a-z.]*/myfy-cli~='"$BASE_VERSION"'/' packages/myfy/pyproject.toml
-          sed -i 's/myfy-web~=[0-9a-z.]*/myfy-web~='"$BASE_VERSION"'/' packages/myfy/pyproject.toml
+          # Update pyproject.toml files
+          toml_files = [
+              'pyproject.toml',
+              'packages/myfy-core/pyproject.toml',
+              'packages/myfy-web/pyproject.toml',
+              'packages/myfy-cli/pyproject.toml',
+              'packages/myfy-frontend/pyproject.toml',
+              'packages/myfy/pyproject.toml'
+          ]
+
+          for file in toml_files:
+              with open(file, 'r') as f:
+                  content = f.read()
+
+              # Replace version in [project] section only
+              content = re.sub(
+                  r'(\[project\][^\[]*\nname = [^\n]+\n)version = "[^"]*"',
+                  r'\1version = "' + version + '"',
+                  content,
+                  count=1
+              )
+
+              with open(file, 'w') as f:
+                  f.write(content)
+
+          # Update version.py files
+          version_files = [
+              'packages/myfy-core/myfy/core/version.py',
+              'packages/myfy-web/myfy/web/version.py',
+              'packages/myfy-cli/myfy_cli/version.py',
+              'packages/myfy-frontend/myfy/frontend/version.py',
+              'packages/myfy/myfy/version.py'
+          ]
+
+          for file in version_files:
+              with open(file, 'r') as f:
+                  content = f.read()
+              content = re.sub(r'__version__ = "[^"]*"', f'__version__ = "{version}"', content)
+              with open(file, 'w') as f:
+                  f.write(content)
+
+          # Update dependency constraints in pyproject.toml files
+          dep_files = [
+              'packages/myfy-web/pyproject.toml',
+              'packages/myfy-cli/pyproject.toml',
+              'packages/myfy-frontend/pyproject.toml',
+              'packages/myfy/pyproject.toml'
+          ]
+
+          for file in dep_files:
+              with open(file, 'r') as f:
+                  content = f.read()
+
+              content = re.sub(r'myfy-core~=[0-9a-z.]+', f'myfy-core~={base_version}', content)
+              content = re.sub(r'myfy-web~=[0-9a-z.]+', f'myfy-web~={base_version}', content)
+              content = re.sub(r'myfy-cli~=[0-9a-z.]+', f'myfy-cli~={base_version}', content)
+
+              with open(file, 'w') as f:
+                  f.write(content)
+
+          print(f"Version updated to {version} in all files")
+          PYTHON_SCRIPT
 
           echo "Version updated to $VERSION in all files"
 
