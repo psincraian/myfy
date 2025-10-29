@@ -106,21 +106,21 @@ jobs:
 
       - name: Build packages
         run: |
-          # Build in dependency order
+          # Build in dependency order using --package flag
           echo "Building myfy-core..."
-          cd packages/myfy-core && uv build && cd ../..
+          uv build --package myfy-core --out-dir packages/myfy-core/dist
 
           echo "Building myfy-web..."
-          cd packages/myfy-web && uv build && cd ../..
+          uv build --package myfy-web --out-dir packages/myfy-web/dist
 
           echo "Building myfy-cli..."
-          cd packages/myfy-cli && uv build && cd ../..
+          uv build --package myfy-cli --out-dir packages/myfy-cli/dist
 
           echo "Building myfy-frontend..."
-          cd packages/myfy-frontend && uv build && cd ../..
+          uv build --package myfy-frontend --out-dir packages/myfy-frontend/dist
 
           echo "Building myfy meta-package..."
-          cd packages/myfy && uv build && cd ../..
+          uv build --package myfy --out-dir packages/myfy/dist
 
           echo "All packages built successfully"
 
