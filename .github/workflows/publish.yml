@@ -112,6 +112,8 @@ jobs:
                   f.write(content)
 
           # Update dependency constraints in pyproject.toml files
+          # For alpha/beta/rc versions, use exact version (==)
+          # For stable versions, use compatible release (~=)
           dep_files = [
               'packages/myfy-web/pyproject.toml',
               'packages/myfy-cli/pyproject.toml',
@@ -119,13 +121,22 @@ jobs:
               'packages/myfy/pyproject.toml'
           ]
 
+          # Determine constraint operator based on version type
+          is_prerelease = 'a' in version or 'b' in version or 'rc' in version
+          if is_prerelease:
+              # For pre-releases, use exact version match
+              constraint = f'=={version}'
+          else:
+              # For stable releases, use compatible release
+              constraint = f'~={base_version}'
+
           for file in dep_files:
               with open(file, 'r') as f:
                   content = f.read()
 
-              content = re.sub(r'myfy-core~=[0-9a-z.]+', f'myfy-core~={base_version}', content)
-              content = re.sub(r'myfy-web~=[0-9a-z.]+', f'myfy-web~={base_version}', content)
-              content = re.sub(r'myfy-cli~=[0-9a-z.]+', f'myfy-cli~={base_version}', content)
+              content = re.sub(r'myfy-core[~=]=?[0-9a-z.]+', f'myfy-core{constraint}', content)
+              content = re.sub(r'myfy-web[~=]=?[0-9a-z.]+', f'myfy-web{constraint}', content)
+              content = re.sub(r'myfy-cli[~=]=?[0-9a-z.]+', f'myfy-cli{constraint}', content)
 
               with open(file, 'w') as f:
                   f.write(content)

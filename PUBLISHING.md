@@ -62,19 +62,32 @@ We use two versioning approaches:
 
 ### Dependency Constraints
 
-Internal dependencies use **compatible release** constraints (`~=`):
+Internal dependencies use **different constraints** based on release type:
 
+**For stable releases** (`~=` - compatible release):
 ```toml
 # Example: myfy-web depends on myfy-core
 dependencies = [
-    "myfy-core~=0.1.0",  # Allows 0.1.x but not 0.2.0
+    "myfy-core~=1.0.0",  # Allows 1.0.x but not 1.1.0
 ]
 ```
 
+**For pre-releases** (`==` - exact version):
+```toml
+# Example: alpha versions
+dependencies = [
+    "myfy-core==0.1.0a15",  # Exact match required
+]
+```
+
+**Why different constraints?**
+- **Pre-releases (alpha/beta/rc)**: Use exact version (`==`) because `~=` doesn't work with pre-release versions in pip
+- **Stable releases**: Use compatible release (`~=`) to allow patch updates while preventing breaking changes
+
 This ensures:
-- Patch updates are automatically compatible
-- Minor/major updates require explicit version alignment
-- Users get the correct package versions together
+- Alpha versions install together correctly
+- Stable releases allow automatic patch updates
+- Users get compatible package versions
 
 ## Publishing Workflows
 
