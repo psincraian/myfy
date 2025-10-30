@@ -54,7 +54,7 @@ def scaffold_frontend(  # noqa: PLR0915
     project_root = Path.cwd()
 
     # Copy configuration files to project root
-    config_files = ["package.json", "vite.config.js", ".gitignore"]
+    config_files = ["package.json", "vite.config.js", ".gitignore", "app.py"]
     for file_name in config_files:
         src = stubs_path_resolved / file_name
         dest = project_root / file_name
