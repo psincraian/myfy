@@ -54,8 +54,11 @@ uv pip install myfy-core
 # Core + Web (for HTTP APIs)
 uv pip install myfy-core myfy-web
 
-# Everything
+# Core + Web + CLI
 uv pip install myfy-core myfy-web myfy-cli
+
+# Full-stack with frontend
+uv pip install myfy-core myfy-web myfy-cli myfy-frontend
 ```
 
 ---
@@ -116,6 +119,114 @@ Visit `http://127.0.0.1:8000/` - you should see:
 ```json
 {"message": "Hello, myfy!"}
 ```
+
+---
+
+## Example: Full-Stack App with Frontend
+
+Want to build a web app with UI? Add the frontend module:
+
+### 1. Install with Frontend Support
+
+```bash
+uv pip install myfy-core myfy-web myfy-cli myfy-frontend
+```
+
+### 2. Create `app.py`
+
+```python
+from myfy.core import Application, BaseSettings
+from myfy.web import route, WebModule
+from myfy.frontend import FrontendModule, render_template
+
+
+class Settings(BaseSettings):
+    app_name: str = "My Web App"
+
+
+@route.get("/")
+async def home():
+    return render_template(
+        "home.html",
+        title="Welcome",
+        message="Hello from myfy!"
+    )
+
+
+@route.get("/api/hello")
+async def api_hello() -> dict:
+    return {"message": "Hello from API!"}
+
+
+app = Application(settings_class=Settings, auto_discover=False)
+app.add_module(WebModule())
+app.add_module(FrontendModule())
+
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(app.run())
+```
+
+### 3. Initialize Frontend
+
+```bash
+# Initialize frontend (creates templates, CSS, JS)
+uv run myfy frontend init
+```
+
+This creates:
+```
+my-app/
+├── frontend/
+│   ├── css/
+│   │   └── input.css       # Tailwind CSS
+│   ├── js/
+│   │   └── main.js         # JavaScript entry
+│   ├── templates/
+│   │   ├── base.html       # Base layout
+│   │   └── home.html       # Home page
+│   └── static/
+│       └── dist/           # Built assets
+├── package.json            # Node dependencies
+├── vite.config.js          # Vite config
+└── app.py
+```
+
+### 4. Create `frontend/templates/home.html`
+
+```jinja2
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="hero min-h-screen bg-gradient-to-r from-primary to-secondary">
+  <div class="hero-content text-center text-neutral-content">
+    <div class="max-w-md">
+      <h1 class="mb-5 text-5xl font-bold">{{ message }}</h1>
+      <p class="mb-5">
+        Build modern web apps with Python backend and beautiful UI.
+      </p>
+      <button class="btn btn-accent">Get Started</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+```
+
+### 5. Run Your App
+
+```bash
+uv run myfy run
+```
+
+Visit `http://127.0.0.1:8000/` to see your app with:
+- **Server-side rendering** with Jinja2
+- **Tailwind CSS 4** for styling
+- **DaisyUI 5** components
+- **Vite** for hot module replacement
+- **Dark mode** built-in
 
 ---
 

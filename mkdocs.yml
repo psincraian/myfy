@@ -93,6 +93,11 @@ nav:
       - Installation: getting-started/installation.md
       - Tutorial: getting-started/tutorial.md
       - Quick Reference: getting-started/quick-reference.md
+  - Modules:
+      - Core: modules/core.md
+      - Web: modules/web.md
+      - CLI: modules/cli.md
+      - Frontend: modules/frontend.md
   - Core Concepts:
       - Dependency Injection: core-concepts/dependency-injection.md
       - Modules: core-concepts/modules.md
