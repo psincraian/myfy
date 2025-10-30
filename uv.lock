@@ -521,7 +521,11 @@ dependencies = [
 
 [package.optional-dependencies]
 all = [
+    { name = "myfy-frontend" },
     { name = "myfy-web" },
+]
+frontend = [
+    { name = "myfy-frontend" },
 ]
 web = [
     { name = "myfy-web" },
@@ -531,10 +535,12 @@ web = [
 requires-dist = [
     { name = "myfy-cli", editable = "packages/myfy-cli" },
     { name = "myfy-core", editable = "packages/myfy-core" },
+    { name = "myfy-frontend", marker = "extra == 'all'", editable = "packages/myfy-frontend" },
+    { name = "myfy-frontend", marker = "extra == 'frontend'", editable = "packages/myfy-frontend" },
     { name = "myfy-web", marker = "extra == 'all'", editable = "packages/myfy-web" },
     { name = "myfy-web", marker = "extra == 'web'", editable = "packages/myfy-web" },
 ]
-provides-extras = ["web", "all"]
+provides-extras = ["web", "frontend", "all"]
 
 [[package]]
 name = "myfy-cli"

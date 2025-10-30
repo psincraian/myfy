@@ -11,7 +11,8 @@ dependencies = [
 
 [project.optional-dependencies]
 web = ["myfy-web~=0.1.0"]
-all = ["myfy-web~=0.1.0"]
+frontend = ["myfy-frontend~=0.1.0"]
+all = ["myfy-web~=0.1.0", "myfy-frontend~=0.1.0"]
 
 [build-system]
 requires = ["hatchling"]

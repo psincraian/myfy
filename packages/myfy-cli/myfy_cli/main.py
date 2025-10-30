@@ -5,6 +5,7 @@ Provides commands for development and operations:
 - myfy run: Start development server
 - myfy routes: List all routes
 - myfy modules: Show loaded modules
+- myfy frontend: Frontend commands
 """
 
 import importlib.util
@@ -19,6 +20,7 @@ from rich.console import Console
 from rich.table import Table
 
 from myfy.core import Application
+from myfy_cli.commands import frontend_app
 
 app = typer.Typer(
     name="myfy",
@@ -26,6 +28,9 @@ app = typer.Typer(
     add_completion=False,
 )
 console = Console()
+
+# Register command groups
+app.add_typer(frontend_app, name="frontend")
 
 
 def find_application():

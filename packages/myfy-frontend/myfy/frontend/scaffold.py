@@ -34,16 +34,21 @@ def scaffold_frontend(  # noqa: PLR0915
     print("🎨 Initializing myfy frontend...")
 
     # Get stubs directory from package resources
-    try:
-        stubs_path = files("myfy.frontend").joinpath("stubs")
-    except (TypeError, AttributeError):
-        # Fallback for development or editable installs
-        package_dir = Path(__file__).parent
-        stubs_path = package_dir.parent.parent / "stubs"
+    # First try importlib.resources (works for installed packages)
+    stubs_path = files("myfy.frontend").joinpath("stubs")
 
-    if not Path(str(stubs_path)).exists():
+    # Convert to Path and check if it exists
+    stubs_path_resolved = Path(str(stubs_path))
+
+    # If not found, try relative to this file (for editable installs)
+    if not stubs_path_resolved.exists():
+        # In editable mode: __file__ is in source, stubs are at package root
+        package_root = Path(__file__).parent.parent.parent
+        stubs_path_resolved = package_root / "stubs"
+
+    if not stubs_path_resolved.exists():
         print("❌ Error: Stubs directory not found in package")
-        print(f"   Looking for: {stubs_path}")
+        print(f"   Looking for: {stubs_path_resolved}")
         sys.exit(1)
 
     project_root = Path.cwd()
@@ -51,7 +56,7 @@ def scaffold_frontend(  # noqa: PLR0915
     # Copy configuration files to project root
     config_files = ["package.json", "vite.config.js", ".gitignore"]
     for file_name in config_files:
-        src = Path(str(stubs_path)) / file_name
+        src = stubs_path_resolved / file_name
         dest = project_root / file_name
 
         if dest.exists():
@@ -63,7 +68,7 @@ def scaffold_frontend(  # noqa: PLR0915
             print(f"⚠️  Warning: {file_name} not found in stubs")
 
     # Copy frontend directory structure
-    frontend_src = Path(str(stubs_path)) / "frontend"
+    frontend_src = stubs_path_resolved / "frontend"
     frontend_dest = project_root / "frontend"
 
     if frontend_dest.exists():

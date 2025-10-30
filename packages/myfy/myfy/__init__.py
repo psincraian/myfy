@@ -9,6 +9,10 @@ Install options:
     pip install myfy[all]     # Everything
 """
 
+# Namespace package for myfy
+# See PEP 420 - Implicit Namespace Packages
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)
+
 from .version import __version__
 
 __all__ = ["__version__"]
