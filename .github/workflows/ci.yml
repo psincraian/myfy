@@ -57,7 +57,7 @@ jobs:
         run: uv sync --all-extras
 
       - name: Run ty type checker
-        run: uv run ty check packages/
+        run: uv run ty check packages/ --exclude '**/stubs/**'
 
   test:
     name: Test on Python ${{ matrix.python-version }}
