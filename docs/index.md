@@ -19,7 +19,50 @@ myfy is that framework. Opinionated where it matters, flexible everywhere else.
 
 ## 60-Second Example
 
-**Build a real API with DI, validation, and clean architecture:**
+### Full-Stack App with Frontend
+
+**Build a complete web app with DaisyUI components:**
+
+```bash
+# Initialize frontend (one-time setup)
+uv run myfy frontend init
+```
+
+This creates `app.py` and `frontend/` with Tailwind 4 + DaisyUI 5:
+
+```python
+from myfy.core import Application
+from myfy.web import WebModule, route
+from myfy.frontend import FrontendModule, render_template
+from starlette.requests import Request
+from starlette.templating import Jinja2Templates
+
+@route.get("/")
+async def home(request: Request, templates: Jinja2Templates):
+    return render_template(
+        "home.html",
+        request=request,
+        templates=templates,
+        title="Welcome to myfy"
+    )
+
+app = Application(auto_discover=False)
+app.add_module(WebModule())
+app.add_module(FrontendModule())
+```
+
+**Run it:**
+```bash
+uv run myfy run
+```
+
+Visit `http://127.0.0.1:8000` - styled UI with DaisyUI, instant HMR, ready to ship.
+
+---
+
+### API-Only Example
+
+**Build a REST API with DI and validation:**
 
 ```python
 from myfy.core import Application, provider, SINGLETON, BaseSettings
@@ -51,10 +94,6 @@ async def greet_user(name: str, service: UserService) -> dict:
 # 4. Run
 app = Application(settings_class=Settings, auto_discover=False)
 app.add_module(WebModule())
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(app.run())
 ```
 
 **Run it:**
@@ -64,8 +103,6 @@ uv run myfy run
 ```
 
 Visit `http://127.0.0.1:8000/greet/World`
-
-**That's it.** Settings, DI, validation, routing, and ASGI server. In 30 lines.
 
 ---
 
@@ -78,7 +115,7 @@ Real, composable modules with their own lifecycle - not "blueprints":
 class DataModule(BaseModule):
     async def start(self):
         await self.db.connect()
-    
+
     async def stop(self):
         await self.db.disconnect()
 
@@ -160,16 +197,16 @@ One file. No config. Just run.
 
 ## Next Steps
 
-**New to myfy?**  
+**New to myfy?**
 Start with the [Installation Guide](getting-started/installation.md) and [Tutorial](getting-started/tutorial.md)
 
-**Want to understand the architecture?**  
+**Want to understand the architecture?**
 Read about [Dependency Injection](core-concepts/dependency-injection.md), [Modules](core-concepts/modules.md), and [Configuration](core-concepts/configuration.md)
 
-**Need API details?**  
+**Need API details?**
 Check the [API Reference](api-reference/core.md)
 
-**Want to contribute?**  
+**Want to contribute?**
 See our [Contributing Guide](contributing.md)
 
 ---

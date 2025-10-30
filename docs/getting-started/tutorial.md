@@ -344,6 +344,45 @@ uv run myfy doctor
 
 ## Next Steps
 
+### Add a Frontend
+
+Want to add a web UI? Initialize the frontend module:
+
+```bash
+# In your project directory
+uv run myfy frontend init
+```
+
+This creates a styled homepage with Tailwind 4 and DaisyUI 5. Update your `app.py` to include the frontend module:
+
+```python
+from myfy.core import Application
+from myfy.web import WebModule
+from myfy.frontend import FrontendModule, render_template  # Add this
+from config import AppSettings
+from starlette.requests import Request  # Add this
+from starlette.templating import Jinja2Templates  # Add this
+
+# Create application
+app = Application(settings_class=AppSettings, auto_discover=False)
+app.add_module(WebModule())
+app.add_module(FrontendModule())  # Add this line
+
+# Add a frontend route
+@route.get("/")
+async def home(request: Request, templates: Jinja2Templates):
+    return render_template(
+        "home.html",
+        request=request,
+        templates=templates,
+        title="Task Management"
+    )
+```
+
+Now you have both an API (`/tasks`) and a web UI (`/`)!
+
+**Learn more:** [Frontend Module Documentation](../modules/frontend.md)
+
 ### Add Database Support
 
 Replace the in-memory repository with SQLAlchemy:

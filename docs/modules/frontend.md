@@ -54,55 +54,88 @@ uv pip install myfy-frontend
 
 ## Quick Start
 
-### Basic Setup
+### Step 1: Initialize Frontend
+
+Run the init command to scaffold your frontend:
+
+```bash
+uv run myfy frontend init
+```
+
+This creates:
+- `app.py` - Ready-to-run application with a home route
+- `frontend/templates/home.html` - Styled welcome page with DaisyUI
+- `frontend/templates/base.html` - Base layout template
+- `frontend/templates/components/` - Reusable component templates
+- `frontend/css/` - Tailwind CSS files
+- `frontend/js/` - JavaScript entry points
+- `package.json` - Node dependencies (Vite, Tailwind 4, DaisyUI 5)
+- `vite.config.js` - Vite configuration
+
+**Output:**
+```
+🎨 Initializing myfy frontend...
+✅ Created package.json
+✅ Created vite.config.js
+✅ Created .gitignore
+✅ Created app.py
+✅ Created frontend/ directory structure
+
+📦 Installing Node dependencies...
+✅ Node dependencies installed!
+
+✨ Frontend initialized successfully!
+
+Next steps:
+  1. Run 'uv run myfy run' to start your app
+  2. Edit frontend/templates/ to create your pages
+  3. Customize frontend/css/input.css for your styles
+```
+
+### Step 2: Run Your App
+
+```bash
+uv run myfy run
+```
+
+Visit `http://127.0.0.1:8000` to see your styled home page!
+
+### What You Get
+
+The generated `app.py` contains:
 
 ```python
 from myfy.core import Application
 from myfy.web import WebModule, route
 from myfy.frontend import FrontendModule, render_template
+from starlette.requests import Request
+from starlette.templating import Jinja2Templates
 
-# Add frontend module
+@route.get("/")
+async def home(request: Request, templates: Jinja2Templates):
+    """Home page."""
+    return render_template(
+        "home.html",
+        request=request,
+        templates=templates,
+        title="Welcome to myfy",
+    )
+
+# Create application
 app = Application(auto_discover=False)
 app.add_module(WebModule())
 app.add_module(FrontendModule())
-
-# Create a route
-@route.get("/")
-async def home():
-    return render_template("home.html", title="Welcome")
 
 if __name__ == "__main__":
     import asyncio
     asyncio.run(app.run())
 ```
 
-### First Run
-
-On first run, the frontend module automatically:
-
-1. Detects missing `frontend/` directory
-2. Copies template files and configurations
-3. Generates `package.json` and `vite.config.js`
-4. Installs Node.js dependencies
-5. Starts Vite dev server on `http://localhost:3001`
-
-**Output:**
-```
-🎨 Frontend not initialized. Running setup...
-✓ Created frontend/ directory
-✓ Copied template files
-✓ Installed dependencies (Tailwind 4, DaisyUI 5, Vite)
-✓ Vite dev server started
-🚀 Frontend ready at http://localhost:3001
-```
-
-### Manual Initialization
-
-You can also initialize manually:
-
-```bash
-uv run myfy frontend init
-```
+The generated `home.html` includes:
+- Welcome message with your app name
+- DaisyUI buttons demonstrating component usage
+- Next steps section guiding you through customization
+- Responsive layout with Tailwind utilities
 
 ## Project Structure
 
