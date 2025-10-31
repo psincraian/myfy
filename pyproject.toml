@@ -3,6 +3,9 @@ name = "myfy-workspace"
 version = "0.1.0"
 description = "myfy framework workspace"
 requires-python = ">=3.12"
+dependencies = [
+    "myfy-frontend",
+]
 
 [tool.uv.workspace]
 members = [
@@ -17,8 +20,8 @@ members = [
 myfy-core = { workspace = true }
 myfy-web = { workspace = true }
 myfy-cli = { workspace = true }
-myfy-frontend = { workspace = true }
 myfy = { workspace = true }
+myfy-frontend = { workspace = true }
 
 [dependency-groups]
 dev = [
