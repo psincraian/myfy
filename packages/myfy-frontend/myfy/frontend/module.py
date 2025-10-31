@@ -257,8 +257,7 @@ class FrontendModule:
             try:
                 # Use asyncio to connect (non-blocking)
                 reader, writer = await asyncio.wait_for(
-                    asyncio.open_connection(host, port),
-                    timeout=1.0
+                    asyncio.open_connection(host, port), timeout=1.0
                 )
 
                 # Send a simple HTTP GET request to check if Vite is responding
