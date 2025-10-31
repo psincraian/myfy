@@ -224,13 +224,13 @@ class FrontendModule:
 
         return shutil.which("npm") is not None
 
-    async def _check_vite_health(self, url: str, timeout: float = 10.0) -> bool:
+    async def _check_vite_health(self, url: str, max_wait: float = 10.0) -> bool:
         """
         Check if Vite dev server is responding.
 
         Args:
             url: Vite dev server URL
-            timeout: Maximum time to wait for server to be ready
+            max_wait: Maximum time to wait for server to be ready
 
         Returns:
             True if server is healthy, False otherwise
@@ -252,7 +252,7 @@ class FrontendModule:
 
         logger.debug(f"Health checking Vite server at {host}:{port}")
 
-        while time.time() - start_time < timeout:
+        while time.time() - start_time < max_wait:
             attempt += 1
             try:
                 # Use asyncio to connect (non-blocking)
@@ -276,10 +276,10 @@ class FrontendModule:
                 if response.startswith(b"HTTP/"):
                     logger.debug(f"Vite server health check passed (attempt {attempt})")
                     return True
-                else:
-                    logger.debug(f"Vite health check got non-HTTP response (attempt {attempt})")
 
-            except (asyncio.TimeoutError, ConnectionRefusedError, OSError) as e:
+                logger.debug(f"Vite health check got non-HTTP response (attempt {attempt})")
+
+            except (TimeoutError, ConnectionRefusedError, OSError) as e:
                 logger.debug(f"Vite health check failed (attempt {attempt}): {type(e).__name__}")
             except Exception as e:
                 logger.debug(f"Vite health check failed (attempt {attempt}): {e}")
@@ -287,7 +287,7 @@ class FrontendModule:
             # Wait a bit before retrying
             await asyncio.sleep(0.5)
 
-        logger.warning(f"Vite server not responding after {timeout}s")
+        logger.warning(f"Vite server not responding after {max_wait}s")
         return False
 
     async def _start_vite_dev_server(self):
@@ -331,7 +331,7 @@ class FrontendModule:
 
         # Wait for Vite to be ready with async health check
         logger.info("⏳ Waiting for Vite dev server to be ready...")
-        is_healthy = await self._check_vite_health(settings.vite_dev_server, timeout=10.0)
+        is_healthy = await self._check_vite_health(settings.vite_dev_server, max_wait=10.0)
 
         if is_healthy:
             logger.info("✅ Vite dev server started (HMR enabled)")
