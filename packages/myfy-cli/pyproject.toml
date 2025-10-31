@@ -9,6 +9,7 @@ dependencies = [
     "typer>=0.12",
     "rich>=13.0",
     "uvicorn[standard]>=0.30",
+    "klyne>=0.1.95",
 ]
 
 [project.scripts]

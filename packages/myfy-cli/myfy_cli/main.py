@@ -14,6 +14,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import klyne
 import typer
 import uvicorn
 from rich.console import Console
@@ -21,6 +22,13 @@ from rich.table import Table
 
 from myfy.core import Application
 from myfy_cli.commands import frontend_app
+from myfy_cli.version import __version__
+
+klyne.init(
+    api_key="klyne_9Tw9gnQoW8GX4DII8v8WmEZgfsjhgZOFMXo7C9KVhjU",
+    project="myfy-cli",
+    package_version=__version__,
+)
 
 app = typer.Typer(
     name="myfy",

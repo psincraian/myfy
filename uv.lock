@@ -290,6 +290,15 @@ wheels = [
 ]
 
 [[package]]
+name = "klyne"
+version = "0.1.95"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/8a/f7/60c4577b5c3d173908e41a98f822fba550591b8753531fed12331b5ffe15/klyne-0.1.95.tar.gz", hash = "sha256:6efa2b3567767d81f5255966c42edbea620728f2ad0fb54f17581137f41b43b4", size = 11195, upload-time = "2025-08-21T15:18:51.872Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4a/3e/369a32b60d3eee03c86b813c0e27ee6a1737903a2e3a76e5fe2ddb399be1/klyne-0.1.95-py3-none-any.whl", hash = "sha256:3b846cf96ca4e9e935463ce4fdacf7eacdd2d4ad545d765f55c844b5f9eb9db9", size = 10093, upload-time = "2025-08-21T15:18:50.312Z" },
+]
+
+[[package]]
 name = "markdown"
 version = "3.9"
 source = { registry = "https://pypi.org/simple" }
@@ -547,6 +556,7 @@ name = "myfy-cli"
 version = "0.1.0"
 source = { editable = "packages/myfy-cli" }
 dependencies = [
+    { name = "klyne" },
     { name = "myfy-core" },
     { name = "rich" },
     { name = "typer" },
@@ -555,6 +565,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "klyne", specifier = ">=0.1.95" },
     { name = "myfy-core", editable = "packages/myfy-core" },
     { name = "rich", specifier = ">=13.0" },
     { name = "typer", specifier = ">=0.12" },
