@@ -224,7 +224,7 @@ class FrontendModule:
 
         return shutil.which("npm") is not None
 
-    async def _check_vite_health(self, url: str, timeout: float = 10.0) -> bool:  # noqa: ASYNC109
+    async def _check_vite_health(self, url: str, timeout: float = 10.0) -> bool:
         """
         Check if Vite dev server is responding.
 
@@ -235,31 +235,52 @@ class FrontendModule:
         Returns:
             True if server is healthy, False otherwise
         """
-        import socket  # noqa: PLC0415
         import time  # noqa: PLC0415
+        from urllib.parse import urlparse  # noqa: PLC0415
 
         start_time = time.time()
         attempt = 0
 
+        # Parse URL properly
+        try:
+            parsed = urlparse(url)
+            host = parsed.hostname or "localhost"
+            port = parsed.port or (443 if parsed.scheme == "https" else 80)
+        except Exception as e:
+            logger.error(f"Failed to parse Vite URL '{url}': {e}")
+            return False
+
+        logger.debug(f"Health checking Vite server at {host}:{port}")
+
         while time.time() - start_time < timeout:
             attempt += 1
             try:
-                # Try to connect to Vite server (just check if port is open)
+                # Use asyncio to connect (non-blocking)
+                reader, writer = await asyncio.wait_for(
+                    asyncio.open_connection(host, port),
+                    timeout=1.0
+                )
 
-                # Parse URL to get host and port
-                parts = url.replace("http://", "").replace("https://", "").split(":")
-                host = parts[0]
-                port = int(parts[1]) if len(parts) > 1 else 80
+                # Send a simple HTTP GET request to check if Vite is responding
+                writer.write(b"GET / HTTP/1.1\r\n")
+                writer.write(f"Host: {host}:{port}\r\n".encode())
+                writer.write(b"Connection: close\r\n\r\n")
+                await writer.drain()
 
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.settimeout(1.0)
-                result = sock.connect_ex((host, port))
-                sock.close()
+                # Read the response (just the status line)
+                response = await asyncio.wait_for(reader.readline(), timeout=1.0)
+                writer.close()
+                await writer.wait_closed()
 
-                if result == 0:
+                # Check if we got an HTTP response
+                if response.startswith(b"HTTP/"):
                     logger.debug(f"Vite server health check passed (attempt {attempt})")
                     return True
+                else:
+                    logger.debug(f"Vite health check got non-HTTP response (attempt {attempt})")
 
+            except (asyncio.TimeoutError, ConnectionRefusedError, OSError) as e:
+                logger.debug(f"Vite health check failed (attempt {attempt}): {type(e).__name__}")
             except Exception as e:
                 logger.debug(f"Vite health check failed (attempt {attempt}): {e}")
 
