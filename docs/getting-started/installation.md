@@ -277,7 +277,7 @@ For active development on myfy itself:
 
 ```bash
 # Clone the repo
-git clone https://github.com/petru/myfy.git
+git clone https://github.com/psincraian/myfy.git
 cd myfy
 
 # Install with uv

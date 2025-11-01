@@ -9,7 +9,7 @@ Thank you for your interest in contributing to myfy!
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/petru/myfy.git
+git clone https://github.com/psincraian/myfy.git
 cd myfy
 ```
 

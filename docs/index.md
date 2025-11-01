@@ -220,14 +220,14 @@ Built on core principles:
 - **Modular by design** - Tiny kernel, add what you need
 - **Zero reflection on hot path** - All analysis at startup
 
-Read the full philosophy: [PRINCIPLES.md](https://github.com/petru/myfy/blob/main/PRINCIPLES.md)
+Read the full philosophy: [PRINCIPLES.md](https://github.com/psincraian/myfy/blob/main/PRINCIPLES.md)
 
 ---
 
 ## Community & Support
 
-- **GitHub**: [Issues & Discussions](https://github.com/petru/myfy)
-- **Examples**: [examples/](https://github.com/petru/myfy/tree/main/examples)
+- **GitHub**: [Issues & Discussions](https://github.com/psincraian/myfy)
+- **Examples**: [examples/](https://github.com/psincraian/myfy/tree/main/examples)
 
 ## License
 

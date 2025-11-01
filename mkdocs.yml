@@ -1,7 +1,7 @@
 site_name: myfy
 site_description: Opinionated Python framework with modularity, ergonomics, and power
 site_url: https://psincraian.github.io/myfy # Update with your GitHub username
-repo_url: https://github.com/petru/myfy # Update with your repo URL
+repo_url: https://github.com/psincraian/myfy # Update with your repo URL
 repo_name: myfy
 edit_uri: edit/main/docs/
 
@@ -112,7 +112,7 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/petru/myfy
+      link: https://github.com/psincraian/myfy
   version:
     provider: mike
 
