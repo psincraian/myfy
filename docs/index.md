@@ -10,7 +10,7 @@ You've built enough Python apps to know: FastAPI is brilliant for APIs but bareb
 
 What if you could have:
 - **FastAPI's ergonomics** (decorators, type hints, async-first)
-- **Spring's architecture** (DI container, module system, lifecycle)
+- **Enterprise-grade architecture** (DI container, module system, lifecycle)
 - **Sensible defaults** (no config files until you need them)
 
 myfy is that framework. Opinionated where it matters, flexible everywhere else.
