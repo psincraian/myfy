@@ -1,6 +1,8 @@
 """Frontend CLI commands for myfy."""
 
+import subprocess
 import sys
+from pathlib import Path
 
 import typer
 from rich.console import Console
@@ -168,4 +170,114 @@ def init(
         _show_success_message()
     except Exception as e:
         console.print(f"[red]✗ Error initializing frontend: {e}[/red]")
+        sys.exit(1)
+
+
+def _ensure_npm_dependencies_installed() -> None:
+    """Ensure npm dependencies are installed."""
+    node_modules = Path("node_modules")
+    if not node_modules.exists():
+        console.print("[yellow]⚠️  node_modules not found[/yellow]")
+        console.print("Installing dependencies first...")
+        console.print("")
+
+        try:
+            subprocess.run(
+                ["npm", "install"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            console.print("[green]✓ Dependencies installed[/green]")
+            console.print("")
+        except subprocess.CalledProcessError as e:
+            console.print("[red]✗ Failed to install dependencies[/red]")
+            console.print(f"Error: {e.stderr}")
+            sys.exit(1)
+        except FileNotFoundError:
+            console.print("[red]✗ npm not found[/red]")
+            console.print("Please install Node.js to build the frontend.")
+            sys.exit(1)
+
+
+def _show_build_success() -> None:
+    """Display success message after build."""
+    console.print("")
+    console.print("[green]✨ Build completed successfully![/green]")
+    console.print("")
+    console.print("[bold]Generated files:[/bold]")
+    console.print("  • frontend/static/dist/.vite/manifest.json")
+    console.print("  • frontend/static/dist/js/*.js (with unique hashes)")
+    console.print("  • frontend/static/dist/css/*.css (with unique hashes)")
+    console.print("")
+    console.print("[bold]Next steps:[/bold]")
+    console.print("  1. Set MYFY_FRONTEND_ENVIRONMENT=production")
+    console.print("  2. Deploy your application")
+    console.print("  3. Assets will be served from the manifest")
+
+
+@frontend_app.command(name="build")
+def build() -> None:
+    """
+    Build frontend assets for production.
+
+    Runs Vite build to generate optimized, hashed assets with manifest.json
+    for cache busting.
+
+    The build process:
+      - Compiles JavaScript and CSS with Vite
+      - Generates unique hashes for each asset (e.g., main-abc123.js)
+      - Creates manifest.json mapping source files to hashed versions
+      - Outputs to frontend/static/dist/
+
+    Examples:
+      myfy frontend build
+    """
+    # Check if frontend module is installed
+    if not HAS_FRONTEND:
+        _show_missing_module_error()
+        sys.exit(1)
+
+    # Check if package.json exists
+    package_json = Path("package.json")
+    if not package_json.exists():
+        console.print("[red]✗ No package.json found[/red]")
+        console.print("")
+        console.print(
+            "Please run [cyan]myfy frontend init[/cyan] first to initialize the frontend."
+        )
+        sys.exit(1)
+
+    # Ensure dependencies are installed
+    _ensure_npm_dependencies_installed()
+
+    # Run the build
+    console.print("[cyan]🏗️  Building frontend assets...[/cyan]")
+    console.print("")
+
+    try:
+        result = subprocess.run(
+            ["npm", "run", "build"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+        # Show build output
+        if result.stdout:
+            console.print(result.stdout)
+
+        _show_build_success()
+
+    except subprocess.CalledProcessError as e:
+        console.print("[red]✗ Build failed[/red]")
+        console.print("")
+        if e.stderr:
+            console.print(e.stderr)
+        if e.stdout:
+            console.print(e.stdout)
+        sys.exit(1)
+    except FileNotFoundError:
+        console.print("[red]✗ npm not found[/red]")
+        console.print("Please install Node.js to build the frontend.")
         sys.exit(1)
