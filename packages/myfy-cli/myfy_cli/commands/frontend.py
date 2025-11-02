@@ -187,9 +187,14 @@ def _ensure_npm_dependencies_installed() -> None:
                 check=True,
                 capture_output=True,
                 text=True,
+                timeout=300,  # 5 minute timeout for npm install
             )
             console.print("[green]✓ Dependencies installed[/green]")
             console.print("")
+        except subprocess.TimeoutExpired:
+            console.print("[red]✗ npm install timed out after 5 minutes[/red]")
+            console.print("Please check your network connection and try again.")
+            sys.exit(1)
         except subprocess.CalledProcessError as e:
             console.print("[red]✗ Failed to install dependencies[/red]")
             console.print(f"Error: {e.stderr}")
@@ -261,6 +266,7 @@ def build() -> None:
             check=True,
             capture_output=True,
             text=True,
+            timeout=300,  # 5 minute timeout for build
         )
 
         # Show build output
@@ -269,6 +275,10 @@ def build() -> None:
 
         _show_build_success()
 
+    except subprocess.TimeoutExpired:
+        console.print("[red]✗ Build timed out after 5 minutes[/red]")
+        console.print("The build process is taking too long. Please check for issues.")
+        sys.exit(1)
     except subprocess.CalledProcessError as e:
         console.print("[red]✗ Build failed[/red]")
         console.print("")
