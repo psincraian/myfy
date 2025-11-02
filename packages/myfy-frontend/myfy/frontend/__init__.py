@@ -5,8 +5,16 @@ Provides server-side rendering with Jinja2 templates, modern CSS/JS bundling,
 and zero-config setup for rapid development.
 """
 
+from .build import BuildError, build_frontend, ensure_npm_dependencies_installed
 from .module import FrontendModule
 from .templates import render_template
 from .version import __version__
 
-__all__ = ["FrontendModule", "__version__", "render_template"]
+__all__ = [
+    "BuildError",
+    "FrontendModule",
+    "__version__",
+    "build_frontend",
+    "ensure_npm_dependencies_installed",
+    "render_template",
+]
