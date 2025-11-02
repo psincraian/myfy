@@ -20,6 +20,9 @@ except ImportError:
 frontend_app = typer.Typer(help="Frontend development commands")
 console = Console()
 
+# Timeout for npm operations (install and build)
+NPM_TIMEOUT = 300  # 5 minutes
+
 
 def _show_missing_module_error() -> None:
     """Display error message when frontend module is not installed."""
@@ -187,12 +190,12 @@ def _ensure_npm_dependencies_installed() -> None:
                 check=True,
                 capture_output=True,
                 text=True,
-                timeout=300,  # 5 minute timeout for npm install
+                timeout=NPM_TIMEOUT,
             )
             console.print("[green]✓ Dependencies installed[/green]")
             console.print("")
         except subprocess.TimeoutExpired:
-            console.print("[red]✗ npm install timed out after 5 minutes[/red]")
+            console.print(f"[red]✗ npm install timed out after {NPM_TIMEOUT} seconds[/red]")
             console.print("Please check your network connection and try again.")
             sys.exit(1)
         except subprocess.CalledProcessError as e:
@@ -266,7 +269,7 @@ def build() -> None:
             check=True,
             capture_output=True,
             text=True,
-            timeout=300,  # 5 minute timeout for build
+            timeout=NPM_TIMEOUT,
         )
 
         # Show build output
@@ -276,7 +279,7 @@ def build() -> None:
         _show_build_success()
 
     except subprocess.TimeoutExpired:
-        console.print("[red]✗ Build timed out after 5 minutes[/red]")
+        console.print(f"[red]✗ Build timed out after {NPM_TIMEOUT} seconds[/red]")
         console.print("The build process is taking too long. Please check for issues.")
         sys.exit(1)
     except subprocess.CalledProcessError as e:
