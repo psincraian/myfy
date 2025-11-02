@@ -58,7 +58,8 @@ uv run myfy run
 
 Visit `http://127.0.0.1:8000` - styled UI with DaisyUI, instant HMR, ready to ship.
 
-![myfy Frontend](images/myfy-frontend-welcome.png)
+![myfy Frontend Light](images/myfy-frontend-light.png#only-light)
+![myfy Frontend Dark](images/myfy-frontend-dark.png#only-dark)
 
 ---
 

@@ -100,7 +100,8 @@ uv run myfy run
 
 Visit `http://127.0.0.1:8000` to see your styled home page!
 
-![myfy Frontend Welcome Page](../images/myfy-frontend-welcome.png)
+![myfy Frontend Welcome Page Light](../images/myfy-frontend-light.png#only-light)
+![myfy Frontend Welcome Page Dark](../images/myfy-frontend-dark.png#only-dark)
 *The generated welcome page with Tailwind 4 and DaisyUI 5 styling*
 
 ### What You Get
