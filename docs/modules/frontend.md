@@ -100,6 +100,9 @@ uv run myfy run
 
 Visit `http://127.0.0.1:8000` to see your styled home page!
 
+![myfy Frontend Welcome Page](../images/myfy-frontend-welcome.png)
+*The generated welcome page with Tailwind 4 and DaisyUI 5 styling*
+
 ### What You Get
 
 The generated `app.py` contains:

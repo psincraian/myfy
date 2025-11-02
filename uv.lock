@@ -292,11 +292,11 @@ wheels = [
 
 [[package]]
 name = "klyne"
-version = "0.1.95"
+version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/8a/f7/60c4577b5c3d173908e41a98f822fba550591b8753531fed12331b5ffe15/klyne-0.1.95.tar.gz", hash = "sha256:6efa2b3567767d81f5255966c42edbea620728f2ad0fb54f17581137f41b43b4", size = 11195, upload-time = "2025-08-21T15:18:51.872Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/05/9f/0fd7b800cb1a390dc5d590a9bf096456706cdd724140b044bea3a914dacc/klyne-0.2.0.tar.gz", hash = "sha256:bc6f31e119e846767c5a5d2357edfdd741e3a430c86e9da022ce027a8eae057c", size = 13591, upload-time = "2025-11-01T20:06:30.436Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4a/3e/369a32b60d3eee03c86b813c0e27ee6a1737903a2e3a76e5fe2ddb399be1/klyne-0.1.95-py3-none-any.whl", hash = "sha256:3b846cf96ca4e9e935463ce4fdacf7eacdd2d4ad545d765f55c844b5f9eb9db9", size = 10093, upload-time = "2025-08-21T15:18:50.312Z" },
+    { url = "https://files.pythonhosted.org/packages/bc/e3/aff5e531584b27892c9566c1086ec5803b53689cd40dcf96f9c4e3860b7e/klyne-0.2.0-py3-none-any.whl", hash = "sha256:54220db7b8412c2c31c59219f83306e842d5e0b40d22c909baccee26b939a0fe", size = 12711, upload-time = "2025-11-01T20:06:29.105Z" },
 ]
 
 [[package]]
@@ -566,7 +566,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "klyne", specifier = ">=0.1.95" },
+    { name = "klyne", specifier = ">=0.2.0" },
     { name = "myfy-core", editable = "packages/myfy-core" },
     { name = "rich", specifier = ">=13.0" },
     { name = "typer", specifier = ">=0.12" },
