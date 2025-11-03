@@ -8,6 +8,7 @@ from rich.console import Console
 # Check if frontend module is available
 try:
     from myfy.core.config import load_settings
+    from myfy.frontend import BuildError, build_frontend
     from myfy.frontend.config import FrontendSettings
     from myfy.frontend.scaffold import check_frontend_initialized, scaffold_frontend
 
@@ -17,6 +18,9 @@ except ImportError:
 
 frontend_app = typer.Typer(help="Frontend development commands")
 console = Console()
+
+# Timeout for npm operations (install and build)
+NPM_TIMEOUT = 300  # 5 minutes
 
 
 def _show_missing_module_error() -> None:
@@ -168,4 +172,56 @@ def init(
         _show_success_message()
     except Exception as e:
         console.print(f"[red]✗ Error initializing frontend: {e}[/red]")
+        sys.exit(1)
+
+
+@frontend_app.command(name="build")
+def build() -> None:
+    """
+    Build frontend assets for production.
+
+    Runs Vite build to generate optimized, hashed assets with manifest.json
+    for cache busting.
+
+    The build process:
+      - Compiles JavaScript and CSS with Vite
+      - Generates unique hashes for each asset (e.g., main-abc123.js)
+      - Creates manifest.json mapping source files to hashed versions
+      - Outputs to frontend/static/dist/
+
+    Examples:
+      myfy frontend build
+    """
+    # Check if frontend module is installed
+    if not HAS_FRONTEND:
+        _show_missing_module_error()
+        sys.exit(1)
+
+    # Run the build
+    console.print("[cyan]🏗️  Building frontend assets...[/cyan]")
+    console.print("")
+
+    try:
+        output = build_frontend(timeout=NPM_TIMEOUT)
+
+        # Show build output
+        if output:
+            console.print(output)
+
+        # Show success message
+        console.print("")
+        console.print("[green]✨ Build completed successfully![/green]")
+        console.print("")
+        console.print("[bold]Generated files:[/bold]")
+        console.print("  • frontend/static/dist/.vite/manifest.json")
+        console.print("  • frontend/static/dist/js/*.js (with unique hashes)")
+        console.print("  • frontend/static/dist/css/*.css (with unique hashes)")
+        console.print("")
+        console.print("[bold]Next steps:[/bold]")
+        console.print("  1. Set MYFY_FRONTEND_ENVIRONMENT=production")
+        console.print("  2. Deploy your application")
+        console.print("  3. Assets will be served from the manifest")
+
+    except BuildError as e:
+        console.print(f"[red]✗ {e}[/red]")
         sys.exit(1)
