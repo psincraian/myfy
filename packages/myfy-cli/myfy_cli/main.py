@@ -21,6 +21,8 @@ from rich.console import Console
 from rich.table import Table
 
 from myfy.core import Application
+from myfy.core.config import load_settings
+from myfy.web.config import WebSettings
 from myfy_cli.commands import frontend_app
 from myfy_cli.version import __version__
 
@@ -122,10 +124,63 @@ def _setup_reload_module(filename: str, var_name: str) -> tuple[str, dict[str, s
     return "myfy_cli.asgi_factory:create_app", env_vars
 
 
+def _resolve_host_and_port(
+    host: str | None,
+    port: int | None,
+    application: Application | None = None,
+) -> tuple[str, int]:
+    """
+    Resolve host and port from CLI args, WebSettings, or defaults.
+
+    Precedence: CLI flags > Environment variables > WebSettings defaults > Hardcoded defaults
+
+    Args:
+        host: Host from CLI (None if not provided)
+        port: Port from CLI (None if not provided)
+        application: Application instance (used to get WebSettings from container)
+
+    Returns:
+        Tuple of (host, port)
+    """
+    # If both provided via CLI, use them
+    if host is not None and port is not None:
+        return host, port
+
+    # Try to get from WebSettings (respects environment variables)
+    if application is not None:
+        try:
+            web_settings = application.container.get(WebSettings)
+            if host is None:
+                host = web_settings.host
+            if port is None:
+                port = web_settings.port
+        except Exception:
+            pass  # Fall through to defaults
+
+    # If using app_path (no application), try loading WebSettings directly
+    if application is None:
+        try:
+            web_settings = load_settings(WebSettings)
+            if host is None:
+                host = web_settings.host
+            if port is None:
+                port = web_settings.port
+        except Exception:
+            pass  # Fall through to defaults
+
+    # Fall back to hardcoded defaults
+    if host is None:
+        host = "127.0.0.1"
+    if port is None:
+        port = 8000
+
+    return host, port
+
+
 @app.command()
 def run(
-    host: str = typer.Option("127.0.0.1", help="Server host"),
-    port: int = typer.Option(8000, help="Server port"),
+    host: str | None = typer.Option(None, help="Server host"),
+    port: int | None = typer.Option(None, help="Server port"),
     reload: bool = typer.Option(True, help="Enable auto-reload"),
     app_path: str | None = typer.Option(None, help="Path to app (e.g., main:app)"),
 ):
@@ -138,6 +193,8 @@ def run(
 
     if app_path:
         # Use provided app path
+        host, port = _resolve_host_and_port(host, port, application=None)
+
         uvicorn.run(
             app_path,
             host=host,
@@ -164,6 +221,9 @@ def run(
             console.print("[red]Error: No web module found[/red]")
             console.print("Add WebModule() to your application")
             sys.exit(1)
+
+        # Resolve host and port (respects CLI flags > env vars > WebSettings defaults)
+        host, port = _resolve_host_and_port(host, port, application)
 
         console.print(f"📡 Listening on http://{host}:{port}")
         console.print(f"📦 Loaded {len(application._modules)} module(s)")
