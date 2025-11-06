@@ -103,6 +103,7 @@ nav:
       - Modules: core-concepts/modules.md
       - Configuration: core-concepts/configuration.md
       - Lifecycle: core-concepts/lifecycle.md
+  - Deployment: deployment.md
   - API Reference:
       - Core: api-reference/core.md
       - Web: api-reference/web.md

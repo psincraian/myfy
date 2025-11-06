@@ -3,6 +3,7 @@ CLI tools for myfy framework.
 
 Provides commands for development and operations:
 - myfy run: Start development server
+- myfy start: Start production server
 - myfy routes: List all routes
 - myfy modules: Show loaded modules
 - myfy frontend: Frontend commands
@@ -269,6 +270,183 @@ def run(
                 reload=False,
                 log_level="info",
             )
+
+
+@app.command()
+def start(
+    host: str | None = typer.Option(None, help="Server host"),
+    port: int | None = typer.Option(None, help="Server port"),
+    workers: int = typer.Option(1, help="Number of worker processes"),
+    app_path: str | None = typer.Option(None, help="Path to app (e.g., main:app)"),
+):
+    """
+    Start production server.
+
+    Optimized for production deployments:
+    - Automatically sets MYFY_FRONTEND_ENVIRONMENT=production
+    - Disables auto-reload
+    - Verifies frontend assets are built (if FrontendModule is loaded)
+    - Supports multiple worker processes via gunicorn
+
+    Example:
+        myfy frontend build
+        myfy start --host 0.0.0.0 --port 8000 --workers 4
+    """
+    console.print("🚀 Starting myfy production server...")
+
+    # Set production environment
+    os.environ["MYFY_FRONTEND_ENVIRONMENT"] = "production"
+
+    if app_path:
+        # Use provided app path
+        host, port = _resolve_host_and_port(host, port, application=None)
+    else:
+        # Auto-discover application
+        application, filename, var_name = find_application()
+
+        # Initialize if not already done
+        if not application._initialized:
+            application.initialize()
+
+        # Verify frontend assets if FrontendModule is loaded
+        _verify_frontend_assets(application)
+
+        # Get ASGI app from web module
+        web_module = None
+        for module in application._modules:
+            if module.name == "web":
+                web_module = module
+                break
+
+        if web_module is None:
+            console.print("[red]Error: No web module found[/red]")
+            console.print("Add WebModule() to your application")
+            sys.exit(1)
+
+        # Resolve host and port
+        host, port = _resolve_host_and_port(host, port, application)
+
+        # Set up app_path for gunicorn/uvicorn
+        import_path, env_vars = _setup_reload_module(filename, var_name)
+        app_path = import_path
+
+        # Update environment
+        os.environ.update(env_vars)
+
+    console.print(f"📡 Listening on http://{host}:{port}")
+    console.print(f"👷 Workers: {workers}")
+
+    if workers > 1:
+        # Use gunicorn for multiple workers
+        _run_with_gunicorn(app_path, host, port, workers)
+    else:
+        # Use uvicorn for single worker
+        _run_with_uvicorn(app_path, host, port)
+
+
+def _verify_frontend_assets(application: Application):
+    """
+    Verify that frontend assets are built if FrontendModule is loaded.
+
+    Args:
+        application: Application instance to check for FrontendModule
+
+    Raises:
+        SystemExit: If FrontendModule is present but assets are not built
+    """
+    # Check if FrontendModule is loaded
+    has_frontend = any(m.name == "frontend" for m in application._modules)
+
+    if not has_frontend:
+        return
+
+    # Check for manifest.json
+    manifest_path = Path("frontend/static/dist/.vite/manifest.json")
+
+    if not manifest_path.exists():
+        console.print("[red]Error: Frontend assets not built[/red]")
+        console.print("Run 'myfy frontend build' before starting production server")
+        sys.exit(1)
+
+    console.print("[green]✓ Frontend assets verified[/green]")
+
+
+def _run_with_gunicorn(app_path: str, host: str, port: int, workers: int):
+    """
+    Run the application with gunicorn for multiple workers.
+
+    Args:
+        app_path: Import path to ASGI app (e.g., "myfy_cli.asgi_factory:create_app")
+        host: Host to bind to
+        port: Port to bind to
+        workers: Number of worker processes
+    """
+    try:
+        import gunicorn.app.base  # noqa: F401, PLC0415  # pyright: ignore[reportMissingModuleSource]
+    except ImportError:
+        console.print("[red]Error: gunicorn not installed[/red]")
+        console.print("Install with: pip install gunicorn")
+        sys.exit(1)
+
+    # Use subprocess for gunicorn to ensure proper signal handling
+    cmd = [
+        "gunicorn",
+        app_path,
+        "--worker-class",
+        "uvicorn.workers.UvicornWorker",
+        "--workers",
+        str(workers),
+        "--bind",
+        f"{host}:{port}",
+        "--access-logfile",
+        "-",
+        "--error-logfile",
+        "-",
+        "--log-level",
+        "info",
+    ]
+
+    console.print(f"🔧 Running: {' '.join(cmd)}")
+
+    try:
+        subprocess.run(cmd, check=True)
+    except KeyboardInterrupt:
+        console.print("\n👋 Shutting down gracefully...")
+    except subprocess.CalledProcessError as e:
+        console.print(f"[red]Error: Gunicorn failed with exit code {e.returncode}[/red]")
+        sys.exit(e.returncode)
+
+
+def _run_with_uvicorn(app_path: str, host: str, port: int):
+    """
+    Run the application with uvicorn for a single worker.
+
+    Args:
+        app_path: Import path to ASGI app (e.g., "myfy_cli.asgi_factory:create_app")
+        host: Host to bind to
+        port: Port to bind to
+    """
+    cmd = [
+        "uvicorn",
+        app_path,
+        "--factory",
+        "--host",
+        host,
+        "--port",
+        str(port),
+        "--log-level",
+        "info",
+    ]
+
+    console.print(f"🔧 Running: {' '.join(cmd)}")
+
+    try:
+        subprocess.run(cmd, check=True)
+    except KeyboardInterrupt:
+        console.print("\n👋 Shutting down gracefully...")
+    except subprocess.CalledProcessError as e:
+        console.print(f"[red]Error: Uvicorn failed with exit code {e.returncode}[/red]")
+        sys.exit(e.returncode)
 
 
 @app.command()
