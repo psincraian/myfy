@@ -294,6 +294,18 @@ class Application:
                         factory=make_factory(field_value),
                         scope=SINGLETON,
                     )
+
+                    # If this is a subclass (e.g., from override()), also register it
+                    # under its base class so DI can find it
+                    # This allows override() to work with dependency injection
+                    for base in settings_class.__bases__:
+                        if base is not BaseSettings and issubclass(base, BaseSettings):
+                            # Register under the base class as well (e.g., WebSettings)
+                            self.container.register(
+                                type_=base,
+                                factory=make_factory(field_value),
+                                scope=SINGLETON,
+                            )
             except Exception:
                 # Skip fields that can't be accessed or cause errors
                 continue
