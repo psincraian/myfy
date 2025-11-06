@@ -5,18 +5,23 @@ These protocols define contracts for modules that want to extend
 the web server functionality.
 """
 
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 
+if TYPE_CHECKING:
+    from myfy.core.di import Container
 
+
+@runtime_checkable
 class IWebExtension(Protocol):
     """
     Protocol for modules that extend WebModule.
 
     Modules implementing this protocol can extend the ASGI application
-    during the finalize() phase to add routes, mount static files, etc.
+    during the finalize() phase or factory creation to add routes,
+    mount static files, etc.
 
     Example:
         class FrontendModule:
@@ -26,14 +31,15 @@ class IWebExtension(Protocol):
 
             def finalize(self, container: Container) -> None:
                 asgi_app = container.get(ASGIApp)
-                self.extend_asgi_app(asgi_app.app)
+                self.extend_asgi_app(asgi_app.app, container)
 
-            def extend_asgi_app(self, app: Starlette) -> None:
+            def extend_asgi_app(self, app: Starlette, container: Container) -> None:
                 from starlette.staticfiles import StaticFiles
-                app.mount("/static", StaticFiles(directory="static"))
+                settings = container.get(MySettings)
+                app.mount(settings.static_path, StaticFiles(directory="static"))
     """
 
-    def extend_asgi_app(self, app: Starlette) -> None:
+    def extend_asgi_app(self, app: Starlette, container: "Container") -> None:
         """
         Extend the ASGI application.
 
@@ -44,6 +50,7 @@ class IWebExtension(Protocol):
 
         Args:
             app: The Starlette application instance
+            container: DI container for accessing settings and services
         """
         ...
 

@@ -87,11 +87,16 @@ class WebModule:
         """
         Get the ASGI application.
 
-        Called by the CLI to start the server.
+        Note: This method is primarily for the `myfy run` command.
+        The `myfy start` command uses the factory pattern instead
+        (see myfy.web.factory.create_asgi_app_with_lifespan).
 
         Args:
             container: DI container
             lifespan: Optional lifespan context manager for module startup/shutdown
+
+        Returns:
+            ASGIApp instance
         """
         if self._asgi_app is None:
             if lifespan is not None:
