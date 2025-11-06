@@ -42,14 +42,22 @@ class WebModule:
         Configure web module.
 
         Registers WebSettings, Router, and ASGI app in the DI container.
+
+        Note: In nested settings pattern (ADR-0007), WebSettings is registered
+        by Application. Otherwise, load standalone WebSettings.
         """
-        # Register web settings as singleton
-        web_settings = load_settings(WebSettings)
-        container.register(
-            type_=WebSettings,
-            factory=lambda: web_settings,
-            scope="singleton",
-        )
+        from myfy.core.di.types import ProviderKey  # noqa: PLC0415
+
+        # Check if WebSettings already registered (from nested app settings)
+        key = ProviderKey(WebSettings)
+        if key not in container._providers:
+            # Load standalone WebSettings
+            web_settings = load_settings(WebSettings)
+            container.register(
+                type_=WebSettings,
+                factory=lambda: web_settings,
+                scope="singleton",
+            )
 
         # Register router as singleton
         container.register(

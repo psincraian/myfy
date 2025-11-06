@@ -15,6 +15,7 @@ from .lifecycle import LifecycleManager
 from .module import Module
 
 T = TypeVar("T")
+ModuleType = TypeVar("ModuleType", bound=Module)
 
 
 class Application:
@@ -58,7 +59,7 @@ class Application:
         self._modules: list[Module] = []
         self._auto_discover = auto_discover
 
-    def add_module(self, module: Module) -> None:
+    def add_module[T: ModuleType](self, module: type[T]) -> None:
         """
         Register a module with the application.
 
@@ -199,6 +200,10 @@ class Application:
                 scope=SINGLETON,
             )
 
+        # Register nested module settings (ADR-0007: Optional Nested Module Settings)
+        # If user's settings class contains nested BaseSettings, register them too
+        self._register_nested_settings()
+
         # Phase 3: Configure (register services)
         for module in self._modules:
             module.configure(self.container)
@@ -242,6 +247,56 @@ class Application:
         except Exception as e:
             # Entry points discovery failed - not critical
             print(f"Warning: Module discovery failed: {e}")
+
+    def _register_nested_settings(self) -> None:
+        """
+        Register nested module settings found in user's settings class.
+
+        Supports ADR-0007: Optional Nested Module Settings pattern.
+        Allows users to define module settings as nested Pydantic models:
+
+        Example:
+            class AppSettings(BaseSettings):
+                app_name: str = "My App"
+                web: WebSettings = Field(default_factory=WebSettings)
+
+        The nested settings are already loaded with environment variables
+        (using their module prefixes like MYFY_WEB_*) when Pydantic loaded
+        the parent settings. We just need to register them in the container.
+        """
+
+        # Iterate over all fields in the settings class
+        for field_name in dir(self.settings):
+            # Skip private/magic attributes
+            if field_name.startswith("_"):
+                continue
+
+            try:
+                field_value = getattr(self.settings, field_name)
+
+                # Check if this field is a BaseSettings instance
+                if isinstance(field_value, BaseSettings):
+                    # Get the class of this nested settings
+                    settings_class = type(field_value)
+
+                    # Create a proper factory closure
+                    # This avoids default argument issues with container DI inspection
+                    def make_factory(val):
+                        def factory():
+                            return val
+
+                        return factory
+
+                    # Register this nested settings as a singleton
+                    # Using the nested instance directly (already has env vars loaded)
+                    self.container.register(
+                        type_=settings_class,
+                        factory=make_factory(field_value),
+                        scope=SINGLETON,
+                    )
+            except Exception:
+                # Skip fields that can't be accessed or cause errors
+                continue
 
     def _validate_dependencies(self) -> None:
         """

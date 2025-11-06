@@ -22,7 +22,7 @@ Usage:
     await app.run()
 """
 
-from .config import BaseSettings, CoreSettings, Profile, load_settings
+from .config import BaseSettings, CoreSettings, Profile, load_settings, override
 from .di import (
     REQUEST,
     SINGLETON,
@@ -50,6 +50,7 @@ __all__ = [
     "ScopeContext",
     "__version__",
     "load_settings",
+    "override",
     "provider",
 ]
 

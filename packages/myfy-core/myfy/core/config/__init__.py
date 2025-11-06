@@ -11,6 +11,7 @@ Usage:
     settings = load_settings(AppSettings)
 """
 
+from .override import override
 from .settings import BaseSettings, CoreSettings, Profile, load_settings
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "CoreSettings",
     "Profile",
     "load_settings",
+    "override",
 ]

@@ -103,17 +103,28 @@ class FrontendModule:
         - FrontendSettings
         - AssetResolver
         - Jinja2Templates
+
+        Note: In nested settings pattern (ADR-0007), FrontendSettings is registered
+        by Application. Otherwise, load standalone FrontendSettings.
         """
+        from myfy.core.di.types import ProviderKey  # noqa: PLC0415
+
         # Store container reference for start()
         self._container = container
 
-        # Load settings
+        # Check if FrontendSettings already registered (from nested app settings)
+        key = ProviderKey(FrontendSettings)
+        if key not in container._providers:
+            # Load standalone FrontendSettings
+            settings = load_settings(FrontendSettings)
+            container.register(
+                type_=FrontendSettings,
+                factory=lambda: settings,
+                scope=SINGLETON,
+            )
+
+        # Load settings for use in this method (before container is compiled)
         settings = load_settings(FrontendSettings)
-        container.register(
-            type_=FrontendSettings,
-            factory=lambda: settings,
-            scope=SINGLETON,
-        )
 
         # Scaffold if needed
         if self.auto_init and not check_frontend_initialized(self.templates_dir):
