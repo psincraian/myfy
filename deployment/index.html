@@ -10,11 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://psincraian.github.io/myfy/contributing/">
+        <link rel="canonical" href="https://psincraian.github.io/myfy/deployment/">
       
       
-        <link rel="prev" href="../api-reference/cli/">
+        <link rel="prev" href="../core-concepts/lifecycle/">
       
+      
+        <link rel="next" href="../api-reference/core/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -22,7 +24,7 @@
     
     
       
-        <title>Contributing - myfy</title>
+        <title>Deployment - myfy</title>
       
     
     
@@ -78,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#contributing-to-myfy" class="md-skip">
+        <a href="#deployment-guide" class="md-skip">
           Skip to content
         </a>
       
@@ -118,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Contributing
+              Deployment
             
           </span>
         </div>
@@ -302,9 +304,11 @@
   
   
   
+    
   
-    <li class="md-tabs__item">
-      <a href="../deployment/" class="md-tabs__link">
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
         
   
   
@@ -341,11 +345,9 @@
   
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="./" class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../contributing/" class="md-tabs__link">
         
   
   
@@ -844,10 +846,32 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../deployment/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Deployment
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -858,6 +882,254 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Start
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#production-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Production Server
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Production Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#myfy-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      myfy start
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#single-worker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Single Worker
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-workers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multiple Workers
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#frontend-assets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Frontend Assets
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Variables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Settings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frontend-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Frontend Settings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deployment Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Compose
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#health-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Health Checks
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoring
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#import-logging-loggingbasicconfig-levellogginginfo-formatasctimes-names-levelnames-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      import logging logging.basicConfig( level=logging.INFO, format=&#39;%(asctime)s - %(name)s - %(levelname)s - %(message)s&#39; )
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#frontend-assets-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      Frontend assets not found
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gunicorn-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      Gunicorn not found
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#port-already-in-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      Port already in use
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worker-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      Worker timeout
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Steps
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -987,32 +1259,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Contributing
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
         
   
   
@@ -1023,206 +1273,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#development-setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      Development Setup
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Development Setup">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-clone-the-repository" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. Clone the Repository
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-install-dependencies" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. Install Dependencies
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-run-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Run Tests
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-code-quality" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. Code Quality
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#project-structure" class="md-nav__link">
-    <span class="md-ellipsis">
-      Project Structure
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#making-changes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Making Changes
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Making Changes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-create-a-branch" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. Create a Branch
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-make-your-changes" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. Make Your Changes
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-run-checks" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Run Checks
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-commit-changes" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. Commit Changes
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-push-and-create-pr" class="md-nav__link">
-    <span class="md-ellipsis">
-      5. Push and Create PR
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#guidelines" class="md-nav__link">
-    <span class="md-ellipsis">
-      Guidelines
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Guidelines">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#code-style" class="md-nav__link">
-    <span class="md-ellipsis">
-      Code Style
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#testing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Testing
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Documentation
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#questions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Questions?
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#license" class="md-nav__link">
-    <span class="md-ellipsis">
-      License
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1254,46 +1304,46 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#development-setup" class="md-nav__link">
+  <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
-      Development Setup
+      Quick Start
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Development Setup">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#production-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Production Server
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Production Server">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-clone-the-repository" class="md-nav__link">
+  <a href="#myfy-start" class="md-nav__link">
     <span class="md-ellipsis">
-      1. Clone the Repository
+      myfy start
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-install-dependencies" class="md-nav__link">
+  <a href="#single-worker" class="md-nav__link">
     <span class="md-ellipsis">
-      2. Install Dependencies
+      Single Worker
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-run-tests" class="md-nav__link">
+  <a href="#multiple-workers" class="md-nav__link">
     <span class="md-ellipsis">
-      3. Run Tests
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-code-quality" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. Code Quality
+      Multiple Workers
     </span>
   </a>
   
@@ -1305,64 +1355,37 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#project-structure" class="md-nav__link">
+  <a href="#frontend-assets" class="md-nav__link">
     <span class="md-ellipsis">
-      Project Structure
+      Frontend Assets
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#making-changes" class="md-nav__link">
+  <a href="#environment-variables" class="md-nav__link">
     <span class="md-ellipsis">
-      Making Changes
+      Environment Variables
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Making Changes">
+    <nav class="md-nav" aria-label="Environment Variables">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-create-a-branch" class="md-nav__link">
+  <a href="#core-settings" class="md-nav__link">
     <span class="md-ellipsis">
-      1. Create a Branch
+      Core Settings
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-make-your-changes" class="md-nav__link">
+  <a href="#frontend-settings" class="md-nav__link">
     <span class="md-ellipsis">
-      2. Make Your Changes
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-run-checks" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Run Checks
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-commit-changes" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. Commit Changes
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-push-and-create-pr" class="md-nav__link">
-    <span class="md-ellipsis">
-      5. Push and Create PR
+      Frontend Settings
     </span>
   </a>
   
@@ -1374,37 +1397,28 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#guidelines" class="md-nav__link">
+  <a href="#deployment-options" class="md-nav__link">
     <span class="md-ellipsis">
-      Guidelines
+      Deployment Options
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Guidelines">
+    <nav class="md-nav" aria-label="Deployment Options">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#code-style" class="md-nav__link">
+  <a href="#docker" class="md-nav__link">
     <span class="md-ellipsis">
-      Code Style
+      Docker
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#testing" class="md-nav__link">
+  <a href="#docker-compose" class="md-nav__link">
     <span class="md-ellipsis">
-      Testing
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Documentation
+      Docker Compose
     </span>
   </a>
   
@@ -1416,18 +1430,102 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#questions" class="md-nav__link">
+  <a href="#health-checks" class="md-nav__link">
     <span class="md-ellipsis">
-      Questions?
+      Health Checks
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#license" class="md-nav__link">
+  <a href="#monitoring" class="md-nav__link">
     <span class="md-ellipsis">
-      License
+      Monitoring
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#import-logging-loggingbasicconfig-levellogginginfo-formatasctimes-names-levelnames-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      import logging logging.basicConfig( level=logging.INFO, format=&#39;%(asctime)s - %(name)s - %(levelname)s - %(message)s&#39; )
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#frontend-assets-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      Frontend assets not found
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gunicorn-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      Gunicorn not found
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#port-already-in-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      Port already in use
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worker-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      Worker timeout
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Steps
     </span>
   </a>
   
@@ -1452,128 +1550,170 @@
   
 
 
-<h1 id="contributing-to-myfy">Contributing to myfy</h1>
-<p>Thank you for your interest in contributing to myfy!</p>
+<h1 id="deployment-guide">Deployment Guide</h1>
+<p>This guide covers how to deploy myfy applications to production environments.</p>
 <hr />
-<h2 id="development-setup">Development Setup</h2>
-<h3 id="1-clone-the-repository">1. Clone the Repository</h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/psincraian/myfy.git
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>myfy
-</span></code></pre></div>
-<h3 id="2-install-dependencies">2. Install Dependencies</h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Install uv</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>curl<span class="w"> </span>-LsSf<span class="w"> </span>https://astral.sh/uv/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Install workspace dependencies</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>uv<span class="w"> </span>sync
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># Install packages in editable mode</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>packages/myfy-core
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>packages/myfy-web
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>packages/myfy-cli
-</span></code></pre></div>
-<h3 id="3-run-tests">3. Run Tests</h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Run all tests</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Run with coverage</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>--cov<span class="o">=</span>myfy<span class="w"> </span>--cov-report<span class="o">=</span>html
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Run specific test</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_di.py
-</span></code></pre></div>
-<h3 id="4-code-quality">4. Code Quality</h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Format code</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>uv<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>format<span class="w"> </span>.
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Lint code</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>uv<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>.
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1"># Type check</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>uv<span class="w"> </span>run<span class="w"> </span>ty<span class="w"> </span>check
+<h2 id="quick-start">Quick Start</h2>
+<p>For a basic production deployment:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># 1. Build frontend assets (if using FrontendModule)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>myfy<span class="w"> </span>frontend<span class="w"> </span>build
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># 2. Start production server</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>myfy<span class="w"> </span>start<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span><span class="w"> </span>--workers<span class="w"> </span><span class="m">4</span>
 </span></code></pre></div>
 <hr />
-<h2 id="project-structure">Project Structure</h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>myfy/
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>├── packages/
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>│   ├── myfy-core/      # Core framework
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>│   ├── myfy-web/       # Web module
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>│   └── myfy-cli/       # CLI tools
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>├── examples/           # Example applications
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>├── docs/               # Documentation
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>└── tests/              # Tests
-</span></code></pre></div>
-<hr />
-<h2 id="making-changes">Making Changes</h2>
-<h3 id="1-create-a-branch">1. Create a Branch</h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature/my-feature
-</span></code></pre></div>
-<h3 id="2-make-your-changes">2. Make Your Changes</h3>
+<h2 id="production-server">Production Server</h2>
+<h3 id="myfy-start">myfy start</h3>
+<p>The <code>myfy start</code> command is optimized for production deployments:</p>
 <ul>
-<li>Write code</li>
-<li>Add tests</li>
-<li>Update documentation</li>
+<li><strong>Automatic production mode</strong>: Sets <code>MYFY_FRONTEND_ENVIRONMENT=production</code></li>
+<li><strong>No auto-reload</strong>: Better performance and stability</li>
+<li><strong>Asset verification</strong>: Ensures frontend assets are built before starting</li>
+<li><strong>Multi-worker support</strong>: Uses gunicorn for horizontal scaling</li>
 </ul>
-<h3 id="3-run-checks">3. Run Checks</h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Format</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>uv<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>format<span class="w"> </span>.
+<h3 id="single-worker">Single Worker</h3>
+<p>For simple deployments or development-like production:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>myfy<span class="w"> </span>start<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
+</span></code></pre></div>
+<p>This uses uvicorn with a single worker process.</p>
+<h3 id="multiple-workers">Multiple Workers</h3>
+<p>For better performance and concurrency:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>myfy<span class="w"> </span>start<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span><span class="w"> </span>--workers<span class="w"> </span><span class="m">4</span>
+</span></code></pre></div>
+<p>This uses gunicorn with multiple uvicorn workers. Install gunicorn first:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>pip<span class="w"> </span>install<span class="w"> </span>gunicorn
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># or</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>uv<span class="w"> </span>add<span class="w"> </span>gunicorn
+</span></code></pre></div>
+<p><strong>Worker count recommendations:</strong>
+- CPU-bound apps: <code>(2 × CPU cores) + 1</code>
+- I/O-bound apps: <code>(4 × CPU cores) + 1</code>
+- Start with 4 workers and adjust based on monitoring</p>
+<hr />
+<h2 id="frontend-assets">Frontend Assets</h2>
+<p>If your application uses <code>FrontendModule</code>, you must build assets before deploying:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>myfy<span class="w"> </span>frontend<span class="w"> </span>build
+</span></code></pre></div>
+<p>This generates:
+- Minified JavaScript bundles
+- Minified CSS files
+- Asset manifest with content hashes
+- Files in <code>frontend/static/dist/</code></p>
+<p><strong>Important:</strong> The <code>myfy start</code> command will verify that assets are built and fail if missing.</p>
+<hr />
+<h2 id="environment-variables">Environment Variables</h2>
+<h3 id="core-settings">Core Settings</h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Frontend environment (auto-set by myfy start)</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nv">MYFY_FRONTEND_ENVIRONMENT</span><span class="o">=</span>production
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># Web server settings</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="nv">MYFY_WEB_HOST</span><span class="o">=</span><span class="m">0</span>.0.0.0
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="nv">MYFY_WEB_PORT</span><span class="o">=</span><span class="m">8000</span>
+</span></code></pre></div>
+<h3 id="frontend-settings">Frontend Settings</h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Static file serving</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nv">MYFY_FRONTEND_STATIC_URL_PREFIX</span><span class="o">=</span>/static
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Lint</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>uv<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>.
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Test</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest
-</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
-</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="c1"># Type check</span>
-</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>uv<span class="w"> </span>run<span class="w"> </span>ty<span class="w"> </span>check
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Cache control</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="nv">MYFY_FRONTEND_CACHE_MAX_AGE</span><span class="o">=</span><span class="m">31536000</span><span class="w">  </span><span class="c1"># 1 year default</span>
 </span></code></pre></div>
-<h3 id="4-commit-changes">4. Commit Changes</h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>git<span class="w"> </span>add<span class="w"> </span>.
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: add my feature&quot;</span>
+<p>See <a href="../api-reference/core/">Configuration Reference</a> for all available settings.</p>
+<hr />
+<h2 id="deployment-options">Deployment Options</h2>
+<h3 id="docker">Docker</h3>
+<p>Create a <code>Dockerfile</code>:</p>
+<div class="language-dockerfile highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.12-slim</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="c"># Install system dependencies</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="k">RUN</span><span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span>nodejs<span class="w"> </span>npm<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/var/lib/apt/lists/*
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="c"># Copy application code</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="k">COPY</span><span class="w"> </span>.<span class="w"> </span>.
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="c"># Install Python dependencies</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="k">RUN</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="k">RUN</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>gunicorn
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>
+</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="c"># Build frontend assets</span>
+</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="k">RUN</span><span class="w"> </span>myfy<span class="w"> </span>frontend<span class="w"> </span>build
+</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>
+</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="c"># Expose port</span>
+</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="k">EXPOSE</span><span class="w"> </span><span class="s">8000</span>
+</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>
+</span><span id="__span-7-23"><a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="c"># Start production server</span>
+</span><span id="__span-7-24"><a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a><span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;myfy&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;start&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--host&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;0.0.0.0&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--port&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;8000&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--workers&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;4&quot;</span><span class="p">]</span>
 </span></code></pre></div>
-<p><strong>Commit Message Format:</strong>
-- <code>feat:</code> - New feature
-- <code>fix:</code> - Bug fix
-- <code>docs:</code> - Documentation
-- <code>test:</code> - Tests
-- <code>refactor:</code> - Code refactoring
-- <code>chore:</code> - Maintenance</p>
-<h3 id="5-push-and-create-pr">5. Push and Create PR</h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>feature/my-feature
+<p>Build and run:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>myfy-app<span class="w"> </span>.
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:8000<span class="w"> </span>myfy-app
 </span></code></pre></div>
-<p>Then create a pull request on GitHub.</p>
+<h3 id="docker-compose">Docker Compose</h3>
+<p>Create a <code>docker-compose.yml</code>:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.8&#39;</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="nt">services</span><span class="p">:</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="nt">web</span><span class="p">:</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">    </span><span class="nt">build</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;8000:8000&quot;</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYFY_FRONTEND_ENVIRONMENT=production</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+</span></code></pre></div>
+<p>Run:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>docker-compose<span class="w"> </span>up<span class="w"> </span>-d
+</span></code></pre></div>
+<h2 id="health-checks">Health Checks</h2>
+<p>Add a health check endpoint to your application:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">myfy.web</span><span class="w"> </span><span class="kn">import</span> <span class="n">route</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="nd">@route</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/health&quot;</span><span class="p">)</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">health_check</span><span class="p">():</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;healthy&quot;</span><span class="p">}</span>
+</span></code></pre></div>
+<p>Configure your load balancer or orchestrator to check this endpoint.</p>
 <hr />
-<h2 id="guidelines">Guidelines</h2>
-<h3 id="code-style">Code Style</h3>
-<ul>
-<li>Follow PEP 8</li>
-<li>Use type hints</li>
-<li>Write docstrings (Google style)</li>
-<li>Keep functions focused and small</li>
-</ul>
-<h3 id="testing">Testing</h3>
-<ul>
-<li>Write tests for new features</li>
-<li>Maintain &gt;80% coverage</li>
-<li>Use pytest fixtures</li>
-<li>Test edge cases</li>
-</ul>
-<h3 id="documentation">Documentation</h3>
-<ul>
-<li>Update docs for new features</li>
-<li>Add examples</li>
-<li>Keep docs up-to-date</li>
-<li>Use clear, simple language</li>
-</ul>
+<h2 id="monitoring">Monitoring</h2>
+<h3 id="logging">Logging</h3>
+<p>myfy uses Python's standard logging. Configure it in your application:</p>
+<h2 id="import-logging-loggingbasicconfig-levellogginginfo-formatasctimes-names-levelnames-messages"><div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>    <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="p">)</span>
+</span></code></pre></div></h2>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="frontend-assets-not-found">Frontend assets not found</h3>
+<p><strong>Error:</strong> "Frontend assets not built"</p>
+<p><strong>Solution:</strong> Run <code>myfy frontend build</code> before starting the server.</p>
+<h3 id="gunicorn-not-found">Gunicorn not found</h3>
+<p><strong>Error:</strong> "gunicorn not installed"</p>
+<p><strong>Solution:</strong> Install gunicorn:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>pip<span class="w"> </span>install<span class="w"> </span>gunicorn
+</span></code></pre></div></p>
+<h3 id="port-already-in-use">Port already in use</h3>
+<p><strong>Error:</strong> "Address already in use"</p>
+<p><strong>Solution:</strong> Change the port or stop the conflicting service:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>myfy<span class="w"> </span>start<span class="w"> </span>--port<span class="w"> </span><span class="m">8080</span>
+</span></code></pre></div></p>
+<h3 id="worker-timeout">Worker timeout</h3>
+<p>If workers are timing out, increase the timeout:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>gunicorn<span class="w"> </span>app:app<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span>--worker-class<span class="w"> </span>uvicorn.workers.UvicornWorker<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span>--timeout<span class="w"> </span><span class="m">120</span>
+</span></code></pre></div></p>
 <hr />
-<h2 id="questions">Questions?</h2>
+<h2 id="next-steps">Next Steps</h2>
 <ul>
-<li>Open an issue on GitHub</li>
-<li>Join our discussions</li>
+<li><a href="../api-reference/cli/">CLI Reference</a> - Full CLI command reference</li>
+<li><a href="../api-reference/core/">Configuration</a> - All configuration options</li>
+<li><a href="../modules/frontend/">Frontend Module</a> - Frontend integration guide</li>
 </ul>
-<hr />
-<h2 id="license">License</h2>
-<p>By contributing, you agree that your contributions will be licensed under the MIT License.</p>
 
 
 
