@@ -25,6 +25,7 @@ from .asgi import ASGIApp
 from .config import WebSettings
 from .context import RequestContext, get_request_context
 from .extensions import IMiddlewareProvider, IWebExtension
+from .factory import create_asgi_app_with_lifespan
 from .module import WebModule, web_module
 from .routing import HTTPMethod, Route, Router, route
 from .version import __version__
@@ -40,6 +41,7 @@ __all__ = [
     "WebModule",
     "WebSettings",
     "__version__",
+    "create_asgi_app_with_lifespan",
     "get_request_context",
     "route",
     "web_module",

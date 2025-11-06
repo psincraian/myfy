@@ -176,20 +176,44 @@ class FrontendModule:
         """
         Finalize frontend module after container compilation.
 
-        Called after container is compiled to:
-        - Mount static files on ASGI app
-        - Verify production assets if needed
+        Called after container is compiled in normal application flow.
+        Mounts static files to the ASGI app.
+
+        Note: In CLI/factory contexts, extend_asgi_app() is used instead.
         """
         from myfy.web import ASGIApp  # noqa: PLC0415
 
-        settings = container.get(FrontendSettings)
-
-        # Mount static files on ASGI app (guaranteed to exist via requires)
         asgi_app = container.get(ASGIApp)
+        self._mount_static_files(asgi_app.app, container)
+
+    def extend_asgi_app(self, app, container: "Container") -> None:
+        """
+        Extend ASGI app for CLI/factory contexts.
+
+        This is called by the factory pattern when creating ASGI apps
+        with lifespan, where the normal finalize() flow doesn't apply.
+
+        Args:
+            app: Starlette application to extend
+            container: DI container for accessing settings
+        """
+        self._mount_static_files(app, container)
+
+    def _mount_static_files(self, app, container: "Container") -> None:
+        """
+        Mount static files to the ASGI app.
+
+        Shared logic used by both finalize() and extend_asgi_app().
+
+        Args:
+            app: Starlette application to mount static files to
+            container: DI container for accessing settings
+        """
+        settings = container.get(FrontendSettings)
 
         static_path = Path(self.static_dir) / "dist"
         if static_path.exists():
-            asgi_app.app.mount(
+            app.mount(
                 settings.static_url_prefix,
                 StaticFiles(directory=str(static_path)),
                 name="static",
