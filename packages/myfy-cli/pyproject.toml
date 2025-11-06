@@ -12,6 +12,11 @@ dependencies = [
     "klyne>=0.2.0",
 ]
 
+[project.optional-dependencies]
+production = [
+    "gunicorn>=22.0.0",
+]
+
 [project.scripts]
 myfy = "myfy_cli.main:app"
 
