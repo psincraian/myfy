@@ -2,98 +2,102 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://psincraian.github.io/myfy/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/contributing/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/adr/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/adr/0001-record-architecture-decisions/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/adr/0002-modular-configuration-design/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/adr/0003-dependency-injection-with-scopes/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/adr/0004-frontend-module-integration/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/adr/0005-module-extension-and-lifecycle-phases/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/adr/0006-monorepo-versioning-and-publishing/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
+    </url>
+    <url>
+         <loc>https://psincraian.github.io/myfy/adr/0007-optional-nested-module-settings/</loc>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/adr/template/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/api-reference/cli/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/api-reference/core/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/api-reference/web/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/core-concepts/configuration/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/core-concepts/dependency-injection/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/core-concepts/lifecycle/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/core-concepts/modules/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/getting-started/installation/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/getting-started/quick-reference/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/getting-started/tutorial/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/modules/cli/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/modules/core/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/modules/frontend/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://psincraian.github.io/myfy/modules/web/</loc>
-         <lastmod>2025-11-03</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
 </urlset>
