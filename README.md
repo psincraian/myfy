@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="docs/images/myfy.png" alt="myfy logo" width="200"/>
+</div>
+
 # myfy
 
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/myfy-core?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLUE&right_color=YELLOWGREEN&left_text=downloads)](https://pepy.tech/projects/myfy-core)

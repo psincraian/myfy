@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="images/myfy.png" alt="myfy logo" width="200"/>
+</div>
+
 # myfy
 
 **Build Python applications that feel like they wrote themselves.**
