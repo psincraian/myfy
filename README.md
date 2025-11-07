@@ -1,5 +1,7 @@
 # myfy
 
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/myfy-core?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLUE&right_color=YELLOWGREEN&left_text=downloads)](https://pepy.tech/projects/myfy-core)
+
 **Build Python applications with FastAPI's ergonomics and enterprise-grade architecture.**
 
 A modern Python framework combining type-safe dependency injection, modular architecture, and sensible defaults—all in a lightweight, async-first design.
