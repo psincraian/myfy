@@ -12,10 +12,10 @@ A modern Python framework combining type-safe dependency injection, modular arch
 
 ```bash
 # Install with uv (recommended)
-uv pip install myfy-core myfy-web myfy-cli
+uv pip install myfy-core myfy-web myfy-frontend myfy-cli
 
 # Or with pip
-pip install myfy-core myfy-web myfy-cli
+pip install myfy-core myfy-web myfy-frontend myfy-cli
 ```
 
 ### Hello World
@@ -24,19 +24,22 @@ pip install myfy-core myfy-web myfy-cli
 # app.py
 from myfy.core import Application
 from myfy.web import route, WebModule
+from myfy.frontend import FrontendModule
 
-@route.get("/hello/{name}")
+@route.get("/api/hello/{name}")
 async def hello(name: str) -> dict:
     return {"message": f"Hello {name}!"}
 
 app = Application(auto_discover=False)
 app.add_module(WebModule())
+app.add_module(FrontendModule())
 ```
 
 **Run it:**
 ```bash
 uv run myfy run
-# Visit http://127.0.0.1:8000/hello/World
+# API: http://127.0.0.1:8000/api/hello/World
+# Frontend: http://127.0.0.1:8000
 ```
 
 ---
