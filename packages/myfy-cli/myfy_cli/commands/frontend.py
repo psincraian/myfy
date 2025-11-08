@@ -145,7 +145,7 @@ def init(
       myfy frontend init -i                 # Interactive mode
       myfy frontend init --templates-dir my/templates
     """
-    klyne.track_event(
+    klyne.track(
         "myfy_frontend_init",
         {
             "interactive": interactive,
@@ -202,7 +202,7 @@ def build() -> None:
     Examples:
       myfy frontend build
     """
-    klyne.track_event("myfy_frontend_build", {})
+    klyne.track("myfy_frontend_build", {})
 
     # Check if frontend module is installed
     if not HAS_FRONTEND:
