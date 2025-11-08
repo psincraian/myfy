@@ -190,12 +190,15 @@ def run(
 
     Runs the ASGI application with uvicorn.
     """
-    klyne.track("myfy_run", {
-        "host": host,
-        "port": port,
-        "reload": reload,
-        "app_path": app_path,
-    })
+    klyne.track(
+        "myfy_run",
+        {
+            "host": host,
+            "port": port,
+            "reload": reload,
+            "app_path": app_path,
+        },
+    )
     console.print("🚀 Starting myfy development server...")
 
     if app_path:
@@ -298,12 +301,15 @@ def start(
         myfy frontend build
         myfy start --host 0.0.0.0 --port 8000 --workers 4
     """
-    klyne.track("myfy_start", {
-        "host": host,
-        "port": port,
-        "workers": workers,
-        "app_path": app_path,
-    })
+    klyne.track(
+        "myfy_start",
+        {
+            "host": host,
+            "port": port,
+            "workers": workers,
+            "app_path": app_path,
+        },
+    )
     console.print("🚀 Starting myfy production server...")
 
     # Set production environment
