@@ -190,7 +190,7 @@ def run(
 
     Runs the ASGI application with uvicorn.
     """
-    klyne.track(
+    klyne.track_event(
         "myfy_run",
         {
             "host": host,
@@ -301,7 +301,7 @@ def start(
         myfy frontend build
         myfy start --host 0.0.0.0 --port 8000 --workers 4
     """
-    klyne.track(
+    klyne.track_event(
         "myfy_start",
         {
             "host": host,
@@ -474,7 +474,7 @@ def routes():
 
     Shows a table of routes with methods, paths, and handler names.
     """
-    klyne.track("myfy_routes", {})
+    klyne.track_event("myfy_routes", {})
     application, _, _ = find_application()
 
     if not application._initialized:
@@ -523,7 +523,7 @@ def modules():
 
     Displays modules and their configuration.
     """
-    klyne.track("myfy_modules", {})
+    klyne.track_event("myfy_modules", {})
     application, _, _ = find_application()
 
     if not application._initialized:
@@ -548,7 +548,7 @@ def doctor():
 
     Checks for common issues and provides recommendations.
     """
-    klyne.track("myfy_doctor", {})
+    klyne.track_event("myfy_doctor", {})
     console.print("🔍 Running myfy doctor...")
 
     try:
