@@ -2,6 +2,7 @@
 
 import sys
 
+import klyne
 import typer
 from rich.console import Console
 
@@ -144,6 +145,15 @@ def init(
       myfy frontend init -i                 # Interactive mode
       myfy frontend init --templates-dir my/templates
     """
+    klyne.track(
+        "myfy_frontend_init",
+        {
+            "interactive": interactive,
+            "templates_dir": templates_dir,
+            "static_dir": static_dir,
+        },
+    )
+
     # Check if frontend module is installed
     if not HAS_FRONTEND:
         _show_missing_module_error()
@@ -192,6 +202,8 @@ def build() -> None:
     Examples:
       myfy frontend build
     """
+    klyne.track("myfy_frontend_build", {})
+
     # Check if frontend module is installed
     if not HAS_FRONTEND:
         _show_missing_module_error()
