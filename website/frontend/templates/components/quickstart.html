@@ -31,6 +31,7 @@ spacing - Dark mode optimized - Better copy button UX #}
                     <button
                         class="copy-button absolute top-3 right-3 btn btn-sm btn-ghost hover:bg-base-content/10"
                         data-copy="pip install myfy"
+                        aria-label="Copy installation command to clipboard"
                     >
                         <svg
                             class="w-4 h-4"
@@ -58,23 +59,23 @@ spacing - Dark mode optimized - Better copy button UX #}
                     <div class="badge badge-primary">app.py</div>
                 </div>
                 <div class="relative">
-                    <pre class="code-block overflow-x-auto"><code><span class="text-primary">from</span> <span class="text-slate-900 dark:text-slate-200">myfy.core</span> <span class="text-primary">import</span> <span class="text-slate-900 dark:text-slate-200">Application</span>
-<span class="text-primary">from</span> <span class="text-slate-900 dark:text-slate-200">myfy.web</span> <span class="text-primary">import</span> <span class="text-slate-900 dark:text-slate-200">WebModule, route</span>
-<span class="text-primary">from</span> <span class="text-slate-900 dark:text-slate-200">myfy.frontend</span> <span class="text-primary">import</span> <span class="text-slate-900 dark:text-slate-200">FrontendModule</span>
+                    <pre class="code-block overflow-x-auto"><code><span class="text-primary">from</span> <span class="text-slate-900">myfy.core</span> <span class="text-primary">import</span> <span class="text-slate-900">Application</span>
+<span class="text-primary">from</span> <span class="text-slate-900">myfy.web</span> <span class="text-primary">import</span> <span class="text-slate-900">WebModule, route</span>
+<span class="text-primary">from</span> <span class="text-slate-900">myfy.frontend</span> <span class="text-primary">import</span> <span class="text-slate-900">FrontendModule</span>
 
-<span class="text-emerald-600 dark:text-emerald-400"># Create application</span>
-<span class="text-slate-900 dark:text-slate-200">app</span> <span class="text-primary">=</span> <span class="text-slate-900 dark:text-slate-200">Application()</span>
-<span class="text-slate-900 dark:text-slate-200">app</span><span class="text-primary">.</span><span class="text-slate-900 dark:text-slate-200">add_module(WebModule())</span>
-<span class="text-slate-900 dark:text-slate-200">app</span><span class="text-primary">.</span><span class="text-slate-900 dark:text-slate-200">add_module(FrontendModule(auto_init=True))</span>
+<span class="text-emerald-600"># Create application</span>
+<span class="text-slate-900">app</span> <span class="text-primary">=</span> <span class="text-slate-900">Application()</span>
+<span class="text-slate-900">app</span><span class="text-primary">.</span><span class="text-slate-900">add_module(WebModule())</span>
+<span class="text-slate-900">app</span><span class="text-primary">.</span><span class="text-slate-900">add_module(FrontendModule(auto_init=True))</span>
 
-<span class="text-emerald-600 dark:text-emerald-400"># Define routes</span>
-<span class="text-primary">@</span><span class="text-slate-900 dark:text-slate-200">route</span><span class="text-primary">.</span><span class="text-slate-900 dark:text-slate-200">get(</span><span class="text-amber-600 dark:text-amber-400">"/"</span><span class="text-slate-900 dark:text-slate-200">)</span>
-<span class="text-primary">async def</span> <span class="text-slate-900 dark:text-slate-200">home():</span>
-    <span class="text-primary">return</span> <span class="text-slate-900 dark:text-slate-200">{</span><span class="text-amber-600 dark:text-amber-400">"message"</span><span class="text-slate-900 dark:text-slate-200">:</span> <span class="text-amber-600 dark:text-amber-400">"Welcome to myfy!"</span><span class="text-slate-900 dark:text-slate-200">}</span>
+<span class="text-emerald-600"># Define routes</span>
+<span class="text-primary">@</span><span class="text-slate-900">route</span><span class="text-primary">.</span><span class="text-slate-900">get(</span><span class="text-amber-600">"/"</span><span class="text-slate-900">)</span>
+<span class="text-primary">async def</span> <span class="text-slate-900">home():</span>
+    <span class="text-primary">return</span> <span class="text-slate-900">{</span><span class="text-amber-600">"message"</span><span class="text-slate-900">:</span> <span class="text-amber-600">"Welcome to myfy!"</span><span class="text-slate-900">}</span>
 
-<span class="text-primary">if</span> <span class="text-slate-900 dark:text-slate-200">__name__</span> <span class="text-primary">==</span> <span class="text-amber-600 dark:text-amber-400">"__main__"</span><span class="text-slate-900 dark:text-slate-200">:</span>
-    <span class="text-primary">import</span> <span class="text-slate-900 dark:text-slate-200">asyncio</span>
-    <span class="text-slate-900 dark:text-slate-200">asyncio</span><span class="text-primary">.</span><span class="text-slate-900 dark:text-slate-200">run(app</span><span class="text-primary">.</span><span class="text-slate-900 dark:text-slate-200">run())</span></code></pre>
+<span class="text-primary">if</span> <span class="text-slate-900">__name__</span> <span class="text-primary">==</span> <span class="text-amber-600">"__main__"</span><span class="text-slate-900">:</span>
+    <span class="text-primary">import</span> <span class="text-slate-900">asyncio</span>
+    <span class="text-slate-900">asyncio</span><span class="text-primary">.</span><span class="text-slate-900">run(app</span><span class="text-primary">.</span><span class="text-slate-900">run())</span></code></pre>
                     <button
                         class="copy-button absolute top-3 right-3 btn btn-sm btn-ghost hover:bg-base-content/10"
                         data-copy='from myfy.core import Application
@@ -94,6 +95,7 @@ async def home():
 if __name__ == "__main__":
     import asyncio
     asyncio.run(app.run())'
+                        aria-label="Copy Python code example to clipboard"
                     >
                         <svg
                             class="w-4 h-4"
@@ -121,11 +123,12 @@ if __name__ == "__main__":
                 </div>
                 <div class="relative">
                     <pre class="command-block"><code>uv run myfy run
-<span class="text-emerald-600 dark:text-emerald-400"># or</span>
+<span class="text-emerald-600"># or</span>
 python app.py</code></pre>
                     <button
                         class="copy-button absolute top-3 right-3 btn btn-sm btn-ghost hover:bg-base-content/10"
                         data-copy="uv run myfy run"
+                        aria-label="Copy run command to clipboard"
                     >
                         <svg
                             class="w-4 h-4"
