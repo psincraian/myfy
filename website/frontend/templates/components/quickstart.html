@@ -1,0 +1,202 @@
+{# Quickstart Component - Modern code showcase Design improvements: - Better
+mobile code block layout - Improved syntax highlighting contrast - Cleaner
+spacing - Dark mode optimized - Better copy button UX #}
+<section id="quickstart" class="py-16 md:py-24 section-alt leaf-pattern">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+            {# Section Header #}
+            <div class="text-center mb-10 md:mb-16">
+                <h2
+                    class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6"
+                >
+                    Get Started in <span class="text-primary">Seconds</span>
+                </h2>
+                <p
+                    class="text-base md:text-lg lg:text-xl text-base-content/70 max-w-2xl mx-auto leading-relaxed"
+                >
+                    Install myfy and create your first application with just a
+                    few lines of code
+                </p>
+            </div>
+
+            {# Installation Command #}
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-primary">
+                        Installation
+                    </h3>
+                </div>
+                <div class="relative">
+                    <pre class="command-block"><code>pip install myfy</code></pre>
+                    <button
+                        class="copy-button absolute top-3 right-3 btn btn-sm btn-ghost hover:bg-base-content/10"
+                        data-copy="pip install myfy"
+                    >
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                            ></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            {# Code Example #}
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-primary">
+                        Minimal Application
+                    </h3>
+                    <div class="badge badge-primary">app.py</div>
+                </div>
+                <div class="relative">
+                    <pre class="code-block overflow-x-auto"><code><span class="text-primary">from</span> <span class="text-slate-900 dark:text-slate-200">myfy.core</span> <span class="text-primary">import</span> <span class="text-slate-900 dark:text-slate-200">Application</span>
+<span class="text-primary">from</span> <span class="text-slate-900 dark:text-slate-200">myfy.web</span> <span class="text-primary">import</span> <span class="text-slate-900 dark:text-slate-200">WebModule, route</span>
+<span class="text-primary">from</span> <span class="text-slate-900 dark:text-slate-200">myfy.frontend</span> <span class="text-primary">import</span> <span class="text-slate-900 dark:text-slate-200">FrontendModule</span>
+
+<span class="text-emerald-600 dark:text-emerald-400"># Create application</span>
+<span class="text-slate-900 dark:text-slate-200">app</span> <span class="text-primary">=</span> <span class="text-slate-900 dark:text-slate-200">Application()</span>
+<span class="text-slate-900 dark:text-slate-200">app</span><span class="text-primary">.</span><span class="text-slate-900 dark:text-slate-200">add_module(WebModule())</span>
+<span class="text-slate-900 dark:text-slate-200">app</span><span class="text-primary">.</span><span class="text-slate-900 dark:text-slate-200">add_module(FrontendModule(auto_init=True))</span>
+
+<span class="text-emerald-600 dark:text-emerald-400"># Define routes</span>
+<span class="text-primary">@</span><span class="text-slate-900 dark:text-slate-200">route</span><span class="text-primary">.</span><span class="text-slate-900 dark:text-slate-200">get(</span><span class="text-amber-600 dark:text-amber-400">"/"</span><span class="text-slate-900 dark:text-slate-200">)</span>
+<span class="text-primary">async def</span> <span class="text-slate-900 dark:text-slate-200">home():</span>
+    <span class="text-primary">return</span> <span class="text-slate-900 dark:text-slate-200">{</span><span class="text-amber-600 dark:text-amber-400">"message"</span><span class="text-slate-900 dark:text-slate-200">:</span> <span class="text-amber-600 dark:text-amber-400">"Welcome to myfy!"</span><span class="text-slate-900 dark:text-slate-200">}</span>
+
+<span class="text-primary">if</span> <span class="text-slate-900 dark:text-slate-200">__name__</span> <span class="text-primary">==</span> <span class="text-amber-600 dark:text-amber-400">"__main__"</span><span class="text-slate-900 dark:text-slate-200">:</span>
+    <span class="text-primary">import</span> <span class="text-slate-900 dark:text-slate-200">asyncio</span>
+    <span class="text-slate-900 dark:text-slate-200">asyncio</span><span class="text-primary">.</span><span class="text-slate-900 dark:text-slate-200">run(app</span><span class="text-primary">.</span><span class="text-slate-900 dark:text-slate-200">run())</span></code></pre>
+                    <button
+                        class="copy-button absolute top-3 right-3 btn btn-sm btn-ghost hover:bg-base-content/10"
+                        data-copy='from myfy.core import Application
+from myfy.web import WebModule, route
+from myfy.frontend import FrontendModule
+
+# Create application
+app = Application()
+app.add_module(WebModule())
+app.add_module(FrontendModule(auto_init=True))
+
+# Define routes
+@route.get("/")
+async def home():
+    return {"message": "Welcome to myfy!"}
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(app.run())'
+                    >
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                            ></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            {# Run Command #}
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-primary">
+                        Run Your App
+                    </h3>
+                </div>
+                <div class="relative">
+                    <pre class="command-block"><code>uv run myfy run
+<span class="text-emerald-600 dark:text-emerald-400"># or</span>
+python app.py</code></pre>
+                    <button
+                        class="copy-button absolute top-3 right-3 btn btn-sm btn-ghost hover:bg-base-content/10"
+                        data-copy="uv run myfy run"
+                    >
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                            ></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            {# Next Steps - improved design #}
+            <div class="mt-12 md:mt-16 text-center">
+                <div
+                    class="glass-card p-8 md:p-10 rounded-3xl max-w-3xl mx-auto"
+                >
+                    <p
+                        class="text-base md:text-lg text-base-content/80 mb-6 leading-relaxed"
+                    >
+                        Ready to build something
+                        <strong class="text-primary">amazing</strong>?
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a
+                            href="https://docs.myfy.dev"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn btn-primary btn-lg gap-2 shadow-lg hover:shadow-xl transition-shadow"
+                        >
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                                ></path>
+                            </svg>
+                            Read Full Documentation
+                        </a>
+                        <a
+                            href="https://github.com/anthropics/myfy"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn btn-outline btn-lg gap-2 hover:bg-base-content hover:text-base-100 transition-all"
+                        >
+                            <svg
+                                class="w-5 h-5"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                                />
+                            </svg>
+                            View on GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

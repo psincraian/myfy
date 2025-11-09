@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Newsletter - myfy{% endblock %}
+
+{% block content %}
+{# Navbar #}
+{% include "components/navbar.html" %}
+
+{# Newsletter Signup Section #}
+<div class="min-h-screen pt-24 pb-16 hero-gradient leaf-pattern">
+  <div class="container mx-auto px-4">
+    <div class="max-w-2xl mx-auto">
+      {# Header #}
+      <div class="text-center mb-12">
+        <div class="inline-block p-4 bg-primary/10 rounded-full mb-6">
+          <svg class="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">
+          <span class="text-primary">myfy Newsletter</span>
+        </h1>
+        <p class="text-lg text-base-content/70">
+          Get monthly updates on new features, best practices, and community highlights delivered to your inbox.
+        </p>
+      </div>
+
+      {# Success Message #}
+      {% if success %}
+      <div class="alert alert-success mb-8 shadow-lg">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>{{ message }}</span>
+      </div>
+      {% elif error %}
+      <div class="alert alert-error mb-8 shadow-lg">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>{{ message }}</span>
+      </div>
+      {% endif %}
+
+      {# Subscription Form Card #}
+      <div class="card bg-base-100 shadow-2xl">
+        <div class="card-body p-8">
+          <form method="POST" action="/newsletter" class="space-y-6">
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text text-lg font-medium">Email Address</span>
+              </label>
+              <input
+                type="email"
+                name="email"
+                placeholder="you@example.com"
+                class="input input-bordered input-lg w-full focus:border-primary"
+                required
+              >
+              <label class="label">
+                <span class="label-text-alt text-base-content/60">
+                  We respect your privacy. Unsubscribe anytime.
+                </span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-full text-lg">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+              Subscribe to Newsletter
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {# What to Expect #}
+      <div class="mt-16">
+        <h2 class="text-2xl font-bold mb-6 text-center">
+          <span class="text-primary">What to Expect</span>
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="text-center p-6 bg-base-100 rounded-lg">
+            <div class="w-12 h-12 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <h3 class="font-bold mb-2">Feature Announcements</h3>
+            <p class="text-sm text-base-content/70">
+              Be the first to know about new modules, updates, and capabilities.
+            </p>
+          </div>
+
+          <div class="text-center p-6 bg-base-100 rounded-lg">
+            <div class="w-12 h-12 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+              </svg>
+            </div>
+            <h3 class="font-bold mb-2">Best Practices</h3>
+            <p class="text-sm text-base-content/70">
+              Learn tips, tricks, and patterns from experienced myfy developers.
+            </p>
+          </div>
+
+          <div class="text-center p-6 bg-base-100 rounded-lg">
+            <div class="w-12 h-12 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+            </div>
+            <h3 class="font-bold mb-2">Community Highlights</h3>
+            <p class="text-sm text-base-content/70">
+              Discover projects, contributions, and stories from the community.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {# Back to Home Link #}
+      <div class="text-center mt-12">
+        <a href="/" class="btn btn-ghost gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          Back to Home
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Footer #}
+{% include "components/footer.html" %}
+{% endblock %}

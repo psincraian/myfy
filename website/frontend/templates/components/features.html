@@ -1,0 +1,107 @@
+{#
+  Features Component - Beautiful, responsive feature showcase
+
+  Design improvements:
+  - Better spacing and padding
+  - Improved icon design with gradient backgrounds
+  - Better mobile responsiveness
+  - Enhanced dark mode support
+  - Cleaner typography
+#}
+<section class="py-16 md:py-24 bg-base-100">
+  <div class="container mx-auto px-4">
+    {# Section Header with better spacing #}
+    <div class="text-center mb-12 md:mb-20 max-w-3xl mx-auto">
+      <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
+        <span class="text-base-content">Why Choose</span>
+        <span class="text-primary"> myfy</span>?
+      </h2>
+      <p class="text-base md:text-lg lg:text-xl text-base-content/70 leading-relaxed">
+        A modern framework designed for developers who value <strong class="text-primary font-semibold">clean architecture</strong> and <strong class="text-primary font-semibold">rapid development</strong>
+      </p>
+    </div>
+
+    {# Features Grid - improved mobile stacking #}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto mb-12 md:mb-16">
+
+      {# Feature 1: Modularity #}
+      <div class="feature-card group cursor-default">
+        <div class="flex justify-center mb-5">
+          <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 shadow-lg">
+            <svg class="w-7 h-7 md:w-8 md:h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+            </svg>
+          </div>
+        </div>
+        <h3 class="text-xl md:text-2xl font-bold mb-3 text-center text-base-content">
+          Modularity
+        </h3>
+        <p class="text-sm md:text-base text-base-content/70 text-center leading-relaxed mb-5">
+          Plug-and-play architecture with dependency injection. Add only what you need - web, frontend, database, or custom modules
+        </p>
+        <div class="flex justify-center">
+          <div class="badge badge-sm md:badge-md badge-outline badge-primary font-medium">DI Container</div>
+        </div>
+      </div>
+
+      {# Feature 2: Frontend Module #}
+      <div class="feature-card group cursor-default">
+        <div class="flex justify-center mb-5">
+          <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 shadow-lg">
+            <svg class="w-7 h-7 md:w-8 md:h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+            </svg>
+          </div>
+        </div>
+        <h3 class="text-xl md:text-2xl font-bold mb-3 text-center text-base-content">
+          Frontend Module
+        </h3>
+        <p class="text-sm md:text-base text-base-content/70 text-center leading-relaxed mb-5">
+          Integrated Tailwind 4 + DaisyUI 5 + Vite setup with hot reload. Beautiful, responsive UIs out of the box
+        </p>
+        <div class="flex flex-wrap gap-2 justify-center">
+          <div class="badge badge-sm md:badge-md badge-outline badge-primary font-medium">Tailwind 4</div>
+          <div class="badge badge-sm md:badge-md badge-outline badge-primary font-medium">DaisyUI 5</div>
+          <div class="badge badge-sm md:badge-md badge-outline badge-primary font-medium">Vite 7</div>
+        </div>
+      </div>
+
+      {# Feature 3: Modern #}
+      <div class="feature-card group cursor-default">
+        <div class="flex justify-center mb-5">
+          <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 shadow-lg">
+            <svg class="w-7 h-7 md:w-8 md:h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+        </div>
+        <h3 class="text-xl md:text-2xl font-bold mb-3 text-center text-base-content">
+          Modern
+        </h3>
+        <p class="text-sm md:text-base text-base-content/70 text-center leading-relaxed mb-5">
+          FastAPI-style decorators with enterprise patterns. Type-safe, async-first, and production-ready from day one
+        </p>
+        <div class="flex flex-wrap gap-2 justify-center">
+          <div class="badge badge-sm md:badge-md badge-outline badge-primary font-medium">Python 3.12+</div>
+          <div class="badge badge-sm md:badge-md badge-outline badge-primary font-medium">Type Safe</div>
+          <div class="badge badge-sm md:badge-md badge-outline badge-primary font-medium">Async</div>
+        </div>
+      </div>
+    </div>
+
+    {# CTA Section - improved design #}
+    <div class="mt-12 md:mt-20 text-center">
+      <div class="max-w-2xl mx-auto glass-card p-8 md:p-10 rounded-3xl">
+        <p class="text-base md:text-lg text-base-content/80 mb-6 leading-relaxed">
+          Join developers building the <strong class="text-primary">next generation</strong> of Python web applications
+        </p>
+        <a href="/newsletter" class="btn btn-primary btn-lg gap-2 shadow-lg hover:shadow-xl transition-shadow">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+          </svg>
+          Subscribe to Newsletter
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

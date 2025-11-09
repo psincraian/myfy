@@ -1,0 +1,252 @@
+/* Tailwind 4 with DaisyUI 5 plugin */
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* Custom theme variables */
+@theme {
+  /* Custom spacing */
+  --spacing-nav: 4rem;
+
+  /* Shadows */
+  --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+/* Custom utility classes */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Organic leaf shapes */
+  .leaf-shape {
+    border-radius: 50% 0 50% 0;
+  }
+
+  /* Smooth floating animation */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: float 8s ease-in-out infinite 2s;
+  }
+}
+
+/* Keyframe animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+}
+
+@keyframes grow {
+  from {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Custom components using @layer */
+@layer components {
+  /* Hero background - light mode */
+  .hero-gradient {
+    background: var(--color-base-100);
+    position: relative;
+  }
+
+  /* Dark mode hero background */
+  [data-theme="dark"] .hero-gradient {
+    background: var(--color-base-100);
+  }
+
+  /* Leaf pattern background - simplified */
+  .leaf-pattern {
+    /* No background pattern needed for plain design */
+  }
+
+  [data-theme="dark"] .leaf-pattern {
+    /* No background pattern needed for plain design */
+  }
+
+  /* Feature card with plant theme - responsive to dark mode */
+  .feature-card {
+    @apply bg-base-100 p-6 md:p-8 rounded-2xl shadow-sm transition-all duration-300;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .feature-card:hover {
+    @apply shadow-xl;
+    border-color: var(--color-primary);
+    border-opacity: 0.4;
+    transform: translateY(-4px);
+  }
+
+  [data-theme="dark"] .feature-card {
+    background: rgba(26, 26, 26, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  [data-theme="dark"] .feature-card:hover {
+    background: rgba(26, 26, 26, 0.7);
+    box-shadow: 0 20px 40px rgba(16, 185, 129, 0.2);
+  }
+
+  /* Primary button with emerald theme */
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-accent transition-all duration-200;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+    transform: translateY(-1px);
+  }
+
+  /* Code block styling - dark mode aware */
+  .code-block {
+    @apply rounded-lg p-4 md:p-6 font-mono text-sm;
+    background: #f8fafc;
+    color: #1e293b;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  [data-theme="dark"] .code-block {
+    background: #0f172a;
+    color: #e2e8f0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Syntax highlighting - override Tailwind classes inside code blocks */
+  .code-block .text-slate-900 {
+    color: #0f172a !important;
+  }
+
+  [data-theme="dark"] .code-block .text-slate-900 {
+    color: #e2e8f0 !important;
+  }
+
+  .code-block .text-slate-200 {
+    color: #0f172a !important;
+  }
+
+  [data-theme="dark"] .code-block .text-slate-200 {
+    color: #e2e8f0 !important;
+  }
+
+  .code-block .text-emerald-600 {
+    color: #059669 !important;
+  }
+
+  [data-theme="dark"] .code-block .text-emerald-600 {
+    color: #34d399 !important;
+  }
+
+  .code-block .text-emerald-400 {
+    color: #059669 !important;
+  }
+
+  [data-theme="dark"] .code-block .text-emerald-400 {
+    color: #34d399 !important;
+  }
+
+  .code-block .text-amber-600 {
+    color: #d97706 !important;
+  }
+
+  [data-theme="dark"] .code-block .text-amber-600 {
+    color: #fbbf24 !important;
+  }
+
+  .code-block .text-amber-400 {
+    color: #d97706 !important;
+  }
+
+  [data-theme="dark"] .code-block .text-amber-400 {
+    color: #fbbf24 !important;
+  }
+
+  /* Command block comment colors */
+  .command-block .text-emerald-600 {
+    color: #059669 !important;
+  }
+
+  [data-theme="dark"] .command-block .text-emerald-600 {
+    color: #34d399 !important;
+  }
+
+  .command-block .text-emerald-400 {
+    color: #059669 !important;
+  }
+
+  [data-theme="dark"] .command-block .text-emerald-400 {
+    color: #34d399 !important;
+  }
+
+  /* Simple command blocks (non-highlighted) */
+  .command-block {
+    @apply rounded-lg p-4 font-mono text-sm overflow-x-auto;
+    background: #f1f5f9;
+    color: #1e293b;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  [data-theme="dark"] .command-block {
+    background: #1e293b;
+    color: #e2e8f0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Section background alternation */
+  .section-alt {
+    @apply bg-base-200/30;
+  }
+
+  [data-theme="dark"] .section-alt {
+    background: rgba(26, 26, 26, 0.3);
+  }
+
+  /* Glass card effect */
+  .glass-card {
+    @apply backdrop-blur-md bg-base-100/70 border border-base-content/10;
+  }
+
+  [data-theme="dark"] .glass-card {
+    background: rgba(26, 26, 26, 0.4);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* Override DaisyUI colors with emerald green theme */
+/* Note: !important is needed only for colors that DaisyUI defines in its @layer base */
+/* which has higher specificity than our custom CSS */
+[data-theme="light"],
+:root {
+  --color-primary: #10b981 !important;      /* Emerald green */
+  --color-secondary: #34d399 !important;    /* Light emerald */
+  --color-accent: #059669 !important;       /* Dark emerald */
+  --color-base-100: #F9F7EC !important;     /* Warm cream background */
+  --color-base-200: #F3F1E6 !important;     /* Slightly darker cream */
+  --color-base-300: #EDE9DD !important;     /* Even darker cream */
+}
+
+[data-theme="dark"] {
+  --color-primary: #10b981 !important;      /* Emerald green */
+  --color-secondary: #34d399 !important;    /* Light emerald */
+  --color-accent: #059669 !important;       /* Dark emerald */
+  --color-base-100: #1a1a1a !important;     /* Dark background */
+  --color-base-200: #262626 !important;     /* Slightly lighter dark */
+  --color-base-300: #404040 !important;     /* Even lighter dark */
+  --color-base-content: #e5e7eb !important; /* Light text for dark mode */
+}

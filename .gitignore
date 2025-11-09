@@ -12,3 +12,6 @@ wheels/
 # myfy CLI generated files
 _myfy_server.py
 site/
+
+.DS_Store
+**/node_modules
