@@ -285,6 +285,7 @@ class TestAssetResolverIntegration:
         resolver_dev = AssetResolver(str(tmp_path / "static"), settings_dev)
 
         url_dev = resolver_dev.get_asset_url("main")
+        assert url_dev is not None
         assert "localhost:5173" in url_dev
 
         # Create production manifest
@@ -301,6 +302,7 @@ class TestAssetResolverIntegration:
         resolver_prod = AssetResolver(str(tmp_path / "static"), settings_prod)
 
         url_prod = resolver_prod.get_asset_url("main")
+        assert url_prod is not None
         assert "assets/main-abc123.js" in url_prod
         assert "localhost" not in url_prod
 
@@ -323,6 +325,9 @@ class TestAssetResolverIntegration:
         theme_url = resolver.get_asset_url("theme-switcher")
         css_url = resolver.get_css_url("styles")
 
+        assert main_url is not None
+        assert theme_url is not None
+        assert css_url is not None
         assert "main-abc123.js" in main_url
         assert "theme-xyz789.js" in theme_url
         assert "input-def456.css" in css_url

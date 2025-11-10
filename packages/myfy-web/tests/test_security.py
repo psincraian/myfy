@@ -21,7 +21,8 @@ class TestXSSPrevention:
         def get_user(user_id: str):
             return {"user_id": user_id}
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
         web_module = app.get_module("web")
@@ -42,7 +43,8 @@ class TestXSSPrevention:
         def get_data():
             return {"input": "<script>alert('xss')</script>", "safe": True}
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
         web_module = app.get_module("web")

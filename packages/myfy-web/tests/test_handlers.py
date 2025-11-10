@@ -253,8 +253,8 @@ class TestParameterConversion:
         with pytest.raises(HTTPException) as exc_info:
             executor._convert_param("abc", int, "id")
 
-        assert exc_info.value.status_code == 400
-        assert "Invalid value" in exc_info.value.detail
+        assert exc_info.value.status_code == 400  # type: ignore[attr-defined]
+        assert "Invalid value" in exc_info.value.detail  # type: ignore[attr-defined]
 
 
 class TestBodyParsing:
@@ -338,7 +338,7 @@ class TestBodyParsing:
         with pytest.raises(HTTPException) as exc_info:
             await executor._parse_body(request, User)
 
-        assert exc_info.value.status_code == 422
+        assert exc_info.value.status_code == 422  # type: ignore[attr-defined]
 
     @pytest.mark.asyncio
     async def test_parse_invalid_json_raises_error(self):
@@ -365,7 +365,7 @@ class TestBodyParsing:
         with pytest.raises(HTTPException) as exc_info:
             await executor._parse_body(request, dict)
 
-        assert exc_info.value.status_code == 400
+        assert exc_info.value.status_code == 400  # type: ignore[attr-defined]
 
 
 class TestResponseGeneration:
@@ -445,7 +445,7 @@ class TestErrorHandling:
 
         assert response.status_code == 500
         # In debug mode, should have traceback
-        assert "traceback" in response.body.decode()
+        assert "traceback" in response.body.decode()  # type: ignore[union-attr]
 
     def test_make_error_response_production_mode(self):
         """Should hide details in production mode."""
@@ -459,7 +459,7 @@ class TestErrorHandling:
         response = executor._make_error_response(error)
 
         assert response.status_code == 500
-        body = response.body.decode()
+        body = response.body.decode()  # type: ignore[union-attr]
         # Should not include actual error message
         assert "Test error" not in body
         assert "Internal Server Error" in body
@@ -476,7 +476,7 @@ class TestErrorHandling:
 
         assert response.status_code == 500
         # Should default to safe/production mode
-        body = response.body.decode()
+        body = response.body.decode()  # type: ignore[union-attr]
         assert "traceback" not in body
 
 

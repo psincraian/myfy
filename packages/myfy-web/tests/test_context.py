@@ -162,7 +162,9 @@ class TestContextVariables:
         ctx1.set("id", 1)
 
         set_request_context(ctx1)
-        assert get_request_context().get("id") == 1
+        ctx = get_request_context()
+        assert ctx is not None
+        assert ctx.get("id") == 1
 
         # Simulate new request
         clear_request_context()
@@ -171,7 +173,9 @@ class TestContextVariables:
         ctx2.set("id", 2)
 
         set_request_context(ctx2)
-        assert get_request_context().get("id") == 2
+        ctx = get_request_context()
+        assert ctx is not None
+        assert ctx.get("id") == 2
 
         # Previous context should not leak
         clear_request_context()

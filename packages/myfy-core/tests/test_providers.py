@@ -98,9 +98,9 @@ class TestProviderDecorator:
             return Database()
 
         assert hasattr(database, "__myfy_provider__")
-        metadata = database.__myfy_provider__  # type: ignore
-        assert metadata["scope"] == Scope.REQUEST
-        assert metadata["qualifier"] == "test"
+        metadata = database.__myfy_provider__  # type: ignore[attr-defined]
+        assert metadata["scope"] == Scope.REQUEST  # type: ignore[index]
+        assert metadata["qualifier"] == "test"  # type: ignore[index]
 
     def test_multiple_providers(self):
         """Should register multiple providers."""

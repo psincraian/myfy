@@ -42,7 +42,7 @@ class TestTemplateXSSPrevention:
             {"request": request, "user_input": "<script>alert('xss')</script>"},
         )
 
-        body = response.body.decode()
+        body = response.body.decode()  # type: ignore[union-attr]
 
         # Should be escaped
         assert "&lt;script&gt;" in body
@@ -73,7 +73,7 @@ class TestTemplateXSSPrevention:
             {"request": request, "user_data": "' onclick='alert(1)' x='"},
         )
 
-        body = response.body.decode()
+        body = response.body.decode()  # type: ignore[union-attr]
 
         # Should be escaped
         assert "onclick=" not in body or "&" in body
@@ -103,7 +103,7 @@ class TestTemplateXSSPrevention:
             {"request": request, "url": "javascript:alert('xss')"},
         )
 
-        body = response.body.decode()
+        body = response.body.decode()  # type: ignore[union-attr]
 
         # Should be in the HTML (proper validation should happen in application)
         assert "href=" in body
@@ -164,6 +164,7 @@ class TestAssetIntegrity:
         url = resolver.get_asset_url("main")
 
         # URL should start with static prefix
+        assert url is not None
         assert url.startswith("/static/dist/")
 
 
@@ -190,6 +191,7 @@ class TestViteDevServerSecurity:
             url = resolver.get_asset_url("main")
 
             # Should use the configured server
+            assert url is not None
             assert url.startswith(vite_url)
 
     def test_vite_client_only_in_development(self, tmp_path):
@@ -244,7 +246,7 @@ class TestConfigurationSecurity:
 
         response = templates.TemplateResponse("test.html", {"request": request})
 
-        body = response.body.decode()
+        body = response.body.decode()  # type: ignore[union-attr]
 
         # Environment is exposed (application should decide what to show)
         # This test documents the behavior

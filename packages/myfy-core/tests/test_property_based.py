@@ -167,7 +167,7 @@ class TestRoutePathProperties:
     )
     def test_path_params_extraction_is_consistent(self, param_names):
         """Path parameter extraction should be consistent."""
-        from myfy.web.routing import Router
+        from myfy.web.routing import HTTPMethod, Router
 
         router = Router()
 
@@ -178,7 +178,7 @@ class TestRoutePathProperties:
         def handler():
             return {}
 
-        route = router.add_route(path, handler, router.add_route.__defaults__[0])
+        route = router.add_route(path, handler, HTTPMethod.GET)
 
         # Should extract all parameters
         assert len(route.path_params) == len(param_names)

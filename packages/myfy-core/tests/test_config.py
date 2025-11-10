@@ -291,7 +291,7 @@ class TestSettingsValidation:
         assert settings.enabled is False
 
         # Pydantic will coerce string to int
-        settings2 = StrictSettings(port="8080")
+        settings2 = StrictSettings(port="8080")  # type: ignore[arg-type]
         assert settings2.port == 8080
 
     def test_settings_validates_required_fields(self):
@@ -303,7 +303,7 @@ class TestSettingsValidation:
 
         # Missing required field should raise
         with pytest.raises(Exception):  # Pydantic ValidationError
-            RequiredSettings()
+            RequiredSettings()  # type: ignore[call-arg]
 
         # With required field should work
         settings = RequiredSettings(api_key="key123")
