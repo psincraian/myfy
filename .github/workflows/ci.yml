@@ -87,5 +87,17 @@ jobs:
         run: |
           # Run tests for each package individually since namespace packages
           # with editable installs work best when run from package directory
+          echo "Running myfy-core tests..."
           cd packages/myfy-core && uv run pytest tests/ -v && cd ../..
-          # Add other package tests as they are created
+
+          echo "Running myfy-web tests..."
+          cd packages/myfy-web && uv run pytest tests/ -v && cd ../..
+
+          echo "Running myfy-frontend tests..."
+          cd packages/myfy-frontend && uv run pytest tests/ -v && cd ../..
+
+          echo "Running myfy-cli tests..."
+          cd packages/myfy-cli && uv run pytest tests/ -v && cd ../..
+
+          echo "Running integration tests..."
+          uv run pytest tests/integration/ -v
