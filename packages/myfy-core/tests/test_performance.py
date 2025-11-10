@@ -10,7 +10,9 @@ import time
 import pytest
 
 from myfy.core.di.container import Container
-from myfy.core.di.scopes import SINGLETON, Scope, ScopeContext
+from myfy.core.di.scopes import SINGLETON, Scope
+
+from .conftest import ScopeContext  # Test helper
 
 
 @pytest.mark.slow

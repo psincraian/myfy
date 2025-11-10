@@ -279,7 +279,7 @@ class TestProviderIntegration:
 
     def test_provider_request_scoped(self):
         """Should work with request-scoped providers."""
-        from myfy.core.di.scopes import ScopeContext
+        from .conftest import ScopeContext  # Test helper
 
         class RequestService:
             pass

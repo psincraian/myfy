@@ -18,8 +18,10 @@ from myfy.core.di.errors import (
     ProviderNotFoundError,
     ScopeMismatchError,
 )
-from myfy.core.di.scopes import SINGLETON, Scope, ScopeContext
+from myfy.core.di.scopes import SINGLETON, Scope
 from myfy.core.di.types import Qualifier
+
+from .conftest import ScopeContext  # Test helper
 
 
 # Test fixtures and mock classes

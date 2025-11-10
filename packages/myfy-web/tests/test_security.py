@@ -69,7 +69,8 @@ class TestInputValidation:
         def get_item(item_id: int):
             return {"item_id": item_id}
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
         web_module = app.get_module("web")
@@ -101,7 +102,8 @@ class TestInputValidation:
         def post_limited(data: LimitedInput):
             return {"length": len(data.text)}
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
         web_module = app.get_module("web")
@@ -128,7 +130,8 @@ class TestInputValidation:
         def post_safe(data: SafeInput):
             return data.model_dump()
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
         web_module = app.get_module("web")
@@ -165,7 +168,8 @@ class TestHeaderSecurity:
         def post_data(data: Data):
             return data.model_dump()
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
         web_module = app.get_module("web")
@@ -188,7 +192,8 @@ class TestHeaderSecurity:
         def get_info():
             return {"status": "ok"}
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
         web_module = app.get_module("web")
@@ -219,7 +224,8 @@ class TestErrorInformationLeakage:
         def error_handler():
             raise ValueError("Internal database error: password123")
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
         web_module = app.get_module("web")
@@ -250,7 +256,8 @@ class TestErrorInformationLeakage:
         def error_handler():
             raise ValueError("Test error message")
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
         web_module = app.get_module("web")
@@ -278,7 +285,8 @@ class TestPathTraversal:
             # In real code, this would read a file
             return {"filename": filename}
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
         web_module = app.get_module("web")
