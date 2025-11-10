@@ -61,10 +61,12 @@ def container_factory():
         Returns:
             Compiled Container instance
         """
+        from myfy.core.di.scopes import SINGLETON
+
         container = Container()
         for type_, factory in providers.items():
-            scope = getattr(factory, "_scope", None)
-            container.register(type_, factory, scope=scope or container._providers.get(type_, None))
+            scope = getattr(factory, "_scope", SINGLETON)
+            container.register(type_, factory, scope=scope)
         container.compile()
         return container
 
