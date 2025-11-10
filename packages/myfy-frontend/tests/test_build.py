@@ -157,8 +157,8 @@ class TestBuildFrontend:
         mock_run.side_effect = subprocess.CalledProcessError(
             1,
             ["npm", "run", "build"],
+            output="Additional info",
             stderr="Vite build error",
-            stdout="Additional info",
         )
 
         with pytest.raises(BuildError, match="Build failed"):
@@ -260,8 +260,8 @@ class TestBuildErrorHandling:
                 mock_run.side_effect = subprocess.CalledProcessError(
                     1,
                     ["npm", "run", "build"],
+                    output="Warning: Some helpful info",
                     stderr="",
-                    stdout="Warning: Some helpful info",
                 )
 
                 with pytest.raises(BuildError) as exc_info:
