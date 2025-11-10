@@ -22,21 +22,20 @@ class TestContainerProperties:
         container1 = Container()
         container2 = Container()
 
-        # Register in original order
-        for name in provider_names:
-
-            def factory(n=name):
+        # Helper to create factory with closure
+        def make_factory(n):
+            def factory():
                 return f"value_{n}"
 
-            container1.register(name, factory, scope=SINGLETON)
+            return factory
+
+        # Register in original order
+        for name in provider_names:
+            container1.register(name, make_factory(name), scope=SINGLETON)
 
         # Register in reverse order
         for name in reversed(provider_names):
-
-            def factory(n=name):
-                return f"value_{n}"
-
-            container2.register(name, factory, scope=SINGLETON)
+            container2.register(name, make_factory(name), scope=SINGLETON)
 
         container1.compile()
         container2.compile()
@@ -238,12 +237,14 @@ class TestScalabilityProperties:
         """Container should scale to any reasonable number of providers."""
         container = Container()
 
-        for i in range(num_providers):
-
-            def factory(val=i):
+        def make_factory(val):
+            def factory():
                 return f"service_{val}"
 
-            container.register(f"Service{i}", factory, scope=SINGLETON)
+            return factory
+
+        for i in range(num_providers):
+            container.register(f"Service{i}", make_factory(i), scope=SINGLETON)
 
         # Should compile without error
         container.compile()
@@ -265,12 +266,20 @@ class TestScalabilityProperties:
         container.register("Service0", lambda: Service0(), scope=SINGLETON)
 
         for i in range(1, chain_depth):
+            prev_name = f"Service{i - 1}"
+            curr_name = f"Service{i}"
 
-            def factory(container=container, prev=f"Service{i - 1}", curr=i):
-                container.get(prev)
-                return f"Service{curr}"
+            # Create factory with proper closure
+            def make_factory(cont, prev, curr):
+                def factory():
+                    cont.get(prev)
+                    return curr
 
-            container.register(f"Service{i}", factory, scope=SINGLETON)
+                return factory
+
+            container.register(
+                f"Service{i}", make_factory(container, prev_name, curr_name), scope=SINGLETON
+            )
 
         container.compile()
 

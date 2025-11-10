@@ -45,7 +45,8 @@ class TestProviderDecorator:
 
         pending = get_pending_providers()
         assert len(pending) == 1
-        assert pending[0][1]["factory"] is database
+        # Check function name instead of identity (decorator returns wrapper)
+        assert pending[0][1]["factory"].__name__ == "database"
         assert pending[0][1]["scope"] == SINGLETON
 
     def test_provider_decorator_with_custom_scope(self):

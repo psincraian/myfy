@@ -24,12 +24,14 @@ class TestContainerPerformance:
         container = Container()
 
         # Register 1000 providers
-        for i in range(1000):
-
-            def factory(val=i):
+        def make_factory(val):
+            def factory():
                 return f"value{val}"
 
-            container.register(f"Service{i}", factory, scope=SINGLETON)
+            return factory
+
+        for i in range(1000):
+            container.register(f"Service{i}", make_factory(i), scope=SINGLETON)
 
         # Compilation should be reasonably fast
         start = time.time()
@@ -57,12 +59,17 @@ class TestContainerPerformance:
 
         for i in range(1, 50):
             prev_name = f"Service{i - 1}"
+            curr_val = f"Service{i}"
 
-            def factory(prev=prev_name):
-                container.get(prev)
-                return f"Service{i}"
+            # Create factory with proper closure
+            def make_factory(prev, curr):
+                def factory():
+                    container.get(prev)
+                    return curr
 
-            container.register(f"Service{i}", factory, scope=SINGLETON)
+                return factory
+
+            container.register(f"Service{i}", make_factory(prev_name, curr_val), scope=SINGLETON)
 
         start = time.time()
         container.compile()
