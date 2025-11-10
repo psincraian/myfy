@@ -83,21 +83,30 @@ jobs:
       - name: Install dependencies
         run: uv sync --all-extras
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: |
-          # Run tests for each package individually since namespace packages
-          # with editable installs work best when run from package directory
+          # Run tests for each package individually with coverage
           echo "Running myfy-core tests..."
-          cd packages/myfy-core && uv run pytest tests/ -v && cd ../..
+          cd packages/myfy-core && uv run pytest tests/ -v --cov=myfy.core --cov-report=xml:../../coverage-core.xml --cov-report=term && cd ../..
 
           echo "Running myfy-web tests..."
-          cd packages/myfy-web && uv run pytest tests/ -v && cd ../..
+          cd packages/myfy-web && uv run pytest tests/ -v --cov=myfy.web --cov-report=xml:../../coverage-web.xml --cov-report=term && cd ../..
 
           echo "Running myfy-frontend tests..."
-          cd packages/myfy-frontend && uv run pytest tests/ -v && cd ../..
+          cd packages/myfy-frontend && uv run pytest tests/ -v --cov=myfy.frontend --cov-report=xml:../../coverage-frontend.xml --cov-report=term && cd ../..
 
           echo "Running myfy-cli tests..."
-          cd packages/myfy-cli && uv run pytest tests/ -v && cd ../..
+          cd packages/myfy-cli && uv run pytest tests/ -v --cov=myfy_cli --cov-report=xml:../../coverage-cli.xml --cov-report=term && cd ../..
 
           echo "Running integration tests..."
-          uv run pytest tests/integration/ -v
+          uv run pytest tests/integration/ -v --cov=myfy --cov-report=xml:coverage-integration.xml --cov-report=term
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: matrix.python-version == '3.12'
+        with:
+          files: ./coverage-*.xml
+          fail_ci_if_error: false
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

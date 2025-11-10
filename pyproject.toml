@@ -30,6 +30,7 @@ dev = [
     "ty>=0.0.1a24",
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
+    "pytest-cov>=6.0.0",
     "commitizen>=4.0.0",
 ]
 docs = [
@@ -118,3 +119,55 @@ python-version = "3.12"
 # Ignore unresolved-import as ty has issues with workspace packages
 # Keep other type checking rules enabled
 unresolved-import = "ignore"
+
+[tool.pytest.ini_options]
+# Pytest configuration
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--strict-config",
+    "--tb=short",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
+
+[tool.coverage.run]
+# Coverage configuration
+source = ["packages/*/myfy*", "packages/*/myfy_cli"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/stubs/*",
+    "*/.venv/*",
+    "*/examples/*",
+]
+branch = true
+parallel = true
+
+[tool.coverage.report]
+# Coverage reporting
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
