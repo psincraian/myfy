@@ -124,9 +124,7 @@ class TestContainerCompilation:
 
         container.compile()
 
-        repo_registration = container._providers[
-            container._providers.keys().__iter__().__next__()
-        ]
+        container._providers[container._providers.keys().__iter__().__next__()]
         # At least one provider should have dependencies
         assert any(reg.dependencies for reg in container._providers.values())
 
@@ -437,7 +435,7 @@ class TestContainerThreadSafety:
             t.join()
 
         # All threads should get the same instance
-        assert len(set(id(instance) for instance in instances)) == 1
+        assert len({id(instance) for instance in instances}) == 1
 
 
 class TestContainerEdgeCases:

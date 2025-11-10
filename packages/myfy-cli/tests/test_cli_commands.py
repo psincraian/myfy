@@ -4,8 +4,7 @@ Tests for CLI commands.
 Tests application discovery, route listing, and command functionality.
 """
 
-from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -91,9 +90,8 @@ application = Application()
         """Should exit if no Application found."""
         monkeypatch.chdir(tmp_path)
 
-        with patch("myfy_cli.main.console"):
-            with pytest.raises(SystemExit):
-                find_application()
+        with patch("myfy_cli.main.console"), pytest.raises(SystemExit):
+            find_application()
 
 
 class TestLoadAppFromFile:
@@ -115,7 +113,7 @@ my_app = Application()
             result = _load_app_from_file(str(test_file))
 
             assert result is not None
-            app, var_name = result
+            _app, var_name = result
             assert var_name == "my_app"
 
     def test_returns_none_for_invalid_file(self, tmp_path):
@@ -158,14 +156,14 @@ class TestSetupReloadModule:
 
     def test_setup_reload_module_env_vars(self):
         """Should set correct environment variables."""
-        import_path, env_vars = _setup_reload_module("app.py", "app")
+        _import_path, env_vars = _setup_reload_module("app.py", "app")
 
         assert env_vars["MYFY_APP_MODULE"] == "app"
         assert env_vars["MYFY_APP_VAR"] == "app"
 
     def test_setup_reload_module_strips_py_extension(self):
         """Should strip .py extension from filename."""
-        import_path, env_vars = _setup_reload_module("main.py", "application")
+        _import_path, env_vars = _setup_reload_module("main.py", "application")
 
         assert env_vars["MYFY_APP_MODULE"] == "main"
 
@@ -284,9 +282,8 @@ class TestVerifyFrontendAssets:
 
         # No manifest created
 
-        with patch("myfy_cli.main.console"):
-            with pytest.raises(SystemExit):
-                _verify_frontend_assets(mock_app)
+        with patch("myfy_cli.main.console"), pytest.raises(SystemExit):
+            _verify_frontend_assets(mock_app)
 
     def test_verify_frontend_assets_skips_if_no_frontend(self):
         """Should skip verification if no frontend module."""
@@ -313,7 +310,7 @@ class TestRunCommand:
         runner = CliRunner()
 
         with patch("myfy_cli.main.console"):
-            result = runner.invoke(
+            runner.invoke(
                 app, ["run", "--app-path", "test:app", "--no-reload", "--host", "0.0.0.0"]
             )
 
@@ -328,9 +325,9 @@ class TestRoutesCommand:
     @patch("myfy_cli.main.find_application")
     def test_routes_command_displays_routes(self, mock_find_app, mock_track):
         """Should display registered routes."""
-        from myfy.web.routing import HTTPMethod, Route
         from typer.testing import CliRunner
 
+        from myfy.web.routing import HTTPMethod, Route
         from myfy_cli.main import app
 
         # Mock application with web module
@@ -341,9 +338,7 @@ class TestRoutesCommand:
         mock_web_module = Mock()
         mock_web_module.name = "web"
 
-        mock_route = Route(
-            path="/users", method=HTTPMethod.GET, handler=lambda: {}, name="get_users"
-        )
+        mock_route = Route(path="/users", method=HTTPMethod.GET, handler=dict, name="get_users")
         mock_web_module.router.get_routes.return_value = [mock_route]
 
         mock_app._modules = [mock_web_module]

@@ -54,7 +54,7 @@ class TestContainerPerformance:
         container.register("Service0", lambda: Service0(), scope=SINGLETON)
 
         for i in range(1, 50):
-            prev_name = f"Service{i-1}"
+            prev_name = f"Service{i - 1}"
 
             def factory(prev=prev_name):
                 container.get(prev)

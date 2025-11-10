@@ -4,7 +4,6 @@ Tests for ASGI application factory.
 Tests dynamic application loading and ASGI app creation.
 """
 
-import os
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -30,9 +29,7 @@ class TestCreateAppConfiguration:
                 mock_app = Mock(spec=Application)
                 mock_getattr.return_value = mock_app
 
-                with patch(
-                    "myfy_cli.asgi_factory.create_asgi_app_with_lifespan"
-                ) as mock_create_asgi:
+                with patch("myfy_cli.asgi_factory.create_asgi_app_with_lifespan"):
                     create_app(app_module="test_app", app_var="app")
 
                     mock_import.assert_called_once_with("test_app")

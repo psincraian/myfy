@@ -4,9 +4,7 @@ Security tests for web handlers and routing.
 Tests XSS prevention, input validation, and other security concerns.
 """
 
-import pytest
 from pydantic import BaseModel, Field
-from starlette.exceptions import HTTPException
 from starlette.testclient import TestClient
 
 from myfy.core import Application

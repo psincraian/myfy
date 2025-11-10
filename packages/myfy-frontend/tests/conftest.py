@@ -5,7 +5,6 @@ Provides reusable fixtures for frontend testing.
 """
 
 import json
-from pathlib import Path
 
 import pytest
 

@@ -138,7 +138,9 @@ class TestRenderTemplate:
         templates = create_templates_instance(str(template_dir), settings, asset_resolver)
 
         request = create_test_request()
-        response = render_template("test.html", request=request, templates=templates, title="Test Title")
+        response = render_template(
+            "test.html", request=request, templates=templates, title="Test Title"
+        )
 
         assert b"<h1>Test Title</h1>" in response.body
 
@@ -244,9 +246,7 @@ class TestAssetHelpersInTemplates:
         """Should access environment variable in template."""
         template_dir = tmp_path / "templates"
         template_dir.mkdir()
-        (template_dir / "test.html").write_text(
-            '<p>Environment: {{ environment }}</p>'
-        )
+        (template_dir / "test.html").write_text("<p>Environment: {{ environment }}</p>")
 
         settings = FrontendSettings(environment="production")
         asset_resolver = AssetResolver(str(tmp_path / "static"), settings)

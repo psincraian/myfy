@@ -4,7 +4,6 @@ Integration tests for the full myfy stack.
 Tests the complete integration of core, web, and DI systems.
 """
 
-import pytest
 from pydantic import BaseModel
 from starlette.testclient import TestClient
 

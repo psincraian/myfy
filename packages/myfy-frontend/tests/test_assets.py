@@ -6,8 +6,6 @@ Tests asset resolution in development and production modes.
 
 import json
 
-import pytest
-
 from myfy.frontend.assets import AssetResolver
 from myfy.frontend.config import FrontendSettings
 
@@ -261,9 +259,7 @@ class TestAssetResolverConfiguration:
         }
         (manifest_dir / "manifest.json").write_text(json.dumps(manifest_data))
 
-        settings = FrontendSettings(
-            environment="production", static_url_prefix="/custom/static"
-        )
+        settings = FrontendSettings(environment="production", static_url_prefix="/custom/static")
         resolver = AssetResolver(str(tmp_path / "static"), settings)
 
         url = resolver.get_asset_url("main")

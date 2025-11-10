@@ -7,7 +7,7 @@ Tests route registration, path parameter extraction, and handler analysis.
 import pytest
 from pydantic import BaseModel
 
-from myfy.web.routing import HTTPMethod, Route, Router
+from myfy.web.routing import HTTPMethod, Router
 
 
 class User(BaseModel):
@@ -19,8 +19,6 @@ class User(BaseModel):
 
 class Database:
     """Mock database for DI testing."""
-
-    pass
 
 
 class TestRouteRegistration:
@@ -363,7 +361,7 @@ class TestRouteRepresentation:
 
         assert "routes=0" in repr(router)
 
-        router.add_route("/test", lambda: {}, HTTPMethod.GET)
+        router.add_route("/test", dict, HTTPMethod.GET)
         assert "routes=1" in repr(router)
 
 

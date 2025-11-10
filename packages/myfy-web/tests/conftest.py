@@ -72,7 +72,9 @@ def test_request():
         if headers:
             header_list = [(k.encode(), v.encode()) for k, v in headers.items()]
 
-        return Request({"type": "http", "method": method, "path": path, "headers": header_list}, client)
+        return Request(
+            {"type": "http", "method": method, "path": path, "headers": header_list}, client
+        )
 
     return _factory
 

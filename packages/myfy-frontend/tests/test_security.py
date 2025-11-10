@@ -53,9 +53,7 @@ class TestTemplateXSSPrevention:
         template_dir = tmp_path / "templates"
         template_dir.mkdir()
 
-        (template_dir / "test.html").write_text(
-            "<div data-value='{{ user_data }}'></div>"
-        )
+        (template_dir / "test.html").write_text("<div data-value='{{ user_data }}'></div>")
 
         settings = FrontendSettings(auto_escape=True)
         asset_resolver = AssetResolver(str(tmp_path / "static"), settings)

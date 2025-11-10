@@ -4,9 +4,6 @@ Tests for the configuration system.
 Tests profile-based settings, environment variables, and validation.
 """
 
-import os
-from pathlib import Path
-
 import pytest
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict

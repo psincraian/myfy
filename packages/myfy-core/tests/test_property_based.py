@@ -5,7 +5,8 @@ Tests invariants and properties that should always hold.
 """
 
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 
 from myfy.core.di.container import Container
 from myfy.core.di.scopes import SINGLETON
@@ -62,7 +63,7 @@ class TestContainerProperties:
         instances = [container.get(provider_name) for _ in range(num_resolutions)]
 
         # All should be the same object
-        assert len(set(id(i) for i in instances)) == 1
+        assert len({id(i) for i in instances}) == 1
 
     @given(st.lists(st.integers(min_value=0, max_value=1000), min_size=1, max_size=100))
     def test_provider_factories_can_return_any_value(self, values):
@@ -82,7 +83,7 @@ class TestContainerProperties:
 class TestPathParameterProperties:
     """Property-based tests for path parameter handling."""
 
-    @given(st.integers(min_value=-2**31, max_value=2**31 - 1))
+    @given(st.integers(min_value=-(2**31), max_value=2**31 - 1))
     def test_int_path_param_conversion_always_valid(self, value):
         """Path param conversion should handle all valid integers."""
         from myfy.web.handlers import HandlerExecutor
@@ -153,7 +154,9 @@ class TestRoutePathProperties:
     @given(
         st.lists(
             st.text(
-                alphabet=st.characters(whitelist_categories=("Lu", "Ll", "Nd"), min_codepoint=97, max_codepoint=122),
+                alphabet=st.characters(
+                    whitelist_categories=("Lu", "Ll", "Nd"), min_codepoint=97, max_codepoint=122
+                ),
                 min_size=1,
                 max_size=20,
             ),
@@ -263,7 +266,7 @@ class TestScalabilityProperties:
 
         for i in range(1, chain_depth):
 
-            def factory(container=container, prev=f"Service{i-1}", curr=i):
+            def factory(container=container, prev=f"Service{i - 1}", curr=i):
                 container.get(prev)
                 return f"Service{curr}"
 

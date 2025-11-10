@@ -5,7 +5,7 @@ Tests handler compilation, parameter injection, and error handling.
 """
 
 import pytest
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
@@ -14,7 +14,7 @@ from starlette.testclient import TestClient
 from myfy.core.config import CoreSettings
 from myfy.core.di.container import Container
 from myfy.core.di.scopes import SINGLETON
-from myfy.web.context import RequestContext, get_request_context
+from myfy.web.context import RequestContext
 from myfy.web.handlers import HandlerExecutor
 from myfy.web.routing import HTTPMethod, Route
 
@@ -493,7 +493,9 @@ class TestRequestContextInjection:
         def handler(request: Request):
             return {"path": request.url.path}
 
-        route = Route(path="/test", method=HTTPMethod.GET, handler=handler, dependencies=["request"])
+        route = Route(
+            path="/test", method=HTTPMethod.GET, handler=handler, dependencies=["request"]
+        )
         executor.compile_route(route)
 
         from starlette.applications import Starlette

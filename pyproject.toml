@@ -100,6 +100,15 @@ unfixable = []
 [tool.ruff.lint.per-file-ignores]
 # Allow unused imports in __init__.py files
 "__init__.py" = ["F401"]
+# Test files can have:
+# - Imports not at top level (PLC0415) - common in fixtures and test methods
+# - Unused arguments (ARG001, ARG002) - test handlers testing signature analysis
+# - Nested with statements (SIM117) - clearer in tests
+# - Broad exception catches (B017, PT011) - testing that errors are raised
+# - Loop variable binding (B023) - intentional in parametric tests
+# - Regex metacharacters (RUF043) - test match strings
+"tests/*" = ["PLC0415", "ARG001", "ARG002", "SIM117", "B017", "PT011", "B023", "RUF043"]
+"*/tests/*" = ["PLC0415", "ARG001", "ARG002", "SIM117", "B017", "PT011", "B023", "RUF043"]
 
 [tool.ruff.lint.isort]
 # Configure import sorting
