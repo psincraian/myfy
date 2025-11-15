@@ -6,8 +6,7 @@ from logging.config import fileConfig
 from alembic import context
 
 # Import your models here
-from database import Base
-from models import NewsletterSubscriber  # noqa: F401
+from website.models import Base, NewsletterSubscriber  # noqa: F401
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config

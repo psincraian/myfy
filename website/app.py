@@ -1,44 +1,38 @@
-"""myfy landing page application."""
+"""myfy Website - Application entry point.
+
+This is the main entry point for the myfy website application.
+It sets up logging, loads configuration, registers modules, and starts the application.
+"""
 
 import logging
-import os
 import sys
-from datetime import UTC, datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-# Add current directory to Python path for local imports
+# Add current directory to Python path so 'website' package can be imported
 sys.path.insert(0, str(Path(__file__).parent))
 
-from database import DatabaseModule
 from dotenv import load_dotenv
-from email_validator import EmailNotValidError, validate_email
-from newsletter_service import NewsletterService
-from security_module import SecurityModule
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import async_sessionmaker
-from starlette.requests import Request
-from starlette.responses import JSONResponse
-from starlette.templating import Jinja2Templates
 
 from myfy.core import Application
-from myfy.frontend import FrontendModule, render_template
-from myfy.web import WebModule, route
+from myfy.frontend import FrontendModule
+from myfy.web import WebModule
 
-# Load environment variables
+# Import website package to register all endpoints
+import website.endpoints  # noqa: F401
+from website.config import AppSettings
+from website.modules import DatabaseModule, SecurityModule
+
+# Load environment variables from .env file
 load_dotenv()
 
 
-# Get secret key from environment
-SECRET_KEY = os.getenv("SECRET_KEY")
-if not SECRET_KEY:
-    raise ValueError("SECRET_KEY must be set")
+def setup_logging(log_level: str = "INFO"):
+    """Configure application logging with console and file handlers.
 
-
-# Configure logging
-def setup_logging():
-    """Configure application logging."""
-    log_level = os.getenv("LOG_LEVEL", "INFO")
+    Args:
+        log_level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    """
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
 
@@ -62,166 +56,25 @@ def setup_logging():
     root_logger.addHandler(file_handler)
 
 
-# Set up logging
-setup_logging()
+# Create application with settings
+settings = AppSettings()
+
+# Set up logging based on settings
+setup_logging(settings.log_level)
 logger = logging.getLogger(__name__)
 
+# Create application instance
+app = Application(settings_class=AppSettings, auto_discover=False)
 
-# Get database URL from environment
-DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgresql+asyncpg://myfy:myfy_dev@localhost:5432/myfy_db"
-)
-
-# Create application
-app = Application(auto_discover=False)
-
-# Add modules
+# Add core modules
 app.add_module(WebModule())
-app.add_module(FrontendModule())  # Frontend module handles templates and static files
-app.add_module(DatabaseModule(database_url=DATABASE_URL))
+app.add_module(FrontendModule())
 
-# Add security module (handles CSRF, rate limiting, security headers)
-security_module = SecurityModule(secret_key=SECRET_KEY)
-app.add_module(security_module)
+# Add application-specific modules
+app.add_module(DatabaseModule())
+app.add_module(SecurityModule())
 
-
-# Routes
-@route.get("/")
-async def landing(request: Request, templates: Jinja2Templates):
-    """Landing page with hero, features, and quickstart."""
-    return render_template(
-        "landing.html",
-        request=request,
-        templates=templates,
-        current_year=datetime.now(tz=UTC).year,
-    )
-
-
-@route.get("/newsletter")
-async def newsletter_page(request: Request, templates: Jinja2Templates):
-    """Newsletter signup page."""
-    return render_template(
-        "newsletter.html",
-        request=request,
-        templates=templates,
-        current_year=datetime.now(tz=UTC).year,
-        success=False,
-        error=False,
-    )
-
-
-@route.post("/newsletter")
-@security_module.limiter.limit("5/minute")
-async def newsletter_subscribe(
-    request: Request, templates: Jinja2Templates, session_maker: async_sessionmaker
-):
-    """Handle newsletter subscription form submission."""
-    logger.info(f"Newsletter subscription attempt from {request.client.host}")
-
-    # Parse form data
-    form_data = await request.form()
-    email = form_data.get("email", "").strip()
-    csrf_token = form_data.get("csrf_token", "").strip()
-
-    # Validate CSRF token
-    if not csrf_token or not security_module.validate_csrf_token(csrf_token):
-        logger.warning(
-            f"CSRF validation failed for newsletter subscription from {request.client.host}"
-        )
-        return render_template(
-            "newsletter.html",
-            request=request,
-            templates=templates,
-            current_year=datetime.now(tz=UTC).year,
-            success=False,
-            error=True,
-            message="Security validation failed. Please try again.",
-        )
-
-    # Validate email is provided
-    if not email:
-        return render_template(
-            "newsletter.html",
-            request=request,
-            templates=templates,
-            current_year=datetime.now(tz=UTC).year,
-            success=False,
-            error=True,
-            message="Please provide an email address.",
-        )
-
-    # Validate email length
-    if len(email) > 255:
-        return render_template(
-            "newsletter.html",
-            request=request,
-            templates=templates,
-            current_year=datetime.now(tz=UTC).year,
-            success=False,
-            error=True,
-            message="Email address is too long.",
-        )
-
-    # Validate email format using email-validator library
-    try:
-        valid = validate_email(email, check_deliverability=False)
-        email = valid.normalized  # Use normalized form
-    except EmailNotValidError:
-        logger.warning(f"Invalid email format attempt: {email}")
-        return render_template(
-            "newsletter.html",
-            request=request,
-            templates=templates,
-            current_year=datetime.now(tz=UTC).year,
-            success=False,
-            error=True,
-            message="Please provide a valid email address.",
-        )
-
-    # Save to database
-    async with session_maker() as session:
-        service = NewsletterService(session)
-        success, message = await service.subscribe(email)
-
-    if success:
-        logger.info(f"Newsletter subscription successful for {email}")
-    else:
-        logger.warning(f"Newsletter subscription failed for {email}: {message}")
-
-    return render_template(
-        "newsletter.html",
-        request=request,
-        templates=templates,
-        current_year=datetime.now(tz=UTC).year,
-        success=success,
-        error=not success,
-        message=message,
-    )
-
-
-@route.get("/health")
-async def health_check(session_maker: async_sessionmaker):
-    """Health check endpoint for monitoring and load balancers."""
-    try:
-        # Check database connectivity
-        async with session_maker() as session:
-            await session.execute(text("SELECT 1"))
-
-        return {
-            "status": "healthy",
-            "database": "connected",
-            "timestamp": datetime.now(UTC).isoformat(),
-        }
-    except Exception as e:
-        logger.error(f"Health check failed: {e}")
-        return JSONResponse(
-            status_code=503,
-            content={
-                "status": "unhealthy",
-                "database": "disconnected",
-                "timestamp": datetime.now(UTC).isoformat(),
-            },
-        )
+logger.info(f"Application configured: {settings.app_name}")
 
 
 if __name__ == "__main__":
