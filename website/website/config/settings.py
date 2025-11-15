@@ -1,8 +1,7 @@
 """Application configuration settings."""
 
-from typing import ClassVar
-
 from pydantic import Field
+from pydantic_settings import SettingsConfigDict
 
 from myfy.core import BaseSettings
 from myfy.frontend.config import FrontendSettings
@@ -19,7 +18,7 @@ class DatabaseSettings(BaseSettings):
         DATABASE_MAX_OVERFLOW: Maximum overflow connections
     """
 
-    model_config: ClassVar[dict] = {"env_prefix": "DATABASE_"}
+    model_config = SettingsConfigDict(env_prefix="DATABASE_")
 
     url: str = "postgresql+asyncpg://myfy:myfy_dev@localhost:5432/myfy_db"
     echo: bool = False
@@ -33,16 +32,16 @@ class SecuritySettings(BaseSettings):
     """Security configuration settings.
 
     Environment variables:
-        SECURITY_SECRET_KEY: Secret key for CSRF and sessions (REQUIRED)
+        SECURITY_SECRET_KEY: Secret key for CSRF and sessions (REQUIRED in production)
         SECURITY_CSRF_MAX_AGE: CSRF token max age in seconds
         SECURITY_RATE_LIMIT: Rate limit string (e.g., "5/minute")
         SECURITY_HTTPS_ONLY: Enable HTTPS-only cookies
         SECURITY_ALLOWED_HOSTS: Comma-separated list of allowed hosts
     """
 
-    model_config: ClassVar[dict] = {"env_prefix": "SECURITY_"}
+    model_config = SettingsConfigDict(env_prefix="SECURITY_")
 
-    secret_key: str  # Required, no default
+    secret_key: str = "dev-secret-key-change-in-production"  # Must be set via env in production
     csrf_max_age: int = 3600  # 1 hour
     rate_limit: str = "5/minute"
     https_only: bool = False

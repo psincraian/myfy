@@ -1,6 +1,7 @@
 """Alembic environment configuration for async migrations."""
 
 import asyncio
+import os
 from logging.config import fileConfig
 
 from alembic import context
@@ -37,7 +38,8 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    # Prioritize DATABASE_URL environment variable over alembic.ini
+    url = os.environ.get("DATABASE_URL") or config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -59,8 +61,13 @@ def do_run_migrations(connection: Connection) -> None:
 
 async def run_async_migrations() -> None:
     """Run migrations in 'online' mode with async engine."""
+    # Prioritize DATABASE_URL environment variable over alembic.ini
+    configuration = config.get_section(config.config_ini_section, {})
+    if database_url := os.environ.get("DATABASE_URL"):
+        configuration["sqlalchemy.url"] = database_url
+
     connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
