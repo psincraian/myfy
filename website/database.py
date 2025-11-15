@@ -1,5 +1,7 @@
 """Database configuration and session management."""
 
+import os
+
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -8,8 +10,6 @@ from myfy.core import Module
 
 class Base(DeclarativeBase):
     """Base class for all database models."""
-
-    pass
 
 
 class DatabaseModule(Module):
@@ -46,8 +46,12 @@ class DatabaseModule(Module):
         """Start the database engine and create session maker."""
         self.engine = create_async_engine(
             self.database_url,
-            echo=False,
+            echo=os.getenv("DATABASE_ECHO", "false").lower() == "true",
             pool_pre_ping=True,
+            pool_size=int(os.getenv("DB_POOL_SIZE", "5")),
+            max_overflow=int(os.getenv("DB_MAX_OVERFLOW", "10")),
+            pool_recycle=3600,  # Recycle connections every hour
+            pool_timeout=30,  # Wait 30s for connection
         )
         self.session_maker = async_sessionmaker(
             self.engine,

@@ -20,8 +20,8 @@ Be respectful and inclusive. We're here to build great software together.
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR-USERNAME/myfy.git`
-3. Add upstream remote: `git remote add upstream https://github.com/ORIGINAL-OWNER/myfy.git`
+2. Clone your fork: `git clone https://github.com/psincraian/myfy.git`
+3. Add upstream remote: `git remote add upstream https://github.com/psincraian/myfy.git`
 4. Create a feature branch: `git checkout -b feat/my-feature`
 
 ## Development Setup

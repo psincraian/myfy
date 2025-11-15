@@ -2,6 +2,9 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+/* Prism.js syntax highlighting */
+@import "prismjs/themes/prism-tomorrow.css";
+
 /* Custom theme variables */
 @theme {
   /* Custom spacing */
@@ -121,77 +124,119 @@
     outline-offset: 2px;
   }
 
-  /* Code block styling - dark mode aware with CSS custom properties */
-  .code-block,
-  .command-block {
-    --syntax-base: #0f172a;
-    --syntax-keyword: #047857;
-    --syntax-comment: #047857;
-    --syntax-string: #d97706;
-  }
-
-  [data-theme="dark"] .code-block,
-  [data-theme="dark"] .command-block {
-    --syntax-base: #e2e8f0;
-    --syntax-keyword: #34d399;
-    --syntax-comment: #34d399;
-    --syntax-string: #fbbf24;
-  }
-
+  /* Code block styling with Prism.js - dark mode aware */
   .code-block {
-    @apply rounded-lg p-4 md:p-6 font-mono text-sm;
+    @apply rounded-lg font-mono text-sm overflow-x-auto;
     background: #f8fafc;
-    color: #1e293b;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(0, 0, 0, 0.1);
   }
 
   [data-theme="dark"] .code-block {
     background: #0f172a;
-    color: #e2e8f0;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  /* Syntax highlighting using CSS custom properties */
-  .code-block code .text-slate-900,
-  .code-block code .text-slate-200 {
-    color: var(--syntax-base);
+  /* Prism code blocks inherit padding */
+  .code-block pre[class*="language-"] {
+    @apply p-4 md:p-6 m-0;
+    background: transparent;
+    box-shadow: none;
   }
 
-  .code-block code .text-emerald-600,
-  .code-block code .text-emerald-400 {
-    color: var(--syntax-comment);
+  /* Light mode Prism token colors */
+  .code-block .token.keyword,
+  .code-block .token.operator,
+  .code-block .token.boolean {
+    color: #047857; /* emerald-700 */
   }
 
-  .code-block code .text-amber-600,
-  .code-block code .text-amber-400 {
-    color: var(--syntax-string);
+  .code-block .token.comment {
+    color: #047857; /* emerald-700 */
   }
 
-  .code-block code .text-primary {
-    color: var(--syntax-keyword);
+  .code-block .token.string,
+  .code-block .token.attr-value {
+    color: #d97706; /* amber-600 */
   }
 
-  /* Simple command blocks (non-highlighted) */
+  .code-block .token.function,
+  .code-block .token.class-name {
+    color: #0284c7; /* sky-600 */
+  }
+
+  .code-block .token.decorator,
+  .code-block .token.builtin {
+    color: #0891b2; /* cyan-600 */
+  }
+
+  /* Dark mode Prism token colors */
+  [data-theme="dark"] .code-block .token.keyword,
+  [data-theme="dark"] .code-block .token.operator,
+  [data-theme="dark"] .code-block .token.boolean {
+    color: #34d399; /* emerald-400 */
+  }
+
+  [data-theme="dark"] .code-block .token.comment {
+    color: #34d399; /* emerald-400 */
+  }
+
+  [data-theme="dark"] .code-block .token.string,
+  [data-theme="dark"] .code-block .token.attr-value {
+    color: #fbbf24; /* amber-400 */
+  }
+
+  [data-theme="dark"] .code-block .token.function,
+  [data-theme="dark"] .code-block .token.class-name {
+    color: #38bdf8; /* sky-400 */
+  }
+
+  [data-theme="dark"] .code-block .token.decorator,
+  [data-theme="dark"] .code-block .token.builtin {
+    color: #22d3ee; /* cyan-400 */
+  }
+
+  /* Base code text color */
+  [data-theme="dark"] .code-block code[class*="language-"],
+  [data-theme="dark"] .code-block pre[class*="language-"] {
+    color: #e2e8f0;
+  }
+
+  /* Command blocks with Prism.js bash highlighting */
   .command-block {
-    @apply rounded-lg p-4 font-mono text-sm overflow-x-auto;
+    @apply rounded-lg font-mono text-sm overflow-x-auto;
     background: #f8fafc;
-    color: #1e293b;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(0, 0, 0, 0.1);
   }
 
   [data-theme="dark"] .command-block {
     background: #1e293b;
-    color: #e2e8f0;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  .command-block code .text-emerald-600,
-  .command-block code .text-emerald-400 {
-    color: var(--syntax-comment);
+  /* Prism command blocks inherit padding */
+  .command-block pre[class*="language-"] {
+    @apply p-4 m-0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  /* Command block comment colors */
+  .command-block .token.comment {
+    color: #047857; /* emerald-700 */
+  }
+
+  [data-theme="dark"] .command-block .token.comment {
+    color: #34d399; /* emerald-400 */
+  }
+
+  /* Base command text color */
+  [data-theme="dark"] .command-block code[class*="language-"],
+  [data-theme="dark"] .command-block pre[class*="language-"] {
+    color: #e2e8f0;
   }
 
   /* Section background alternation */
@@ -212,6 +257,15 @@
     background: rgba(26, 26, 26, 0.4);
     border-color: rgba(255, 255, 255, 0.15);
   }
+
+  /* Footer logo styling - invert only in light mode */
+  .footer-logo {
+    @apply invert;
+  }
+
+  [data-theme="dark"] .footer-logo {
+    filter: none;
+  }
 }
 
 /* Override DaisyUI colors with emerald green theme */
@@ -226,6 +280,9 @@
   --color-base-100: #ffffff !important;     /* White background (WCAG AA compliant) */
   --color-base-200: #f9fafb !important;     /* Very light gray */
   --color-base-300: #f3f4f6 !important;     /* Light gray */
+  --color-base-content: #1f2937 !important; /* Dark text for light mode */
+  --color-neutral: #1f2937 !important;      /* Dark neutral background */
+  --color-neutral-content: #f9fafb !important; /* Light text on neutral */
 }
 
 [data-theme="dark"] {
@@ -236,4 +293,6 @@
   --color-base-200: #262626 !important;     /* Slightly lighter dark */
   --color-base-300: #404040 !important;     /* Even lighter dark */
   --color-base-content: #e5e7eb !important; /* Light text for dark mode */
+  --color-neutral: #0f0f0f !important;      /* Very dark neutral background */
+  --color-neutral-content: #f3f4f6 !important; /* Very light text on neutral in dark mode */
 }

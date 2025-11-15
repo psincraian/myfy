@@ -46,6 +46,9 @@
       <div class="card bg-base-100 shadow-2xl">
         <div class="card-body p-8">
           <form method="POST" action="/newsletter" class="space-y-6">
+            {# CSRF Token #}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
             <div class="form-control">
               <label class="label">
                 <span class="label-text text-lg font-medium">Email Address</span>

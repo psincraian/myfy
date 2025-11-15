@@ -1,11 +1,10 @@
 """Database models for the myfy website."""
 
-from datetime import datetime
-
-from sqlalchemy import Boolean, DateTime, String
-from sqlalchemy.orm import Mapped, mapped_column
+from datetime import UTC, datetime
 
 from database import Base
+from sqlalchemy import Boolean, DateTime, String
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 class NewsletterSubscriber(Base):
@@ -16,7 +15,9 @@ class NewsletterSubscriber(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     subscribed_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
     )
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 

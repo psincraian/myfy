@@ -1,12 +1,13 @@
 """Newsletter service for managing subscriptions."""
 
-from typing import Optional
+import logging
 
+from models import NewsletterSubscriber
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import NewsletterSubscriber
+logger = logging.getLogger(__name__)
 
 
 class NewsletterService:
@@ -30,31 +31,35 @@ class NewsletterService:
             Tuple of (success: bool, message: str)
         """
         try:
-            # Check if email already exists
-            existing = await self.get_subscriber(email)
-            if existing:
-                if existing.active:
-                    return False, "This email is already subscribed to our newsletter."
-                else:
+            # Use explicit transaction
+            async with self.session.begin_nested():
+                # Check if email already exists
+                existing = await self.get_subscriber(email)
+                if existing:
+                    if existing.active:
+                        return False, "This email is already subscribed to our newsletter."
                     # Reactivate subscription
                     existing.active = True
                     await self.session.commit()
                     return True, "Your subscription has been reactivated!"
 
-            # Create new subscriber
-            subscriber = NewsletterSubscriber(email=email, active=True)
-            self.session.add(subscriber)
-            await self.session.commit()
+                # Create new subscriber
+                subscriber = NewsletterSubscriber(email=email, active=True)
+                self.session.add(subscriber)
+                await self.session.commit()
             return True, "Thank you for subscribing! You'll receive our monthly updates."
 
-        except IntegrityError:
+        except IntegrityError as e:
             await self.session.rollback()
+            logger.warning(f"Newsletter subscription failed for {email}: {e}")
             return False, "This email is already subscribed."
         except Exception as e:
             await self.session.rollback()
-            return False, f"An error occurred: {str(e)}"
+            # Log detailed error but show generic message to user
+            logger.error(f"Newsletter subscription error for {email}: {e}", exc_info=True)
+            return False, "An error occurred. Please try again later."
 
-    async def get_subscriber(self, email: str) -> Optional[NewsletterSubscriber]:
+    async def get_subscriber(self, email: str) -> NewsletterSubscriber | None:
         """Get a subscriber by email.
 
         Args:

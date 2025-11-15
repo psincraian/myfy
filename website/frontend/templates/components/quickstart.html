@@ -27,7 +27,9 @@ spacing - Dark mode optimized - Better copy button UX #}
                     </h3>
                 </div>
                 <div class="relative">
-                    <pre class="command-block"><code>pip install myfy</code></pre>
+                    <pre
+                        class="command-block language-bash"
+                    ><code class="language-bash">pip install myfy</code></pre>
                     <button
                         class="copy-button absolute top-3 right-3 btn btn-sm btn-ghost hover:bg-base-content/10"
                         data-copy="pip install myfy"
@@ -59,23 +61,25 @@ spacing - Dark mode optimized - Better copy button UX #}
                     <div class="badge badge-primary">app.py</div>
                 </div>
                 <div class="relative">
-                    <pre class="code-block overflow-x-auto"><code><span class="text-primary">from</span> <span class="text-slate-900">myfy.core</span> <span class="text-primary">import</span> <span class="text-slate-900">Application</span>
-<span class="text-primary">from</span> <span class="text-slate-900">myfy.web</span> <span class="text-primary">import</span> <span class="text-slate-900">WebModule, route</span>
-<span class="text-primary">from</span> <span class="text-slate-900">myfy.frontend</span> <span class="text-primary">import</span> <span class="text-slate-900">FrontendModule</span>
+                    <pre
+                        class="code-block overflow-x-auto language-python"
+                    ><code class="language-python">from myfy.core import Application
+from myfy.web import WebModule, route
+from myfy.frontend import FrontendModule
 
-<span class="text-emerald-600"># Create application</span>
-<span class="text-slate-900">app</span> <span class="text-primary">=</span> <span class="text-slate-900">Application()</span>
-<span class="text-slate-900">app</span><span class="text-primary">.</span><span class="text-slate-900">add_module(WebModule())</span>
-<span class="text-slate-900">app</span><span class="text-primary">.</span><span class="text-slate-900">add_module(FrontendModule(auto_init=True))</span>
+# Create application
+app = Application()
+app.add_module(WebModule())
+app.add_module(FrontendModule(auto_init=True))
 
-<span class="text-emerald-600"># Define routes</span>
-<span class="text-primary">@</span><span class="text-slate-900">route</span><span class="text-primary">.</span><span class="text-slate-900">get(</span><span class="text-amber-600">"/"</span><span class="text-slate-900">)</span>
-<span class="text-primary">async def</span> <span class="text-slate-900">home():</span>
-    <span class="text-primary">return</span> <span class="text-slate-900">{</span><span class="text-amber-600">"message"</span><span class="text-slate-900">:</span> <span class="text-amber-600">"Welcome to myfy!"</span><span class="text-slate-900">}</span>
+# Define routes
+@route.get("/")
+async def home():
+    return {"message": "Welcome to myfy!"}
 
-<span class="text-primary">if</span> <span class="text-slate-900">__name__</span> <span class="text-primary">==</span> <span class="text-amber-600">"__main__"</span><span class="text-slate-900">:</span>
-    <span class="text-primary">import</span> <span class="text-slate-900">asyncio</span>
-    <span class="text-slate-900">asyncio</span><span class="text-primary">.</span><span class="text-slate-900">run(app</span><span class="text-primary">.</span><span class="text-slate-900">run())</span></code></pre>
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(app.run())</code></pre>
                     <button
                         class="copy-button absolute top-3 right-3 btn btn-sm btn-ghost hover:bg-base-content/10"
                         data-copy='from myfy.core import Application
@@ -122,8 +126,10 @@ if __name__ == "__main__":
                     </h3>
                 </div>
                 <div class="relative">
-                    <pre class="command-block"><code>uv run myfy run
-<span class="text-emerald-600"># or</span>
+                    <pre
+                        class="command-block language-bash"
+                    ><code class="language-bash">uv run myfy run
+# or
 python app.py</code></pre>
                     <button
                         class="copy-button absolute top-3 right-3 btn btn-sm btn-ghost hover:bg-base-content/10"
@@ -181,7 +187,7 @@ python app.py</code></pre>
                             Read Full Documentation
                         </a>
                         <a
-                            href="https://github.com/anthropics/myfy"
+                            href="https://github.com/psincraian/myfy"
                             target="_blank"
                             rel="noopener noreferrer"
                             class="btn btn-outline btn-lg gap-2 hover:bg-base-content hover:text-base-100 transition-all"

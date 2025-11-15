@@ -17,6 +17,7 @@ export default defineConfig({
       input: {
         main: 'frontend/js/main.js',
         'theme-switcher': 'frontend/js/theme-switcher.js',
+        'prism-init': 'frontend/js/prism-init.js',
         styles: 'frontend/css/input.css'
       },
       output: {
