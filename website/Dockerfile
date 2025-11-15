@@ -49,6 +49,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 COPY packages/ ./packages/
 COPY website/pyproject.toml ./website/pyproject.toml
+COPY website/README.md ./website/README.md
 
 # Install dependencies (website and workspace packages)
 RUN uv sync --frozen --no-dev
