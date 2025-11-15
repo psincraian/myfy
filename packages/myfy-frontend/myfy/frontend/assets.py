@@ -26,7 +26,7 @@ class AssetResolver:
         self.manifest_path = self.static_dir / "dist" / ".vite" / "manifest.json"
 
     @lru_cache(maxsize=1)  # noqa: B019
-    def load_manifest(self) -> dict:
+    def load_manifest(self) -> dict[str, str]:
         """Load Vite manifest (cached in production)."""
         if self.manifest_path.exists():
             with self.manifest_path.open() as f:
@@ -43,7 +43,10 @@ class AssetResolver:
 
     def get_asset_url(self, entry_name: str) -> str | None:
         """
-        Get asset URL for entry (main, theme-switcher, etc).
+        Get asset URL for entry (main, theme-switcher, prism-init, etc).
+
+        Dynamically discovers entries from manifest.json (production) or
+        constructs paths for Vite dev server (development).
 
         Args:
             entry_name: Entry name from vite.config.js
@@ -52,25 +55,20 @@ class AssetResolver:
             Asset URL (dev server or production URL with hash)
         """
         if self.is_development() and self.settings.enable_vite_dev:
-            # Development: proxy to Vite server
-            entry_map = {
-                "main": "frontend/js/main.js",
-                "theme-switcher": "frontend/js/theme-switcher.js",
-            }
-            path = entry_map.get(entry_name)
-            if path:
-                return f"{self.settings.vite_dev_server}/{path}"
-        else:
-            # Production: use manifest
-            manifest = self.load_manifest()
-            entry_map = {
-                "main": "frontend/js/main.js",
-                "theme-switcher": "frontend/js/theme-switcher.js",
-            }
-            input_path = entry_map.get(entry_name)
-            if input_path and input_path in manifest:
-                file_path = manifest[input_path]["file"]
+            # Development: construct path dynamically for Vite dev server
+            path = f"frontend/js/{entry_name}.js"
+            return f"{self.settings.vite_dev_server}/{path}"
+
+        # Production: dynamically search manifest for matching entry
+        manifest = self.load_manifest()
+
+        # Look for entry by name in manifest
+        for entry_data in manifest.values():
+            # Check if this is an entry point with matching name
+            if entry_data.get("isEntry") and entry_data.get("name") == entry_name:
+                file_path = entry_data["file"]
                 return f"{self.settings.static_url_prefix}/{file_path}"
+
         return None
 
     def get_css_url(self, entry_name: str) -> str | None:

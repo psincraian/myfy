@@ -127,6 +127,6 @@ Use admonitions for important notes:
 
 ## Links
 
-- [Live Documentation](https://psincraian.github.io/myfy/)
+- [Live Documentation](https://myfy.dev)
 - [MkDocs Documentation](https://www.mkdocs.org/)
 - [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/)

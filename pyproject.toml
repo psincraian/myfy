@@ -15,6 +15,7 @@ members = [
   "packages/myfy-cli",
   "packages/myfy-frontend",
   "packages/myfy",
+  "website",
 ]
 
 [tool.uv.sources]
@@ -23,6 +24,7 @@ myfy-web = { workspace = true }
 myfy = { workspace = true }
 myfy-frontend = { workspace = true }
 myfy-cli = { workspace = true, editable = true }
+myfy-website = { workspace = true }
 
 [dependency-groups]
 dev = [

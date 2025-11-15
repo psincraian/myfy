@@ -30,10 +30,10 @@ jobs:
         run: uv sync --all-extras
 
       - name: Run Ruff linter
-        run: uv run ruff check packages/ examples/
+        run: uv run ruff check packages/ website/ examples/
 
       - name: Check Ruff formatting
-        run: uv run ruff format --check packages/ examples/
+        run: uv run ruff format --check packages/ website/ examples/
 
   typecheck:
     name: Type Check with ty
@@ -57,7 +57,7 @@ jobs:
         run: uv sync --all-extras
 
       - name: Run ty type checker
-        run: uv run ty check packages/ --exclude '**/stubs/**'
+        run: uv run ty check packages/ website/ --exclude '**/stubs/**'
 
   test:
     name: Test on Python ${{ matrix.python-version }}

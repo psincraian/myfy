@@ -1,0 +1,200 @@
+{# Hero Component - Modern, beautiful hero section Design improvements: -
+Cleaner layout with better spacing - Subtle floating leaf decorations - Improved
+typography hierarchy - Better mobile responsiveness - Dark mode optimized #}
+<section
+    class="relative min-h-[calc(100vh-4rem)] hero-gradient leaf-pattern overflow-hidden pt-24 pb-16"
+>
+    {# Subtle floating leaf decorations - hidden on mobile for performance #}
+    <div
+        class="hidden md:block absolute top-32 left-10 w-20 h-20 opacity-10 animate-float pointer-events-none"
+    >
+        <img
+            src="/static/images/leaf-1.svg"
+            alt=""
+            class="w-full h-full"
+            loading="lazy"
+        />
+    </div>
+    <div
+        class="hidden md:block absolute top-48 right-16 w-24 h-24 opacity-8 animate-float-delayed pointer-events-none"
+    >
+        <img
+            src="/static/images/leaf-2.svg"
+            alt=""
+            class="w-full h-full"
+            loading="lazy"
+        />
+    </div>
+    <div
+        class="hidden lg:block absolute bottom-32 left-1/4 w-16 h-16 opacity-6 animate-float pointer-events-none"
+    >
+        <img
+            src="/static/images/leaf-1.svg"
+            alt=""
+            class="w-full h-full transform rotate-45"
+            loading="lazy"
+        />
+    </div>
+
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="max-w-5xl mx-auto text-center">
+            {# Main headline with better typography #}
+            <h1
+                class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-tight"
+            >
+                <span class="text-primary"> Modern Python </span>
+                <br />
+                <span class="text-base-content">Web Framework</span>
+            </h1>
+
+            {# Subtitle with better readability #}
+            <p
+                class="text-lg sm:text-xl md:text-2xl text-base-content/70 mb-10 max-w-3xl mx-auto leading-relaxed"
+            >
+                Build
+                <strong class="text-primary font-semibold"
+                    >elegant, modular</strong
+                >
+                web applications with FastAPI ergonomics and enterprise-grade
+                architecture
+            </p>
+
+            {# CTA Buttons - improved spacing and touch targets #}
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                <a
+                    href="#quickstart"
+                    class="btn btn-primary btn-lg gap-2 shadow-lg hover:shadow-xl transition-shadow"
+                >
+                    <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"
+                        ></path>
+                    </svg>
+                    Get Started
+                </a>
+                <a
+                    href="https://docs.myfy.dev"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-outline btn-lg gap-2 border-2 hover:border-primary hover:bg-primary hover:text-white transition-all"
+                >
+                    <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                        ></path>
+                    </svg>
+                    Read Docs
+                </a>
+            </div>
+
+            {# Feature badges - improved mobile layout #}
+            <div
+                class="flex flex-wrap gap-3 justify-center text-sm max-w-2xl mx-auto"
+            >
+                <div
+                    class="glass-card px-4 py-3 rounded-full flex items-center gap-2 hover:scale-105 transition-transform"
+                >
+                    <svg
+                        class="w-4 h-4 text-primary"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                    >
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                        ></path>
+                    </svg>
+                    <span class="font-medium">Python 3.12+</span>
+                </div>
+                <div
+                    class="glass-card px-4 py-3 rounded-full flex items-center gap-2 hover:scale-105 transition-transform"
+                >
+                    <svg
+                        class="w-4 h-4 text-primary"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"
+                        ></path>
+                    </svg>
+                    <span class="font-medium">Lightning Fast</span>
+                </div>
+                <div
+                    class="glass-card px-4 py-3 rounded-full flex items-center gap-2 hover:scale-105 transition-transform"
+                >
+                    <svg
+                        class="w-4 h-4 text-primary"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                        ></path>
+                    </svg>
+                    <span class="font-medium">Fully Modular</span>
+                </div>
+                <div
+                    class="glass-card px-4 py-3 rounded-full flex items-center gap-2 hover:scale-105 transition-transform"
+                >
+                    <svg
+                        class="w-4 h-4 text-primary"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+                        ></path>
+                    </svg>
+                    <span class="font-medium">Tailwind + Vite</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Scroll indicator - subtle and elegant #}
+    <div
+        class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce opacity-50 hidden md:block"
+    >
+        <svg
+            class="w-6 h-6 text-primary"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+            ></path>
+        </svg>
+    </div>
+</section>

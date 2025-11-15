@@ -1,0 +1,148 @@
+"""Newsletter subscription endpoints."""
+
+import logging
+from datetime import UTC, datetime
+
+from email_validator import EmailNotValidError, validate_email
+from starlette.requests import Request
+from starlette.templating import Jinja2Templates
+
+from myfy.frontend import render_template
+from myfy.web import route
+
+from ..services import NewsletterService
+from ..services.csrf import CsrfService
+
+logger = logging.getLogger(__name__)
+
+
+@route.get("/newsletter")
+async def newsletter_page(request: Request, templates: Jinja2Templates):
+    """Newsletter signup page.
+
+    Args:
+        request: HTTP request
+        templates: Jinja2 templates (DI-injected)
+
+    Returns:
+        Rendered newsletter page template
+    """
+    return render_template(
+        "newsletter.html",
+        request=request,
+        templates=templates,
+        current_year=datetime.now(tz=UTC).year,
+        success=False,
+        error=False,
+    )
+
+
+@route.post("/newsletter")
+async def newsletter_subscribe(
+    request: Request,
+    templates: Jinja2Templates,
+    service: NewsletterService,
+    csrf_service: CsrfService,
+):
+    """Handle newsletter subscription form submission.
+
+    This endpoint:
+    1. Validates CSRF token
+    2. Validates email format and length
+    3. Subscribes email via NewsletterService
+    4. Returns success/error page
+
+    Args:
+        request: HTTP request
+        templates: Jinja2 templates (DI-injected)
+        service: Newsletter service (DI-injected)
+        csrf_service: CSRF service for token validation (DI-injected)
+
+    Returns:
+        Rendered newsletter page with success/error message
+    """
+    client_host = request.client.host if request.client else "unknown"
+    logger.info(f"Newsletter subscription attempt from {client_host}")
+
+    # Parse form data
+    form_data = await request.form()
+    email_raw = form_data.get("email", "")
+    csrf_token_raw = form_data.get("csrf_token", "")
+
+    # Ensure we have strings, not UploadFile
+    email = email_raw if isinstance(email_raw, str) else ""
+    csrf_token = csrf_token_raw if isinstance(csrf_token_raw, str) else ""
+
+    email = email.strip()
+    csrf_token = csrf_token.strip()
+
+    # Validate CSRF token
+    if not csrf_token or not csrf_service.validate_token(csrf_token):
+        logger.warning(f"CSRF validation failed for newsletter subscription from {client_host}")
+        return render_template(
+            "newsletter.html",
+            request=request,
+            templates=templates,
+            current_year=datetime.now(tz=UTC).year,
+            success=False,
+            error=True,
+            message="Security validation failed. Please try again.",
+        )
+
+    # Validate email is provided
+    if not email:
+        return render_template(
+            "newsletter.html",
+            request=request,
+            templates=templates,
+            current_year=datetime.now(tz=UTC).year,
+            success=False,
+            error=True,
+            message="Please provide an email address.",
+        )
+
+    # Validate email length
+    if len(email) > 255:
+        return render_template(
+            "newsletter.html",
+            request=request,
+            templates=templates,
+            current_year=datetime.now(tz=UTC).year,
+            success=False,
+            error=True,
+            message="Email address is too long.",
+        )
+
+    # Validate email format using email-validator library
+    try:
+        valid = validate_email(email, check_deliverability=False)
+        email = valid.normalized  # Use normalized form
+    except EmailNotValidError:
+        logger.warning(f"Invalid email format attempt: {email}")
+        return render_template(
+            "newsletter.html",
+            request=request,
+            templates=templates,
+            current_year=datetime.now(tz=UTC).year,
+            success=False,
+            error=True,
+            message="Please provide a valid email address.",
+        )
+
+    # Subscribe via service (business logic handled in service layer)
+    success, message = await service.subscribe(email)
+
+    if success:
+        logger.info(f"Newsletter subscription successful for {email}")
+    else:
+        logger.warning(f"Newsletter subscription failed for {email}: {message}")
+
+    return render_template(
+        "newsletter.html",
+        request=request,
+        templates=templates,
+        current_year=datetime.now(tz=UTC).year,
+        success=success,
+        error=not success,
+        message=message,
+    )
