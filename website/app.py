@@ -12,16 +12,15 @@ from pathlib import Path
 # Add current directory to Python path so 'website' package can be imported
 sys.path.insert(0, str(Path(__file__).parent))
 
+# Import website package to register all endpoints
+import website.endpoints  # noqa: F401
 from dotenv import load_dotenv
+from website.config import AppSettings
+from website.modules import DatabaseModule, SecurityModule
 
 from myfy.core import Application
 from myfy.frontend import FrontendModule
 from myfy.web import WebModule
-
-# Import website package to register all endpoints
-import website.endpoints  # noqa: F401
-from website.config import AppSettings
-from website.modules import DatabaseModule, SecurityModule
 
 # Load environment variables from .env file
 load_dotenv()

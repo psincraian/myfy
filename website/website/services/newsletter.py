@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from myfy.core import provider, SINGLETON
+from myfy.core import SINGLETON, provider
 
 from ..models import NewsletterSubscriber
 
@@ -41,26 +41,27 @@ class NewsletterService:
             Tuple of (success: bool, message: str)
         """
         try:
-            async with self.session_maker() as session:
-                # Use explicit transaction
-                async with session.begin_nested():
-                    # Check if email already exists
-                    existing = await self._get_subscriber(session, email)
-                    if existing:
-                        if existing.active:
-                            return (
-                                False,
-                                "This email is already subscribed to our newsletter.",
-                            )
-                        # Reactivate subscription
-                        existing.active = True
-                        await session.commit()
-                        return True, "Your subscription has been reactivated!"
-
-                    # Create new subscriber
-                    subscriber = NewsletterSubscriber(email=email, active=True)
-                    session.add(subscriber)
+            async with (
+                self.session_maker() as session,
+                session.begin_nested(),
+            ):
+                # Check if email already exists
+                existing = await self._get_subscriber(session, email)
+                if existing:
+                    if existing.active:
+                        return (
+                            False,
+                            "This email is already subscribed to our newsletter.",
+                        )
+                    # Reactivate subscription
+                    existing.active = True
                     await session.commit()
+                    return True, "Your subscription has been reactivated!"
+
+                # Create new subscriber
+                subscriber = NewsletterSubscriber(email=email, active=True)
+                session.add(subscriber)
+                await session.commit()
             return (
                 True,
                 "Thank you for subscribing! You'll receive our monthly updates.",

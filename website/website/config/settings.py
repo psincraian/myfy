@@ -1,5 +1,7 @@
 """Application configuration settings."""
 
+from typing import ClassVar
+
 from pydantic import Field
 
 from myfy.core import BaseSettings
@@ -17,7 +19,7 @@ class DatabaseSettings(BaseSettings):
         DATABASE_MAX_OVERFLOW: Maximum overflow connections
     """
 
-    model_config = {"env_prefix": "DATABASE_"}
+    model_config: ClassVar[dict] = {"env_prefix": "DATABASE_"}
 
     url: str = "postgresql+asyncpg://myfy:myfy_dev@localhost:5432/myfy_db"
     echo: bool = False
@@ -38,7 +40,7 @@ class SecuritySettings(BaseSettings):
         SECURITY_ALLOWED_HOSTS: Comma-separated list of allowed hosts
     """
 
-    model_config = {"env_prefix": "SECURITY_"}
+    model_config: ClassVar[dict] = {"env_prefix": "SECURITY_"}
 
     secret_key: str  # Required, no default
     csrf_max_age: int = 3600  # 1 hour

@@ -1,9 +1,8 @@
-"""Security module for middleware and CSRF protection."""
+"""Security module for middleware and security headers."""
 
 import logging
 import os
 
-from itsdangerous import BadSignature, URLSafeTimedSerializer
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
@@ -20,6 +19,7 @@ from myfy.core import Container, Module
 from myfy.web import IWebExtension
 
 from ..config import SecuritySettings
+from ..services.csrf import CsrfService
 
 logger = logging.getLogger(__name__)
 
@@ -44,9 +44,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        response.headers[
-            "Permissions-Policy"
-        ] = "geolocation=(), microphone=(), camera=()"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
 
         # Add CSP - more permissive in development for Vite HMR
         if self.environment == "development":
@@ -72,10 +70,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 
 class SecurityModule(Module, IWebExtension):
-    """Module for security features (CSRF, headers, rate limiting).
+    """Module for security features (headers, rate limiting, middleware).
 
     This module provides comprehensive security features including:
-    - CSRF token generation and validation
     - Rate limiting with slowapi
     - Security headers (CSP, X-Frame-Options, etc.)
     - Session middleware
@@ -84,6 +81,8 @@ class SecurityModule(Module, IWebExtension):
 
     The module implements IWebExtension to extend the ASGI app with
     middleware and error handlers during application startup.
+
+    Note: CSRF token operations are handled by CsrfService.
     """
 
     name = "security"
@@ -91,9 +90,8 @@ class SecurityModule(Module, IWebExtension):
     def __init__(self):
         """Initialize security module."""
         super().__init__()
-        self.csrf_serializer = None
-        self.limiter = None
-        self._settings = None
+        self.limiter: Limiter | None = None
+        self._settings: SecuritySettings | None = None
 
     @property
     def provides(self):
@@ -106,23 +104,8 @@ class SecurityModule(Module, IWebExtension):
         Args:
             container: DI container to register services
         """
-        # Store container reference for later use
-        self._container = container
-
-        # Register factories that will be initialized in finalize()
-        # We register the factory now, but it will get the actual instance later
-        container.register(
-            type_=URLSafeTimedSerializer,
-            factory=lambda: self.csrf_serializer,
-            scope="singleton",
-        )
-
-        # Register SecurityModule itself as singleton for injection into endpoints
-        container.register(
-            type_=SecurityModule,
-            factory=lambda: self,
-            scope="singleton",
-        )
+        # No need to register anything here
+        # CsrfService is registered via @provider decorator
 
     def finalize(self, container: Container) -> None:
         """Finalize the security module after container compilation.
@@ -136,11 +119,6 @@ class SecurityModule(Module, IWebExtension):
         # Get security settings from container (auto-injected from AppSettings)
         self._settings = container.get(SecuritySettings)
 
-        # Initialize CSRF serializer (the factory registered in configure() will use this)
-        self.csrf_serializer = URLSafeTimedSerializer(
-            self._settings.secret_key, salt="csrf-token"
-        )
-
         # Initialize rate limiter
         self.limiter = Limiter(key_func=get_remote_address)
 
@@ -151,6 +129,9 @@ class SecurityModule(Module, IWebExtension):
             app: The Starlette application
             container: DI container
         """
+        if not self._settings or not self.limiter:
+            raise RuntimeError("Security module not initialized")
+
         logger.info("Adding security middleware and rate limiting")
 
         # Detect environment from MYFY_FRONTEND_ENVIRONMENT or default to production
@@ -181,7 +162,7 @@ class SecurityModule(Module, IWebExtension):
 
         # Add error handlers
         @app.exception_handler(404)
-        async def not_found(request: Request, exc: HTTPException):
+        async def not_found(request: Request, _exc: HTTPException):
             """Handle 404 errors."""
             logger.warning(f"404 error: {request.url}")
             return JSONResponse(
@@ -195,7 +176,8 @@ class SecurityModule(Module, IWebExtension):
         @app.exception_handler(500)
         async def server_error(request: Request, exc: Exception):
             """Handle 500 errors."""
-            logger.error(f"Server error: {exc}", exc_info=True)
+            # Log the exception with full traceback
+            logger.error(f"Server error on {request.url}: {exc}", exc_info=True)
             return JSONResponse(
                 status_code=500,
                 content={
@@ -207,35 +189,9 @@ class SecurityModule(Module, IWebExtension):
         # Add CSRF token generator to Jinja2 templates
         try:
             templates = container.get(Jinja2Templates)
-            if templates:
-                templates.env.globals["csrf_token"] = self.generate_csrf_token
+            csrf_service = container.get(CsrfService)
+            if templates and csrf_service:
+                templates.env.globals["csrf_token"] = csrf_service.generate_token
                 logger.info("Added CSRF token generator to Jinja2 templates")
         except Exception as e:
             logger.warning(f"Could not add CSRF token to templates: {e}")
-
-    def generate_csrf_token(self) -> str:
-        """Generate a CSRF token.
-
-        Returns:
-            CSRF token string
-        """
-        return self.csrf_serializer.dumps("csrf-token")
-
-    def validate_csrf_token(self, token: str, max_age: int | None = None) -> bool:
-        """Validate a CSRF token.
-
-        Args:
-            token: The CSRF token to validate
-            max_age: Maximum age of token in seconds (default from settings)
-
-        Returns:
-            True if valid, False otherwise
-        """
-        if max_age is None:
-            max_age = self._settings.csrf_max_age
-
-        try:
-            self.csrf_serializer.loads(token, max_age=max_age)
-            return True
-        except (BadSignature, Exception):
-            return False

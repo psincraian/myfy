@@ -1,8 +1,10 @@
 """Database configuration and session management module."""
 
+from collections.abc import AsyncGenerator
+
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from myfy.core import Container, Module, SINGLETON
+from myfy.core import SINGLETON, Container, Module
 
 from ..config import DatabaseSettings
 
@@ -27,7 +29,7 @@ class DatabaseModule(Module):
         super().__init__()
         self.engine = None
         self.session_maker = None
-        self._container = None
+        self._container: Container | None = None
 
     def configure(self, container: Container) -> None:
         """Configure the database module and register session maker.
@@ -57,7 +59,7 @@ class DatabaseModule(Module):
         """
         # Get database settings from container (will be used in start())
         # Store it for later use in start()
-        pass  # Settings will be retrieved in start() method
+        # Settings will be retrieved in start() method
 
     async def start(self) -> None:
         """Start the database engine and create session maker.
@@ -65,6 +67,9 @@ class DatabaseModule(Module):
         This method is called during application startup to initialize
         the database connection pool.
         """
+        if not self._container:
+            raise RuntimeError("Database module not configured")
+
         # Get database settings from container (auto-injected from AppSettings)
         settings = self._container.get(DatabaseSettings)
 
@@ -93,7 +98,7 @@ class DatabaseModule(Module):
             await self.engine.dispose()
 
 
-async def get_db_session(session_maker: async_sessionmaker) -> AsyncSession:
+async def get_db_session(session_maker: async_sessionmaker) -> AsyncGenerator[AsyncSession, None]:
     """Get a database session.
 
     This is a factory function that can be injected into routes.

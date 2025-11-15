@@ -10,8 +10,8 @@ from starlette.templating import Jinja2Templates
 from myfy.frontend import render_template
 from myfy.web import route
 
-from ..modules.security import SecurityModule
 from ..services import NewsletterService
+from ..services.csrf import CsrfService
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ async def newsletter_subscribe(
     request: Request,
     templates: Jinja2Templates,
     service: NewsletterService,
-    security_module: SecurityModule,
+    csrf_service: CsrfService,
 ):
     """Handle newsletter subscription form submission.
 
@@ -56,23 +56,29 @@ async def newsletter_subscribe(
         request: HTTP request
         templates: Jinja2 templates (DI-injected)
         service: Newsletter service (DI-injected)
-        security_module: Security module for CSRF validation (DI-injected)
+        csrf_service: CSRF service for token validation (DI-injected)
 
     Returns:
         Rendered newsletter page with success/error message
     """
-    logger.info(f"Newsletter subscription attempt from {request.client.host}")
+    client_host = request.client.host if request.client else "unknown"
+    logger.info(f"Newsletter subscription attempt from {client_host}")
 
     # Parse form data
     form_data = await request.form()
-    email = form_data.get("email", "").strip()
-    csrf_token = form_data.get("csrf_token", "").strip()
+    email_raw = form_data.get("email", "")
+    csrf_token_raw = form_data.get("csrf_token", "")
+
+    # Ensure we have strings, not UploadFile
+    email = email_raw if isinstance(email_raw, str) else ""
+    csrf_token = csrf_token_raw if isinstance(csrf_token_raw, str) else ""
+
+    email = email.strip()
+    csrf_token = csrf_token.strip()
 
     # Validate CSRF token
-    if not csrf_token or not security_module.validate_csrf_token(csrf_token):
-        logger.warning(
-            f"CSRF validation failed for newsletter subscription from {request.client.host}"
-        )
+    if not csrf_token or not csrf_service.validate_token(csrf_token):
+        logger.warning(f"CSRF validation failed for newsletter subscription from {client_host}")
         return render_template(
             "newsletter.html",
             request=request,
