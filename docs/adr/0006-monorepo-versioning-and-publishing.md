@@ -42,19 +42,21 @@ All five packages share the same version number at all times. When any package i
 - All packages export `__version__` for introspection
 - Commitizen manages version bumping across all files simultaneously
 
-### 2. Dual-Track Publishing
+### 2. Single Workflow, Dual-Mode Publishing
 
-**Track 1: Alpha Releases (Automatic)**
+A unified workflow (`.github/workflows/publish.yml`) handles both alpha and stable releases through conditional logic:
+
+**Alpha Release Mode (Automatic)**
 - Format: `{major}.{minor}.{patch}a{commit_count}` (e.g., `0.1.0a123`)
 - Trigger: Automatic on every push to `main` that modifies `packages/**`
 - Purpose: Continuous deployment for testing and early adoption
-- Workflow: `.github/workflows/publish.yml`
+- No git commits, tags, or GitHub releases created
 
-**Track 2: Stable Releases (Manual)**
+**Stable Release Mode (Manual)**
 - Format: `{major}.{minor}.{patch}` or with prerelease suffix (e.g., `1.0.0`, `1.2.0b1`)
-- Trigger: Manual workflow dispatch with version bump type selection
+- Trigger: Manual workflow dispatch with `release_type: stable`
 - Purpose: Production-ready releases with full changelog and GitHub release
-- Workflow: `.github/workflows/release.yml`
+- Creates git commits, tags, and GitHub releases
 
 ### 3. Compatible Release Constraints (`~=`)
 
@@ -125,6 +127,8 @@ Use OIDC-based trusted publishing instead of API tokens:
 8. **Controlled Stability**: Manual stable releases for production use
 9. **Better Security**: Trusted publishing eliminates token management
 10. **Developer Guardrails**: Git hooks catch issues before commit
+11. **Simpler PyPI Configuration**: Only one trusted publisher per package (not two)
+12. **Single Source of Truth**: One workflow to maintain and understand
 
 ### Negative
 
@@ -161,22 +165,22 @@ Each package maintains its own version number.
 
 **Rejected because:** The packages are designed to work together as a cohesive framework, not as independent libraries.
 
-### Alternative 2: Manual Publishing Only
+### Alternative 2: Separate Workflows for Alpha and Stable
 
-No automatic alpha releases, only manual stable releases.
+Use two distinct workflows: `publish.yml` for alpha, `release.yml` for stable.
 
 **Pros:**
-- Full control over every release
-- Simpler workflow (one path)
-- No alpha version clutter on PyPI
+- Clear separation of concerns
+- Each workflow optimized for its purpose
+- Easier to understand each individual workflow
 
 **Cons:**
-- Slower iteration cycle
-- Users can't easily test unreleased changes
-- Less feedback from early adopters
-- Manual work required for every release
+- Requires two trusted publisher configurations per package (10 total)
+- Duplicate code between workflows
+- More maintenance burden
+- More complex PyPI setup
 
-**Rejected because:** Alpha releases provide valuable continuous deployment and user feedback.
+**Initially implemented, then rejected in favor of:** Single unified workflow provides same functionality with less complexity and easier PyPI configuration.
 
 ### Alternative 3: Git Tags for Versioning
 
@@ -240,8 +244,7 @@ Keep using minimum version constraints for internal dependencies.
 - `PUBLISHING.md` - Detailed publishing guide
 - `CONTRIBUTING.md` - Developer contribution guidelines
 - `.cz.toml` - Commitizen configuration
-- `.github/workflows/publish.yml` - Alpha publishing workflow
-- `.github/workflows/release.yml` - Stable release workflow
+- `.github/workflows/publish.yml` - Unified publishing workflow
 
 ## Implementation Notes
 
@@ -260,8 +263,7 @@ Keep using minimum version constraints for internal dependencies.
 - `packages/*/CHANGELOG.md` - Per-package changelogs (5 files)
 
 **Workflows:**
-- `.github/workflows/publish.yml` - Automatic alpha publishing
-- `.github/workflows/release.yml` - Manual stable releases
+- `.github/workflows/publish.yml` - Unified workflow for both alpha and stable releases
 
 **Git Hooks:**
 - `scripts/hooks/commit-msg` - Validates conventional commits
@@ -318,5 +320,9 @@ VERSION="${BASE_VERSION}a${TOTAL_COMMITS}"
 ## Decision Log
 
 - **2025-10-29**: ADR created and accepted
+- **2025-11-16**: Updated to consolidate dual workflows into single unified workflow
+  - Changed from separate alpha and stable workflows to single `publish.yml`
+  - Rationale: Simpler PyPI trusted publisher configuration (5 vs 10 configurations)
+  - Maintains same functionality with conditional logic for alpha vs stable modes
 - **Decision maker**: Project maintainers
-- **Review date**: To be reviewed after 3 months of usage (2025-01-29)
+- **Review date**: To be reviewed after 3 months of usage (2026-02-16)

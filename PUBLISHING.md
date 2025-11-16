@@ -91,9 +91,10 @@ This ensures:
 
 ## Publishing Workflows
 
+We use a **single unified workflow** (`.github/workflows/publish.yml`) that handles both alpha and stable releases through conditional logic.
+
 ### Automatic Alpha Publishing
 
-**Workflow:** `.github/workflows/publish.yml`
 **Trigger:** Push to `main` with changes to `packages/**`
 
 **Process:**
@@ -105,6 +106,7 @@ This ensures:
 6. Builds all 5 packages in dependency order
 7. Publishes to PyPI using trusted publishing
 8. Validates installation across Python versions
+9. **No git commits, tags, or GitHub releases created**
 
 **Publishing Order:**
 1. myfy-core (no internal dependencies)
@@ -114,40 +116,48 @@ This ensures:
 
 ### Manual Stable Releases
 
-**Workflow:** `.github/workflows/release.yml`
-**Trigger:** Manual workflow dispatch
+**Trigger:** Manual workflow dispatch via GitHub Actions
 
 **Parameters:**
-- `bump_type`: `patch`, `minor`, or `major`
+- `release_type`: `alpha` or `stable` (default: `alpha`)
+- `bump_type`: `patch`, `minor`, or `major` (default: `patch`)
 - `prerelease`: Optional suffix (e.g., `b1`, `rc1`)
 
-**Process:**
+**Process for Stable Releases:**
 1. Bumps version using commitizen
 2. Generates changelog from conventional commits
 3. Updates all version files and dependencies
 4. Runs full test suite
 5. Builds all packages
-6. Creates git tag `v{version}`
-7. Pushes changes and tag to repository
-8. Creates GitHub release with notes
-9. Publishes to PyPI
-10. Validates installation
+6. **Creates git commit** with version bump
+7. **Creates git tag** `v{version}`
+8. **Pushes changes and tag** to repository
+9. **Creates GitHub release** with notes and artifacts
+10. Publishes to PyPI
+11. Validates installation
 
 **Example Usage:**
 
 ```bash
-# Patch release (e.g., 1.0.0 → 1.0.1)
+# Stable patch release (e.g., 1.0.0 → 1.0.1)
 Go to Actions → Release to PyPI → Run workflow
+  release_type: stable
   bump_type: patch
 
-# Minor release (e.g., 1.0.1 → 1.1.0)
+# Stable minor release (e.g., 1.0.1 → 1.1.0)
 Go to Actions → Release to PyPI → Run workflow
+  release_type: stable
   bump_type: minor
 
 # Beta release (e.g., 1.0.0 → 1.1.0b1)
 Go to Actions → Release to PyPI → Run workflow
+  release_type: stable
   bump_type: minor
   prerelease: b1
+
+# Manual alpha release (usually automatic, but can be triggered manually)
+Go to Actions → Release to PyPI → Run workflow
+  release_type: alpha
 ```
 
 ## PyPI Trusted Publishing Setup
@@ -164,42 +174,44 @@ For each package, you need to configure PyPI:
 
 ### Configuration per Package
 
-Configure these 5 trusted publishers:
+Configure **one trusted publisher per package** (5 total):
 
 #### myfy-core
 - **PyPI Project:** `myfy-core`
 - **Owner:** `{your-github-username-or-org}`
 - **Repository:** `myfy`
-- **Workflow:** `publish.yml` AND `release.yml`
+- **Workflow:** `publish.yml`
 - **Environment:** (leave empty)
 
 #### myfy-web
 - **PyPI Project:** `myfy-web`
 - **Owner:** `{your-github-username-or-org}`
 - **Repository:** `myfy`
-- **Workflow:** `publish.yml` AND `release.yml`
+- **Workflow:** `publish.yml`
 - **Environment:** (leave empty)
 
 #### myfy-cli
 - **PyPI Project:** `myfy-cli`
 - **Owner:** `{your-github-username-or-org}`
 - **Repository:** `myfy`
-- **Workflow:** `publish.yml` AND `release.yml`
+- **Workflow:** `publish.yml`
 - **Environment:** (leave empty)
 
 #### myfy-frontend
 - **PyPI Project:** `myfy-frontend`
 - **Owner:** `{your-github-username-or-org}`
 - **Repository:** `myfy`
-- **Workflow:** `publish.yml` AND `release.yml`
+- **Workflow:** `publish.yml`
 - **Environment:** (leave empty)
 
 #### myfy
 - **PyPI Project:** `myfy`
 - **Owner:** `{your-github-username-or-org}`
 - **Repository:** `myfy`
-- **Workflow:** `publish.yml` AND `release.yml`
+- **Workflow:** `publish.yml`
 - **Environment:** (leave empty)
+
+> **Note:** Since we use a single unified workflow, you only need to configure **one trusted publisher per package** (not two). This simplifies the setup compared to having separate workflows for alpha and stable releases.
 
 ### First-Time Setup
 

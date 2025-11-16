@@ -63,60 +63,58 @@ This document summarizes the complete PyPI publishing system implemented for the
 
 **Format:** Keep a Changelog compatible, auto-updated by commitizen
 
-### 5. GitHub Actions Workflows
+### 5. GitHub Actions Workflow
 
-#### Automatic Alpha Publishing (`.github/workflows/publish.yml`)
+#### Unified Publishing Workflow (`.github/workflows/publish.yml`)
+
+A **single workflow** handles both alpha and stable releases through conditional logic.
 
 **Triggers:**
-- Push to `main` with changes to `packages/**`
-- Manual workflow dispatch (optional custom version)
+- **Automatic:** Push to `main` with changes to `packages/**` (alpha mode)
+- **Manual:** Workflow dispatch (alpha or stable mode)
+
+**Manual Workflow Inputs:**
+- `release_type`: `alpha` or `stable` (default: `alpha`)
+- `bump_type`: `patch`, `minor`, or `major` (default: `patch`)
+- `prerelease`: Optional suffix (e.g., "b1", "rc1")
 
 **Jobs:**
-1. **Test** - Runs across Python 3.12 & 3.13
+
+1. **CI** - Runs across Python 3.12 & 3.13
    - Linting (ruff)
    - Type checking (ty)
    - Tests (pytest)
 
-2. **Build and Publish**
+2. **Release** (conditional based on mode)
+   
+   **Alpha Mode:**
    - Calculates version: `{base}a{commit_count}` (e.g., `0.1.0a123`)
    - Updates all version files
    - Builds packages in dependency order
    - Publishes to PyPI via trusted publishing
+   - **No git commits, tags, or GitHub releases**
+   
+   **Stable Mode:**
+   - Bumps version with commitizen
+   - Generates changelog
+   - Updates all version files and dependencies
+   - Runs full test suite
+   - Builds all packages
+   - **Creates git commit and tag**
+   - **Pushes changes and tag**
+   - **Creates GitHub release**
+   - Publishes to PyPI
 
-3. **Validate Install**
+3. **Validate Release**
    - Tests installation across Python versions
    - Verifies imports and version consistency
+   - Tests CLI functionality
 
 **Publishing Order:**
 1. myfy-core
 2. myfy-web & myfy-cli (parallel)
 3. myfy-frontend
 4. myfy (meta-package)
-
-#### Stable Release Publishing (`.github/workflows/release.yml`)
-
-**Trigger:** Manual workflow dispatch
-
-**Inputs:**
-- `bump_type`: patch/minor/major
-- `prerelease`: Optional (e.g., "b1", "rc1")
-
-**Jobs:**
-1. **Release**
-   - Bumps version with commitizen
-   - Generates changelog
-   - Updates all version files and dependencies
-   - Runs full test suite
-   - Builds all packages
-   - Creates git tag
-   - Pushes changes and tag
-   - Creates GitHub release
-   - Publishes to PyPI
-
-2. **Validate Release**
-   - Tests installation across Python versions
-   - Verifies all versions match
-   - Tests CLI functionality
 
 ### 6. Git Hooks
 
@@ -170,11 +168,10 @@ This document summarizes the complete PyPI publishing system implemented for the
 11. `packages/myfy-frontend/myfy/frontend/version.py`
 12. `packages/myfy/myfy/version.py`
 13. `packages/myfy/myfy/__init__.py` - Meta-package init
-14. `.github/workflows/publish.yml` - Alpha publishing
-15. `.github/workflows/release.yml` - Stable releases
-16. `scripts/hooks/commit-msg` - Commit validation
-17. `PUBLISHING.md` - Publishing guide
-18. `CONTRIBUTING.md` - Contributing guide
+14. `.github/workflows/publish.yml` - Unified publishing workflow
+15. `scripts/hooks/commit-msg` - Commit validation
+16. `PUBLISHING.md` - Publishing guide
+17. `CONTRIBUTING.md` - Contributing guide
 
 ### Modified Files (11)
 1. `pyproject.toml` - Added commitizen dependency
@@ -211,7 +208,7 @@ Before you can publish, configure PyPI for each package:
 3. Configure Trusted Publishers on PyPI:
    - Go to each project's PyPI page
    - Navigate to "Publishing" → "Add a new publisher"
-   - Add for both `publish.yml` and `release.yml` workflows
+   - **Only need one trusted publisher per package** (not two)
 
    Example for myfy-core:
    - PyPI Project: `myfy-core`
@@ -221,6 +218,8 @@ Before you can publish, configure PyPI for each package:
    - Environment: (leave empty)
 
    Repeat for: myfy-web, myfy-cli, myfy-frontend, myfy
+   
+   **Total:** 5 trusted publishers (one per package)
 
 ### 2. Install Git Hooks
 
