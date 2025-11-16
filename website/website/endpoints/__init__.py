@@ -5,6 +5,6 @@ Routes are automatically registered when the modules are imported.
 """
 
 # Import all endpoints to register routes
-from . import health, landing, newsletter
+from . import health, landing, newsletter, static
 
-__all__ = ["health", "landing", "newsletter"]
+__all__ = ["health", "landing", "newsletter", "static"]

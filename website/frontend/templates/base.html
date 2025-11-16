@@ -1,41 +1,74 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="light">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}My App{% endblock %}</title>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{% block title %}My App{% endblock %}</title>
 
-  <!-- SEO Meta Tags -->
-  <meta name="description" content="{% block description %}Built with myfy framework{% endblock %}">
-  <meta name="author" content="{% block author %}{% endblock %}">
+        <!-- SEO Meta Tags -->
+        <meta
+            name="description"
+            content="{% block description %}Built with myfy framework{% endblock %}"
+        />
+        <meta name="author" content="{% block author %}{% endblock %}" />
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/static/images/myfy_logo.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/static/images/myfy_logo.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/static/images/myfy.png">
+        <!-- Favicon -->
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="/static/images/myfy_logo.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="/static/images/myfy_logo.png"
+        />
 
-  {# Vite dev mode: HMR client #}
-  {% if get_vite_client_url() %}
-  <script type="module" src="{{ get_vite_client_url() }}"></script>
-  {% endif %}
+        <!-- Apple Touch Icons -->
+        <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="/apple-touch-icon-180x180.png"
+        />
+        <link
+            rel="apple-touch-icon"
+            sizes="152x152"
+            href="/apple-touch-icon-152x152.png"
+        />
+        <link
+            rel="apple-touch-icon"
+            sizes="120x120"
+            href="/apple-touch-icon-120x120.png"
+        />
 
-  {# CSS: dev server or hashed production file #}
-  <link rel="stylesheet" href="{{ get_css_url('styles') }}">
+        <!-- Apple Web App Meta Tags -->
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Myfy" />
 
-  {# Theme switcher JS (loads immediately to prevent flash) #}
-  <script type="module" src="{{ get_asset_url('theme-switcher') }}"></script>
+        {# Vite dev mode: HMR client #} {% if get_vite_client_url() %}
+        <script type="module" src="{{ get_vite_client_url() }}"></script>
+        {% endif %} {# CSS: dev server or hashed production file #}
+        <link rel="stylesheet" href="{{ get_css_url('styles') }}" />
 
-  {% block extra_head %}{% endblock %}
-</head>
-<body>
-  {% block content %}{% endblock %}
+        {# Theme switcher JS (loads immediately to prevent flash) #}
+        <script
+            type="module"
+            src="{{ get_asset_url('theme-switcher') }}"
+        ></script>
 
-  {# Main JS #}
-  <script type="module" src="{{ get_asset_url('main') }}"></script>
+        {% block extra_head %}{% endblock %}
+    </head>
+    <body>
+        {% block content %}{% endblock %} {# Main JS #}
+        <script type="module" src="{{ get_asset_url('main') }}"></script>
 
-  {# Prism syntax highlighting #}
-  <script type="module" src="{{ get_asset_url('prism-init') }}"></script>
+        {# Prism syntax highlighting #}
+        <script type="module" src="{{ get_asset_url('prism-init') }}"></script>
 
-  {% block extra_scripts %}{% endblock %}
-</body>
+        {% block extra_scripts %}{% endblock %}
+    </body>
 </html>
