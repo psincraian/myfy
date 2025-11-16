@@ -20,6 +20,7 @@ dependencies = [
     "email-validator>=2.0.0",
     "slowapi>=0.1.9",
     "itsdangerous>=2.1.0",
+    "captcha>=0.6.0",
 ]
 
 [project.optional-dependencies]

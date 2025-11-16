@@ -49,6 +49,9 @@
             {# CSRF Token #}
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
+            {# Captcha Token #}
+            <input type="hidden" name="captcha_token" value="{{ captcha_token }}" id="captcha-token">
+
             <div class="form-control">
               <label class="label">
                 <span class="label-text text-lg font-medium">Email Address</span>
@@ -63,6 +66,48 @@
               <label class="label">
                 <span class="label-text-alt text-base-content/60">
                   We respect your privacy. Unsubscribe anytime.
+                </span>
+              </label>
+            </div>
+
+            {# Captcha Field #}
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text text-lg font-medium">Security Check</span>
+              </label>
+              <div class="flex flex-col gap-4">
+                <div class="flex items-center gap-4">
+                  <img
+                    id="captcha-image"
+                    src="/captcha/{{ captcha_token }}"
+                    alt="Captcha"
+                    class="border-2 border-base-300 rounded-lg"
+                    style="height: 80px; width: 200px;"
+                  >
+                  <button
+                    type="button"
+                    class="btn btn-circle btn-outline"
+                    onclick="refreshCaptcha()"
+                    title="Refresh captcha"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  name="captcha_input"
+                  placeholder="Enter the characters shown above"
+                  class="input input-bordered input-lg w-full focus:border-primary"
+                  required
+                  autocomplete="off"
+                  maxlength="6"
+                >
+              </div>
+              <label class="label">
+                <span class="label-text-alt text-base-content/60">
+                  Enter the characters shown in the image above.
                 </span>
               </label>
             </div>
@@ -136,4 +181,31 @@
 
 {# Footer #}
 {% include "components/footer.html" %}
+
+{# Captcha refresh script #}
+<script>
+async function refreshCaptcha() {
+  try {
+    // Fetch a new captcha token from the server
+    const response = await fetch('/newsletter');
+    const html = await response.text();
+
+    // Parse the HTML to extract the new captcha token
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const newToken = doc.getElementById('captcha-token').value;
+
+    // Update the hidden token field and image source
+    document.getElementById('captcha-token').value = newToken;
+    document.getElementById('captcha-image').src = '/captcha/' + newToken + '?' + new Date().getTime();
+
+    // Clear the input field
+    document.querySelector('input[name="captcha_input"]').value = '';
+  } catch (error) {
+    console.error('Failed to refresh captcha:', error);
+    // Fallback: just reload the page
+    window.location.reload();
+  }
+}
+</script>
 {% endblock %}
