@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       bump_type:
-        description: 'Version bump type'
+        description: "Version bump type"
         required: true
         type: choice
         options:
@@ -12,7 +12,7 @@ on:
           - minor
           - major
       prerelease:
-        description: 'Is this a pre-release? (e.g., b1, rc1)'
+        description: "Is this a pre-release? (e.g., b1, rc1)"
         required: false
         type: string
 
@@ -26,8 +26,8 @@ jobs:
     needs: ci
     runs-on: ubuntu-latest
     permissions:
-      id-token: write  # Required for PyPI trusted publishing
-      contents: write  # Required for creating releases and pushing tags
+      id-token: write # Required for PyPI trusted publishing
+      contents: write # Required for creating releases and pushing tags
 
     steps:
       - uses: actions/checkout@v4
@@ -38,7 +38,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
@@ -57,8 +57,8 @@ jobs:
           # Run commitizen bump
           cz bump --increment ${{ github.event.inputs.bump_type }} --yes
 
-          # Get the new version from pyproject.toml
-          NEW_VERSION=$(grep -o 'version = "[^"]*"' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          # Get the new version from pyproject.toml [project] section only
+          NEW_VERSION=$(grep -m 1 -A 5 '^\[project\]' pyproject.toml | grep 'version = ' | sed 's/version = "\(.*\)"/\1/')
 
           # Add prerelease suffix if specified
           if [ -n "${{ github.event.inputs.prerelease }}" ]; then
@@ -270,7 +270,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.12', '3.13']
+        python-version: ["3.12", "3.13"]
 
     steps:
       - name: Set up Python ${{ matrix.python-version }}
