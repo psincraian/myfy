@@ -5,14 +5,14 @@ description = "Opinionated Python framework with modularity, ergonomics, and pow
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "myfy-core~=0.1.0",
-    "myfy-cli~=0.1.0",
+    "myfy-core~=0.1.2",
+    "myfy-cli~=0.1.2",
 ]
 
 [project.optional-dependencies]
-web = ["myfy-web~=0.1.0"]
+web = ["myfy-web~=0.1.2"]
 frontend = ["myfy-frontend~=0.1.0"]
-all = ["myfy-web~=0.1.0", "myfy-frontend~=0.1.0"]
+all = ["myfy-web~=0.1.2", "myfy-frontend~=0.1.0"]
 
 [build-system]
 requires = ["hatchling"]

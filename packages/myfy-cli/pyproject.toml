@@ -5,7 +5,7 @@ description = "CLI tools for myfy framework"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "myfy-core~=0.1.0",
+    "myfy-core~=0.1.2",
     "typer>=0.12",
     "rich>=13.0",
     "uvicorn[standard]>=0.30",
