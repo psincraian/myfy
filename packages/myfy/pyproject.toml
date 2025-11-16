@@ -1,6 +1,6 @@
 [project]
 name = "myfy"
-version = "0.1.1"
+version = "0.1.2"
 description = "Opinionated Python framework with modularity, ergonomics, and power"
 readme = "README.md"
 requires-python = ">=3.12"

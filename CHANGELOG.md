@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Frontend module with Tailwind 4 and DaisyUI 5
 - Comprehensive documentation
 
+## v0.1.2 (2025-11-16)
+
+### Refactor
+
+- **ci**: use only one file for publishing to pypi
+
 ## v0.1.1 (2025-11-16)
 
 ### Feat

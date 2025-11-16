@@ -1,6 +1,6 @@
 [project]
 name = "myfy-web"
-version = "0.1.1"
+version = "0.1.2"
 description = "Web/ASGI module for myfy framework"
 readme = "README.md"
 requires-python = ">=3.12"

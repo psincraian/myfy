@@ -1,6 +1,6 @@
 [project]
 name = "myfy-frontend"
-version = "0.1.1"
+version = "0.1.2"
 description = "Frontend module for myfy with Tailwind 4, DaisyUI 5, and Vite"
 requires-python = ">=3.12"
 readme = "README.md"

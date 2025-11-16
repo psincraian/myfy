@@ -1,6 +1,6 @@
 [project]
 name = "myfy-workspace"
-version = "0.1.1"
+version = "0.1.2"
 description = "myfy framework workspace"
 requires-python = ">=3.12"
 dependencies = [
