@@ -9,6 +9,11 @@
   <meta name="description" content="{% block description %}Built with myfy framework{% endblock %}">
   <meta name="author" content="{% block author %}{% endblock %}">
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/images/myfy_logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/images/myfy_logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/images/myfy.png">
+
   {# Vite dev mode: HMR client #}
   {% if get_vite_client_url() %}
   <script type="module" src="{{ get_vite_client_url() }}"></script>
