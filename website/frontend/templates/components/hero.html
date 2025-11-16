@@ -1,41 +1,9 @@
 {# Hero Component - Modern, beautiful hero section Design improvements: -
-Cleaner layout with better spacing - Subtle floating leaf decorations - Improved
-typography hierarchy - Better mobile responsiveness - Dark mode optimized #}
+Cleaner layout with better spacing - Improved typography hierarchy - Better mobile
+responsiveness - Dark mode optimized #}
 <section
-    class="relative min-h-[calc(100vh-4rem)] hero-gradient leaf-pattern overflow-hidden pt-24 pb-16"
+    class="relative min-h-[calc(100vh-4rem)] hero-gradient overflow-hidden pt-24 pb-16"
 >
-    {# Subtle floating leaf decorations - hidden on mobile for performance #}
-    <div
-        class="hidden md:block absolute top-32 left-10 w-20 h-20 opacity-10 animate-float pointer-events-none"
-    >
-        <img
-            src="/static/images/leaf-1.svg"
-            alt=""
-            class="w-full h-full"
-            loading="lazy"
-        />
-    </div>
-    <div
-        class="hidden md:block absolute top-48 right-16 w-24 h-24 opacity-8 animate-float-delayed pointer-events-none"
-    >
-        <img
-            src="/static/images/leaf-2.svg"
-            alt=""
-            class="w-full h-full"
-            loading="lazy"
-        />
-    </div>
-    <div
-        class="hidden lg:block absolute bottom-32 left-1/4 w-16 h-16 opacity-6 animate-float pointer-events-none"
-    >
-        <img
-            src="/static/images/leaf-1.svg"
-            alt=""
-            class="w-full h-full transform rotate-45"
-            loading="lazy"
-        />
-    </div>
-
     <div class="container mx-auto px-4 relative z-10">
         <div class="max-w-5xl mx-auto text-center">
             {# Main headline with better typography #}

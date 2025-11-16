@@ -39,16 +39,4 @@ document.addEventListener('DOMContentLoaded', () => {
     card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
     observer.observe(card);
   });
-
-  // Add parallax effect to floating leaves
-  window.addEventListener('scroll', () => {
-    const scrolled = window.pageYOffset;
-    const leaves = document.querySelectorAll('.animate-float, .animate-float-delayed');
-
-    leaves.forEach((leaf, index) => {
-      const speed = 0.1 + (index * 0.05);
-      const yPos = -(scrolled * speed);
-      leaf.style.transform = `translateY(${yPos}px)`;
-    });
-  });
 });

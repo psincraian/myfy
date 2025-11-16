@@ -19,32 +19,9 @@
   .text-balance {
     text-wrap: balance;
   }
-
-  /* Organic leaf shapes */
-  .leaf-shape {
-    border-radius: 50% 0 50% 0;
-  }
-
-  /* Smooth floating animation */
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-
-  .animate-float-delayed {
-    animation: float 8s ease-in-out infinite 2s;
-  }
 }
 
 /* Keyframe animations */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(5deg);
-  }
-}
-
 @keyframes grow {
   from {
     transform: scale(0.95);
@@ -67,15 +44,6 @@
   /* Dark mode hero background */
   [data-theme="dark"] .hero-gradient {
     background: var(--color-base-100);
-  }
-
-  /* Leaf pattern background - simplified */
-  .leaf-pattern {
-    /* No background pattern needed for plain design */
-  }
-
-  [data-theme="dark"] .leaf-pattern {
-    /* No background pattern needed for plain design */
   }
 
   /* Feature card with plant theme - responsive to dark mode */
