@@ -7,7 +7,6 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
 from myfy.core.config import load_settings
@@ -17,6 +16,7 @@ from .assets import AssetResolver
 from .config import FrontendSettings
 from .process import ProcessManager
 from .scaffold import check_frontend_initialized, scaffold_frontend
+from .static_files import CachedStaticFiles
 from .templates import create_templates_instance
 
 if TYPE_CHECKING:
@@ -215,10 +215,18 @@ class FrontendModule:
         if static_path.exists():
             app.mount(
                 settings.static_url_prefix,
-                StaticFiles(directory=str(static_path)),
+                CachedStaticFiles(
+                    directory=str(static_path),
+                    cache_max_age=settings.cache_max_age,
+                    enable_caching=settings.cache_static_assets,
+                ),
                 name="static",
             )
-            logger.info(f"✅ Static files mounted at {settings.static_url_prefix}")
+            cache_status = "enabled" if settings.cache_static_assets else "disabled"
+            logger.info(
+                f"✅ Static files mounted at {settings.static_url_prefix} "
+                f"(caching {cache_status}, max-age={settings.cache_max_age}s)"
+            )
         else:
             logger.debug(f"Static files directory not found: {static_path}")
 
