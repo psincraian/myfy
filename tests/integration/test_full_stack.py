@@ -130,7 +130,10 @@ class TestFullStackIntegration:
         request_count = {"count": 0}
 
         class RequestService:
-            """Service that tracks request counts."""
+            """A test service for verifying request-scoped dependency injection.
+
+            Each request should receive a new instance with a unique request_id.
+            """
 
             def __init__(self, request_id: int):
                 self.request_id = request_id
@@ -353,6 +356,11 @@ class TestLifecycle:
         lifecycle_events = []
 
         class TestModule(BaseModule):
+            """A test module for verifying lifecycle event hooks.
+
+            Records configure, start, and stop events to verify they are called.
+            """
+
             def __init__(self):
                 super().__init__("test")
 
