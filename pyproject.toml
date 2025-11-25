@@ -33,6 +33,7 @@ dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
     "commitizen>=4.0.0",
+    "httpx>=0.27.0",
 ]
 docs = [
     "mkdocs>=1.5.0",
@@ -100,6 +101,23 @@ unfixable = []
 [tool.ruff.lint.per-file-ignores]
 # Allow unused imports in __init__.py files
 "__init__.py" = ["F401"]
+# Test files have different requirements
+"**/tests/**/*.py" = [
+    "ARG001",   # Unused function arguments (common in test fixtures)
+    "ARG002",   # Unused method arguments (common in test fixtures)
+    "PLC0415",  # Import not at top of file (common pattern in tests)
+    "PT012",    # pytest.raises block can contain multiple statements
+    "SIM105",   # contextlib.suppress vs try/except/pass (test clarity)
+    "PTH109",   # os.getcwd() instead of Path.cwd() (test fixtures)
+    "RUF059",   # Unused unpacked variables (often needed for test setup)
+    "A002",     # Function argument shadowing builtin (test handlers use 'id')
+    "PT011",    # pytest.raises too broad (acceptable in tests)
+    "PIE790",   # Unnecessary pass statement (protocol classes)
+    "PERF401",  # list.extend vs append in loop (test clarity)
+    "B007",     # Loop control variable unused (common in tests)
+    "TC001",    # Move import into type-checking block (not needed in tests)
+    "RUF012",   # Mutable class attributes (Pydantic model_config)
+]
 
 [tool.ruff.lint.isort]
 # Configure import sorting

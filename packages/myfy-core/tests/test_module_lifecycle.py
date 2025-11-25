@@ -81,7 +81,7 @@ class ExtendingModule:
     def configure(self, container: Container) -> None:
         container.register(bool, lambda: True, scope=SINGLETON)
 
-    def extend(self, container: Container) -> None:  # noqa: ARG002
+    def extend(self, container: Container) -> None:
         """Modify registrations in extend phase."""
         self.extend_called = True
 

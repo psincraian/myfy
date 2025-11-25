@@ -15,6 +15,11 @@ Architecture Decision Records document important architectural decisions made in
 - [ADR-0001: Record Architecture Decisions](0001-record-architecture-decisions.md) - Establishes the practice of using ADRs
 - [ADR-0002: Modular Configuration Design](0002-modular-configuration-design.md) - Module-owned configuration pattern
 - [ADR-0003: Dependency Injection with Scopes](0003-dependency-injection-with-scopes.md) - Scoped DI container design
+- [ADR-0004: Frontend Module Integration](0004-frontend-module-integration.md) - Vite/Tailwind frontend integration
+- [ADR-0005: Module Extension and Lifecycle Phases](0005-module-extension-and-lifecycle-phases.md) - Module lifecycle design
+- [ADR-0006: Monorepo Versioning and Publishing](0006-monorepo-versioning-and-publishing.md) - Version management strategy
+- [ADR-0007: Optional Nested Module Settings](0007-optional-nested-module-settings.md) - Settings nesting pattern
+- [ADR-0008: Test Organization Strategy](0008-test-organization-strategy.md) - Test structure and categories
 
 ## Creating New ADRs
 
