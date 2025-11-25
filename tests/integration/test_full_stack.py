@@ -7,9 +7,7 @@ Tests the complete integration of core, web, and DI systems.
 from pydantic import BaseModel
 from starlette.testclient import TestClient
 
-from myfy.core import Application
-from myfy.core.di.provider import provider
-from myfy.core.di.scopes import SINGLETON, Scope
+from myfy.core import REQUEST, SINGLETON, Application, BaseModule, Container, provider
 from myfy.web import WebModule, route
 
 
@@ -91,11 +89,12 @@ class TestFullStackIntegration:
             return created.model_dump()
 
         # Create application
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
         # Get ASGI app
-        web_module = app.get_module("web")
+        web_module = app.get_module(WebModule)
         lifespan = app.create_lifespan()
         asgi_app = web_module.get_asgi_app(app.container, lifespan=lifespan)
 
@@ -130,19 +129,26 @@ class TestFullStackIntegration:
         """Should create new instances for request-scoped dependencies."""
         request_count = {"count": 0}
 
-        @provider(scope=Scope.REQUEST)
-        def request_service() -> dict:
+        class RequestService:
+            """Service that tracks request counts."""
+
+            def __init__(self, request_id: int):
+                self.request_id = request_id
+
+        @provider(scope=REQUEST)
+        def request_service() -> RequestService:
             request_count["count"] += 1
-            return {"request_id": request_count["count"]}
+            return RequestService(request_count["count"])
 
         @route.get("/test")
-        def test_handler(svc: dict):
-            return svc
+        def test_handler(svc: RequestService):
+            return {"request_id": svc.request_id}
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
-        web_module = app.get_module("web")
+        web_module = app.get_module(WebModule)
         lifespan = app.create_lifespan()
         asgi_app = web_module.get_asgi_app(app.container, lifespan=lifespan)
 
@@ -168,10 +174,11 @@ class TestFullStackIntegration:
 
             raise HTTPException(status_code=400, detail="Bad request")
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
-        web_module = app.get_module("web")
+        web_module = app.get_module(WebModule)
         lifespan = app.create_lifespan()
         asgi_app = web_module.get_asgi_app(app.container, lifespan=lifespan)
 
@@ -211,10 +218,11 @@ class TestFullStackIntegration:
         def get_combined(b: ServiceB):
             return {"value": b.get_combined()}
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
-        web_module = app.get_module("web")
+        web_module = app.get_module(WebModule)
         lifespan = app.create_lifespan()
         asgi_app = web_module.get_asgi_app(app.container, lifespan=lifespan)
 
@@ -242,10 +250,11 @@ class TestAsyncHandlers:
                 return {"error": "Not found"}, 404
             return user.model_dump()
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
-        web_module = app.get_module("web")
+        web_module = app.get_module(WebModule)
         lifespan = app.create_lifespan()
         asgi_app = web_module.get_asgi_app(app.container, lifespan=lifespan)
 
@@ -265,10 +274,11 @@ class TestAsyncHandlers:
         async def async_handler():
             return {"type": "async"}
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
-        web_module = app.get_module("web")
+        web_module = app.get_module(WebModule)
         lifespan = app.create_lifespan()
         asgi_app = web_module.get_asgi_app(app.container, lifespan=lifespan)
 
@@ -290,10 +300,11 @@ class TestValidation:
         def get_item(item_id: int):
             return {"item_id": item_id}
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
-        web_module = app.get_module("web")
+        web_module = app.get_module(WebModule)
         lifespan = app.create_lifespan()
         asgi_app = web_module.get_asgi_app(app.container, lifespan=lifespan)
 
@@ -314,10 +325,11 @@ class TestValidation:
         def validate_user(user: User):
             return user.model_dump()
 
-        app = Application(modules=[WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(WebModule())
         app.initialize()
 
-        web_module = app.get_module("web")
+        web_module = app.get_module(WebModule)
         lifespan = app.create_lifespan()
         asgi_app = web_module.get_asgi_app(app.container, lifespan=lifespan)
 
@@ -340,31 +352,26 @@ class TestLifecycle:
         """Should properly initialize and clean up modules."""
         lifecycle_events = []
 
-        from myfy.core.module import IModule
+        class TestModule(BaseModule):
+            def __init__(self):
+                super().__init__("test")
 
-        class TestModule(IModule):
-            @property
-            def name(self) -> str:
-                return "test"
-
-            def configure(self, app):
+            def configure(self, container: Container) -> None:
                 lifecycle_events.append("configure")
 
-            def compile(self, app):
-                lifecycle_events.append("compile")
-
-            async def start(self):
+            async def start(self) -> None:
                 lifecycle_events.append("start")
 
-            async def stop(self):
+            async def stop(self) -> None:
                 lifecycle_events.append("stop")
 
-        app = Application(modules=[TestModule(), WebModule()])
+        app = Application(auto_discover=False)
+        app.add_module(TestModule())
+        app.add_module(WebModule())
         app.initialize()
 
-        # Should have called configure and compile
+        # Should have called configure during initialization
         assert "configure" in lifecycle_events
-        assert "compile" in lifecycle_events
 
         # Clean up
         lifecycle_events.clear()

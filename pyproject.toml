@@ -33,6 +33,7 @@ dev = [
     "pytest-cov>=6.0.0",
     "hypothesis>=6.0.0",
     "commitizen>=4.0.0",
+    "httpx>=0.28.0",
 ]
 docs = [
     "mkdocs>=1.5.0",
