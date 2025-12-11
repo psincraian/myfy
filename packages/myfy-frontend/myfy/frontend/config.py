@@ -36,5 +36,8 @@ class FrontendSettings(BaseSettings):
     auto_escape: bool = Field(default=True)
     auto_reload: bool = Field(default=True)  # Dev only
 
+    # Theme settings
+    theme_storage_key: str = Field(default="myfy-theme-preference")
+
     class Config:
         env_prefix = "MYFY_FRONTEND_"

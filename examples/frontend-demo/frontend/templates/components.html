@@ -7,7 +7,15 @@
 {% block title %}{{ title }} - myfy Frontend{% endblock %}
 
 {% block content %}
-{{ navbar(logo="myfy") }}
+{{ navbar(
+  logo="myfy",
+  links=[
+    {"url": "/", "text": "Home"},
+    {"url": "/todos", "text": "Todos"},
+    {"url": "/components", "text": "Components"},
+    {"url": "/about", "text": "About"}
+  ]
+) }}
 
 <div class="container mx-auto px-4 py-16">
   <h1 class="text-5xl font-bold text-center mb-12">DaisyUI Components</h1>

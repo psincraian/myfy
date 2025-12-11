@@ -7,10 +7,23 @@ members = [
     "myfy",
     "myfy-cli",
     "myfy-core",
+    "myfy-data",
     "myfy-frontend",
     "myfy-web",
     "myfy-website",
     "myfy-workspace",
+]
+
+[[package]]
+name = "aiosqlite"
+version = "0.21.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/13/7d/8bca2bf9a247c2c5dfeec1d7a5f40db6518f88d314b8bca9da29670d2671/aiosqlite-0.21.0.tar.gz", hash = "sha256:131bb8056daa3bc875608c631c678cda73922a2d4ba8aec373b19f18c17e7aa3", size = 13454, upload-time = "2025-02-03T07:30:16.235Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f5/10/6c25ed6de94c49f88a91fa5018cb4c0f3625f31d5be9f771ebe5cc7cd506/aiosqlite-0.21.0-py3-none-any.whl", hash = "sha256:2549cf4057f95f53dcba16f2b64e8e2791d7e1adedb13197dd8ed77bb226d7d0", size = 15792, upload-time = "2025-02-03T07:30:13.6Z" },
 ]
 
 [[package]]
@@ -727,8 +740,12 @@ dependencies = [
 
 [package.optional-dependencies]
 all = [
+    { name = "myfy-data" },
     { name = "myfy-frontend" },
     { name = "myfy-web" },
+]
+data = [
+    { name = "myfy-data" },
 ]
 frontend = [
     { name = "myfy-frontend" },
@@ -741,12 +758,14 @@ web = [
 requires-dist = [
     { name = "myfy-cli", editable = "packages/myfy-cli" },
     { name = "myfy-core", editable = "packages/myfy-core" },
+    { name = "myfy-data", marker = "extra == 'all'", editable = "packages/myfy-data" },
+    { name = "myfy-data", marker = "extra == 'data'", editable = "packages/myfy-data" },
     { name = "myfy-frontend", marker = "extra == 'all'", editable = "packages/myfy-frontend" },
     { name = "myfy-frontend", marker = "extra == 'frontend'", editable = "packages/myfy-frontend" },
     { name = "myfy-web", marker = "extra == 'all'", editable = "packages/myfy-web" },
     { name = "myfy-web", marker = "extra == 'web'", editable = "packages/myfy-web" },
 ]
-provides-extras = ["web", "frontend", "all"]
+provides-extras = ["web", "frontend", "data", "all"]
 
 [[package]]
 name = "myfy-cli"
@@ -761,6 +780,9 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+data = [
+    { name = "myfy-data" },
+]
 production = [
     { name = "gunicorn" },
 ]
@@ -770,11 +792,12 @@ requires-dist = [
     { name = "gunicorn", marker = "extra == 'production'", specifier = ">=22.0.0" },
     { name = "klyne", specifier = ">=0.3.0" },
     { name = "myfy-core", editable = "packages/myfy-core" },
+    { name = "myfy-data", marker = "extra == 'data'", editable = "packages/myfy-data" },
     { name = "rich", specifier = ">=13.0" },
     { name = "typer", specifier = ">=0.12" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.30" },
 ]
-provides-extras = ["production"]
+provides-extras = ["data", "production"]
 
 [[package]]
 name = "myfy-core"
@@ -793,6 +816,25 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.0" },
     { name = "pydantic-settings", specifier = ">=2.0" },
     { name = "typing-extensions", specifier = ">=4.8" },
+]
+
+[[package]]
+name = "myfy-data"
+version = "0.1.2"
+source = { editable = "packages/myfy-data" }
+dependencies = [
+    { name = "aiosqlite" },
+    { name = "alembic" },
+    { name = "myfy-core" },
+    { name = "sqlalchemy", extra = ["asyncio"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "aiosqlite", specifier = ">=0.20.0" },
+    { name = "alembic", specifier = ">=1.13.0" },
+    { name = "myfy-core", editable = "packages/myfy-core" },
+    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0" },
 ]
 
 [[package]]

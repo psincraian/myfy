@@ -2,12 +2,33 @@
 
 from typing import Any
 
+from markupsafe import Markup
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
 from starlette.templating import Jinja2Templates
 
 from .assets import AssetResolver
 from .config import FrontendSettings
+
+
+def create_theme_script(storage_key: str) -> Markup:
+    """
+    Generate inline script for theme initialization.
+
+    This script runs synchronously before CSS loads to prevent
+    flash of wrong theme (FOWT) on page navigation.
+
+    Args:
+        storage_key: localStorage key for theme preference
+
+    Returns:
+        Safe HTML markup with the script tag
+    """
+    if not storage_key:
+        return Markup("")
+
+    script = f"""<script>(function(){{var t=localStorage.getItem('{storage_key}');if(!t){{t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}}document.documentElement.setAttribute('data-theme',t)}})();</script>"""
+    return Markup(script)
 
 
 def create_templates_instance(
@@ -36,6 +57,10 @@ def create_templates_instance(
     templates.env.globals["get_asset_url"] = asset_resolver.get_asset_url
     templates.env.globals["get_css_url"] = asset_resolver.get_css_url
     templates.env.globals["get_vite_client_url"] = asset_resolver.get_vite_client_url
+
+    # Theme script helper (prevents flash of wrong theme on page load)
+    theme_script = create_theme_script(settings.theme_storage_key)
+    templates.env.globals["get_theme_script"] = lambda: theme_script
 
     # Add environment info
     templates.env.globals["environment"] = settings.environment

@@ -13,6 +13,7 @@ members = [
   "packages/myfy-core",
   "packages/myfy-web",
   "packages/myfy-cli",
+  "packages/myfy-data",
   "packages/myfy-frontend",
   "packages/myfy",
   "website",
@@ -21,6 +22,7 @@ members = [
 [tool.uv.sources]
 myfy-core = { workspace = true }
 myfy-web = { workspace = true }
+myfy-data = { workspace = true }
 myfy = { workspace = true }
 myfy-frontend = { workspace = true }
 myfy-cli = { workspace = true, editable = true }

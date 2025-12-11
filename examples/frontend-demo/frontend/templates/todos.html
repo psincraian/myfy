@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% from "components/navbar.html" import navbar %}
+
+{% block title %}{{ title }} - myfy Frontend{% endblock %}
+
+{% block content %}
+{{ navbar(
+  logo="myfy",
+  links=[
+    {"url": "/", "text": "Home"},
+    {"url": "/todos", "text": "Todos"},
+    {"url": "/components", "text": "Components"},
+    {"url": "/about", "text": "About"}
+  ]
+) }}
+
+<div class="min-h-screen pt-24 pb-12 px-4">
+  <div class="max-w-3xl mx-auto">
+    <!-- Page Header -->
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold mb-2">
+        <span class="text-primary">Todo List</span>
+      </h1>
+      <p class="text-base-content/70">
+        Powered by myfy-data with SQLAlchemy async sessions
+      </p>
+    </div>
+
+    <!-- Add Todo Form -->
+    <div class="card bg-base-100 shadow-xl mb-6">
+      <div class="card-body">
+        <form method="POST" action="/todos" class="flex gap-2">
+          <input
+            type="text"
+            name="title"
+            placeholder="What needs to be done?"
+            class="input input-bordered input-primary flex-1"
+            required
+            autofocus
+          />
+          <button type="submit" class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            Add
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Todo Stats -->
+    {% set total = todos|length %}
+    {% set completed = todos|selectattr("completed")|list|length %}
+    {% set remaining = total - completed %}
+
+    {% if total > 0 %}
+    <div class="stats stats-horizontal shadow mb-6 w-full">
+      <div class="stat">
+        <div class="stat-title">Total Tasks</div>
+        <div class="stat-value text-primary">{{ total }}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-title">Completed</div>
+        <div class="stat-value text-success">{{ completed }}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-title">Remaining</div>
+        <div class="stat-value text-warning">{{ remaining }}</div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Todo List -->
+    {% if todos %}
+    <div class="space-y-2">
+      {% for todo in todos %}
+      <div class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
+        <div class="card-body p-4 flex flex-row items-center gap-4">
+          <!-- Toggle Checkbox -->
+          <form method="POST" action="/todos/{{ todo.id }}/toggle" class="flex-shrink-0">
+            <input
+              type="checkbox"
+              class="checkbox checkbox-primary"
+              {% if todo.completed %}checked{% endif %}
+              onchange="this.form.submit()"
+            />
+          </form>
+
+          <!-- Todo Title -->
+          <div class="flex-1">
+            <span class="{% if todo.completed %}line-through text-base-content/50{% endif %}">
+              {{ todo.title }}
+            </span>
+          </div>
+
+          <!-- Delete Button -->
+          <form method="POST" action="/todos/{{ todo.id }}/delete" class="flex-shrink-0">
+            <button
+              type="submit"
+              class="btn btn-ghost btn-sm btn-circle text-error"
+              title="Delete todo"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info shrink-0 w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <span>No todos yet! Add your first task above.</span>
+    </div>
+    {% endif %}
+
+    <!-- Database Info Card -->
+    <div class="mt-8 card bg-base-200">
+      <div class="card-body">
+        <h3 class="card-title text-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z" />
+            <path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z" />
+            <path d="M17 5c0 1.657-3.134 3-7 3S3 6.657 3 5s3.134-3 7-3 7 1.343 7 3z" />
+          </svg>
+          Database Integration
+        </h3>
+        <p class="text-sm text-base-content/70">
+          This page demonstrates myfy-data module with:
+        </p>
+        <ul class="text-sm text-base-content/70 list-disc list-inside space-y-1">
+          <li>Async SQLAlchemy 2.0+ with SQLite</li>
+          <li>REQUEST-scoped sessions (auto-injected, auto-cleaned)</li>
+          <li>Connection pooling and lifecycle management</li>
+          <li>Zero configuration (sensible defaults)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
