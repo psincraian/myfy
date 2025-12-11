@@ -13,6 +13,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+data = [
+    "myfy-data~=0.1.2",
+]
 production = [
     "gunicorn>=22.0.0",
 ]

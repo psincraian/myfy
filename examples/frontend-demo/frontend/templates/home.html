@@ -6,7 +6,15 @@
 {% block title %}{{ title }} - myfy Frontend{% endblock %}
 
 {% block content %}
-{{ navbar(logo="myfy") }}
+{{ navbar(
+  logo="myfy",
+  links=[
+    {"url": "/", "text": "Home"},
+    {"url": "/todos", "text": "Todos"},
+    {"url": "/components", "text": "Components"},
+    {"url": "/about", "text": "About"}
+  ]
+) }}
 
 <div class="hero min-h-screen hero-gradient">
   <div class="hero-content text-center">
