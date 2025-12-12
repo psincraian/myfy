@@ -17,9 +17,21 @@ variant = "modern"
 logo = "images/myfy.png"
 favicon = "images/myfy.png"
 
-[project.theme.palette]
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
 primary = "green"
 accent = "light green"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+primary = "green"
+accent = "light green"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to light mode"
 
 [project.extra]
 # Social links and other custom data
