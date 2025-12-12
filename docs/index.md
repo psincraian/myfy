@@ -4,7 +4,7 @@
 
 # myfy
 
-**Build Python applications that feel like they wrote themselves.**
+**Opinionated Python framework with modularity, ergonomics, and power**
 
 ---
 
@@ -13,6 +13,7 @@
 You've built enough Python apps to know: FastAPI is brilliant for APIs but barebones for real apps. Django's too heavy and too coupled. Flask feels like duct tape.
 
 What if you could have:
+
 - **FastAPI's ergonomics** (decorators, type hints, async-first)
 - **Enterprise-grade architecture** (DI container, module system, lifecycle)
 - **Sensible defaults** (no config files until you need them)
