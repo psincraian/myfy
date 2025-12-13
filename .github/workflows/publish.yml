@@ -135,6 +135,7 @@ jobs:
               'packages/myfy-core/pyproject.toml',
               'packages/myfy-web/pyproject.toml',
               'packages/myfy-cli/pyproject.toml',
+              'packages/myfy-data/pyproject.toml',
               'packages/myfy-frontend/pyproject.toml',
               'packages/myfy/pyproject.toml'
           ]
@@ -156,6 +157,7 @@ jobs:
               'packages/myfy-core/myfy/core/version.py',
               'packages/myfy-web/myfy/web/version.py',
               'packages/myfy-cli/myfy_cli/version.py',
+              'packages/myfy-data/myfy/data/version.py',
               'packages/myfy-frontend/myfy/frontend/version.py',
               'packages/myfy/myfy/version.py'
           ]
@@ -171,6 +173,7 @@ jobs:
           dep_files = [
               'packages/myfy-web/pyproject.toml',
               'packages/myfy-cli/pyproject.toml',
+              'packages/myfy-data/pyproject.toml',
               'packages/myfy-frontend/pyproject.toml',
               'packages/myfy/pyproject.toml'
           ]
@@ -217,6 +220,9 @@ jobs:
           echo "Building myfy-cli..."
           uv build --package myfy-cli --out-dir packages/myfy-cli/dist
 
+          echo "Building myfy-data..."
+          uv build --package myfy-data --out-dir packages/myfy-data/dist
+
           echo "Building myfy-frontend..."
           uv build --package myfy-frontend --out-dir packages/myfy-frontend/dist
 
@@ -235,6 +241,9 @@ jobs:
 
           echo -e "\nmyfy-cli:"
           ls -lh packages/myfy-cli/dist/
+
+          echo -e "\nmyfy-data:"
+          ls -lh packages/myfy-data/dist/
 
           echo -e "\nmyfy-frontend:"
           ls -lh packages/myfy-frontend/dist/
@@ -281,6 +290,7 @@ jobs:
             packages/myfy-core/dist/*
             packages/myfy-web/dist/*
             packages/myfy-cli/dist/*
+            packages/myfy-data/dist/*
             packages/myfy-frontend/dist/*
             packages/myfy/dist/*
 
@@ -300,6 +310,12 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: packages/myfy-cli/dist/
+          verbose: true
+
+      - name: Publish myfy-data to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/myfy-data/dist/
           verbose: true
 
       - name: Publish myfy-frontend to PyPI
@@ -339,16 +355,18 @@ jobs:
           import myfy.core
           import myfy.web
           import myfy_cli
+          import myfy.data
           import myfy.frontend
 
           print(f'myfy version: {myfy.__version__}')
           print(f'myfy-core version: {myfy.core.__version__}')
           print(f'myfy-web version: {myfy.web.__version__}')
           print(f'myfy-cli version: {myfy_cli.__version__}')
+          print(f'myfy-data version: {myfy.data.__version__}')
           print(f'myfy-frontend version: {myfy.frontend.__version__}')
 
           # Verify all versions match
-          versions = [myfy.__version__, myfy.core.__version__, myfy.web.__version__, myfy_cli.__version__, myfy.frontend.__version__]
+          versions = [myfy.__version__, myfy.core.__version__, myfy.web.__version__, myfy_cli.__version__, myfy.data.__version__, myfy.frontend.__version__]
           assert len(set(versions)) == 1, f'Version mismatch: {versions}'
           print('✓ All versions match')
           "
