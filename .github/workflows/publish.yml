@@ -355,18 +355,27 @@ jobs:
           import myfy.core
           import myfy.web
           import myfy_cli
-          import myfy.data
           import myfy.frontend
+
+          # myfy.data is optional - import if available
+          try:
+              import myfy.data
+              data_version = myfy.data.__version__
+              print(f'myfy-data version: {data_version}')
+          except ImportError:
+              data_version = None
+              print('myfy-data: not installed (optional)')
 
           print(f'myfy version: {myfy.__version__}')
           print(f'myfy-core version: {myfy.core.__version__}')
           print(f'myfy-web version: {myfy.web.__version__}')
           print(f'myfy-cli version: {myfy_cli.__version__}')
-          print(f'myfy-data version: {myfy.data.__version__}')
           print(f'myfy-frontend version: {myfy.frontend.__version__}')
 
-          # Verify all versions match
-          versions = [myfy.__version__, myfy.core.__version__, myfy.web.__version__, myfy_cli.__version__, myfy.data.__version__, myfy.frontend.__version__]
+          # Verify all versions match (excluding optional packages that aren't installed)
+          versions = [myfy.__version__, myfy.core.__version__, myfy.web.__version__, myfy_cli.__version__, myfy.frontend.__version__]
+          if data_version:
+              versions.append(data_version)
           assert len(set(versions)) == 1, f'Version mismatch: {versions}'
           print('✓ All versions match')
           "
