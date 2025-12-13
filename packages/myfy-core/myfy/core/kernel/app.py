@@ -59,7 +59,7 @@ class Application:
         self._modules: list[Module] = []
         self._auto_discover = auto_discover
 
-    def add_module[T: ModuleType](self, module: type[T]) -> None:
+    def add_module(self, module: Module) -> None:
         """
         Register a module with the application.
 

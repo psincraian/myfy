@@ -172,6 +172,9 @@ class FrontendModule:
         # Store templates as instance attribute for convenience access
         self.templates = templates
 
+    def extend(self, container: "Container") -> None:
+        """Extend other modules (no-op for FrontendModule)."""
+
     def finalize(self, container: "Container") -> None:
         """
         Finalize frontend module after container compilation.

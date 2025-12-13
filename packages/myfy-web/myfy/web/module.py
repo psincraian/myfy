@@ -37,6 +37,14 @@ class WebModule:
     def name(self) -> str:
         return "web"
 
+    @property
+    def requires(self) -> list[type]:
+        return []
+
+    @property
+    def provides(self) -> list[type]:
+        return []
+
     def configure(self, container) -> None:
         """
         Configure web module.
@@ -76,6 +84,12 @@ class WebModule:
             factory=create_asgi_app,
             scope="singleton",
         )
+
+    def extend(self, container) -> None:
+        """Extend other modules (no-op for WebModule)."""
+
+    def finalize(self, container) -> None:
+        """Finalize module configuration (no-op for WebModule)."""
 
     async def start(self) -> None:
         """Start web module (nothing to do - ASGI server handles this)."""
