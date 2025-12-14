@@ -52,6 +52,7 @@ Home = "index.md"
 Modules = [
   { Core = "modules/core.md" },
   { Web = "modules/web.md" },
+  { Data = "modules/data.md" },
   { CLI = "modules/cli.md" },
   { Frontend = "modules/frontend.md" },
 ]

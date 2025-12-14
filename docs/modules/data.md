@@ -17,6 +17,7 @@ uv pip install myfy-data
 ```
 
 **Dependencies:**
+
 - `myfy-core` - Core framework
 - `sqlalchemy[asyncio]` - SQLAlchemy with async support
 - `aiosqlite` - Async SQLite driver (default)
