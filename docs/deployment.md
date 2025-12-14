@@ -103,7 +103,7 @@ MYFY_FRONTEND_STATIC_URL_PREFIX=/static
 MYFY_FRONTEND_CACHE_MAX_AGE=31536000  # 1 year default
 ```
 
-See [Configuration Reference](./api-reference/core.md) for all available settings.
+See [Configuration](./core-concepts/configuration.md) for all available settings.
 
 ---
 
@@ -242,6 +242,6 @@ gunicorn app:app \
 
 ## Next Steps
 
-- [CLI Reference](./api-reference/cli.md) - Full CLI command reference
-- [Configuration](./api-reference/core.md) - All configuration options
+- [CLI Module](./modules/cli.md) - CLI commands reference
+- [Configuration](./core-concepts/configuration.md) - All configuration options
 - [Frontend Module](./modules/frontend.md) - Frontend integration guide

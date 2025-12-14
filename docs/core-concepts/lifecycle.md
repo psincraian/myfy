@@ -433,5 +433,4 @@ uv run myfy run
 
 - [Modules](modules.md) - Create custom modules
 - [Dependency Injection](dependency-injection.md) - Use DI in lifecycle
-- [Testing Guide](../guides/testing.md) - Test lifecycle
-- [Deployment](../guides/deployment.md) - Production lifecycle
+- [Deployment](../deployment.md) - Production lifecycle

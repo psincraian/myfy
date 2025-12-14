@@ -418,12 +418,6 @@ uv run myfy run --port 8001
 lsof -ti:8000 | xargs kill
 ```
 
-## API Reference
-
-For detailed API documentation, see:
-
-- [CLI API Reference](../api-reference/cli.md)
-
 ## Best Practices
 
 ### Use Profiles

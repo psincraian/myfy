@@ -178,11 +178,15 @@ async def create_user(body: CreateUser, db: Database) -> User:
 ### Query Parameters
 
 ```python
-# Coming soon - use Starlette's Request for now
-@route.get("/search")
-async def search(request: Request) -> list[Result]:
-    query = request.query_params.get("q", "")
-    return await search_engine.search(query)
+@route.get("/users")
+async def list_users(
+    page: int = 1,
+    limit: int = 10,
+    sort: str = "name"
+) -> list[User]:
+    return await service.list_users(page, limit, sort)
+
+# Call with: GET /users?page=2&limit=20&sort=created_at
 ```
 
 ---
@@ -341,15 +345,16 @@ def test_get_users(app):
 ### Request DTOs
 
 ```python
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 class CreateUserDTO(BaseModel):
     username: str = Field(min_length=3, max_length=50)
     email: str = Field(pattern=r'^[\w\.-]+@[\w\.-]+\.\w+$')
     age: int = Field(ge=18, le=120)
 
-    @validator('username')
-    def username_alphanumeric(cls, v):
+    @field_validator('username')
+    @classmethod
+    def username_alphanumeric(cls, v: str) -> str:
         if not v.isalnum():
             raise ValueError('must be alphanumeric')
         return v
@@ -396,16 +401,20 @@ def get_config(settings: Settings) -> dict:
 ### Background Tasks
 
 ```python
-# Coming soon - use Starlette's BackgroundTasks for now
-from starlette.background import BackgroundTasks
+from starlette.background import BackgroundTask
+from starlette.responses import Response
+
+async def send_email_task(to: str, subject: str):
+    # Send email asynchronously
+    pass
 
 @route.post("/send-email")
-async def send_email(
-    body: EmailDTO,
-    background_tasks: BackgroundTasks
-) -> dict:
-    background_tasks.add_task(send_email_task, body.to, body.subject)
-    return {"status": "queued"}
+async def send_email(body: EmailDTO) -> Response:
+    return Response(
+        content='{"status": "queued"}',
+        media_type="application/json",
+        background=BackgroundTask(send_email_task, body.to, body.subject)
+    )
 ```
 
 ---
@@ -530,5 +539,4 @@ result: User | dict[str, Any] = get_result()
 ## Next Steps
 
 - [Core Concepts](../core-concepts/dependency-injection.md) - Deep dive
-- [Testing Guide](../guides/testing.md) - Test your app
-- [Deployment](../guides/deployment.md) - Go to production
+- [Deployment](../deployment.md) - Go to production

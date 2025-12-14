@@ -357,7 +357,7 @@ This creates a styled homepage with Tailwind 4 and DaisyUI 5. Update your `app.p
 
 ```python
 from myfy.core import Application
-from myfy.web import WebModule
+from myfy.web import WebModule, route  # Add route
 from myfy.frontend import FrontendModule, render_template  # Add this
 from config import AppSettings
 from starlette.requests import Request  # Add this
@@ -495,5 +495,4 @@ uv run myfy run --port 8001
 
 - [Quick Reference](quick-reference.md) - Common patterns
 - [Core Concepts: DI](../core-concepts/dependency-injection.md) - Deep dive
-- [Testing Guide](../guides/testing.md) - Test your application
-- [Deployment Guide](../guides/deployment.md) - Go to production
+- [Deployment Guide](../deployment.md) - Go to production

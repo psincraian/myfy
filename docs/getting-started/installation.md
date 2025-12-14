@@ -138,6 +138,8 @@ uv pip install myfy-core myfy-web myfy-cli myfy-frontend
 from myfy.core import Application, BaseSettings
 from myfy.web import route, WebModule
 from myfy.frontend import FrontendModule, render_template
+from starlette.requests import Request
+from starlette.templating import Jinja2Templates
 
 
 class Settings(BaseSettings):
@@ -145,9 +147,11 @@ class Settings(BaseSettings):
 
 
 @route.get("/")
-async def home():
+async def home(request: Request, templates: Jinja2Templates):
     return render_template(
         "home.html",
+        request=request,
+        templates=templates,
         title="Welcome",
         message="Hello from myfy!"
     )

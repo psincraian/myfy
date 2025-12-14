@@ -211,9 +211,6 @@ Start with the [Installation Guide](getting-started/installation.md) and [Tutori
 **Want to understand the architecture?**
 Read about [Dependency Injection](core-concepts/dependency-injection.md), [Modules](core-concepts/modules.md), and [Configuration](core-concepts/configuration.md)
 
-**Need API details?**
-Check the [API Reference](api-reference/core.md)
-
 **Want to contribute?**
 See our [Contributing Guide](contributing.md)
 
