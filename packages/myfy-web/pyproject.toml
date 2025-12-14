@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "myfy-core~=0.1.2",
+    "python-multipart>=0.0.20",
     "starlette>=0.40",
 ]
 
