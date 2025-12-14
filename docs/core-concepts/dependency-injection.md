@@ -120,7 +120,7 @@ def database(settings: Settings) -> Database:
 def session(db: Database) -> Session:
     return db.create_session()
 
-@provider(scope=SINGLETON)
+@provider(scope=REQUEST)
 def user_repository(session: Session) -> UserRepository:
     return UserRepository(session)
 
@@ -137,7 +137,7 @@ Database (SINGLETON)
    ↓
 Session (REQUEST)
    ↓
-UserRepository (SINGLETON)
+UserRepository (REQUEST)
    ↓
 list_users (handler)
 ```
@@ -534,5 +534,3 @@ def service(session: Session) -> Service:  # ✅
 
 - [Modules](modules.md) - Organize your application
 - [Configuration](configuration.md) - Type-safe settings
-- [Testing Guide](../guides/testing.md) - Test with DI
-- [Building Modules](../guides/building-modules.md) - Create reusable modules

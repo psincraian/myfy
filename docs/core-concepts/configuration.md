@@ -451,4 +451,4 @@ API_KEY=${API_KEY}  # From environment
 
 - [Dependency Injection](dependency-injection.md) - Use settings in DI
 - [Modules](modules.md) - Module-specific config
-- [Deployment](../guides/deployment.md) - Production configuration
+- [Deployment](../deployment.md) - Production configuration

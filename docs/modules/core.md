@@ -157,12 +157,6 @@ import my_providers  # Must import to register
 import my_routes
 ```
 
-## API Reference
-
-For detailed API documentation, see:
-
-- [Core API Reference](../api-reference/core.md)
-
 ## Common Patterns
 
 ### Service Layer

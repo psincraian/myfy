@@ -59,21 +59,15 @@ docs/
 │   ├── modules.md
 │   ├── configuration.md
 │   └── lifecycle.md
-├── guides/                   # How-to guides
-│   ├── building-modules.md
-│   ├── testing.md
-│   ├── deployment.md
-│   ├── web-routes.md
-│   ├── validation.md
-│   └── middleware.md
-├── advanced/                 # Advanced topics
-│   ├── performance.md
-│   ├── security.md
-│   └── observability.md
-├── api-reference/            # Auto-generated API docs
+├── modules/                  # Module documentation
 │   ├── core.md
 │   ├── web.md
-│   └── cli.md
+│   ├── cli.md
+│   ├── data.md
+│   └── frontend.md
+├── adr/                      # Architecture Decision Records
+│   └── *.md
+├── deployment.md             # Deployment guide
 └── contributing.md           # Contribution guide
 ```
 

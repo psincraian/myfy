@@ -117,6 +117,7 @@ from myfy.web import route, WebModule
 from sqlalchemy import Column, Integer, String, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import declarative_base
+from starlette.exceptions import HTTPException
 
 # Define model
 Base = declarative_base()

@@ -24,6 +24,8 @@ myfy ships with these modules:
 | **Core** | `myfy-core` | DI, config, lifecycle management |
 | **Web** | `myfy-web` | HTTP/ASGI, routing, handlers |
 | **CLI** | `myfy-cli` | Development tools |
+| **Data** | `myfy-data` | Database/ORM with async SQLAlchemy |
+| **Frontend** | `myfy-frontend` | Jinja2 templates, Tailwind CSS, Vite |
 
 ---
 
@@ -504,5 +506,3 @@ Error: Circular module dependency: auth → cache → auth
 
 - [Configuration](configuration.md) - Module configuration
 - [Lifecycle](lifecycle.md) - Application lifecycle
-- [Building Modules Guide](../guides/building-modules.md) - Detailed tutorial
-- [Testing Guide](../guides/testing.md) - Test your modules

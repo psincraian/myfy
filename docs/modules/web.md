@@ -464,12 +464,6 @@ async def send_notification(email: str, message: str):
     )
 ```
 
-## API Reference
-
-For detailed API documentation, see:
-
-- [Web API Reference](../api-reference/web.md)
-
 ## Best Practices
 
 ### Use DTOs for Input
@@ -541,5 +535,3 @@ See the [Tutorial](../getting-started/tutorial.md) for a complete CRUD API examp
 
 - **Add Frontend**: Install [`myfy-frontend`](frontend.md) for UI templates
 - **Add CLI**: Install [`myfy-cli`](cli.md) for development tools
-- **Learn Routing**: Read the [API Reference](../api-reference/web.md)
-- **Testing**: Learn how to test your web application
