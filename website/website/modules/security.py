@@ -1,7 +1,6 @@
 """Security module for middleware and security headers."""
 
 import logging
-import os
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -16,6 +15,7 @@ from starlette.responses import JSONResponse
 from starlette.templating import Jinja2Templates
 
 from myfy.core import Container, Module
+from myfy.frontend.config import FrontendSettings
 from myfy.web import IWebExtension
 
 from ..config import SecuritySettings
@@ -134,8 +134,9 @@ class SecurityModule(Module, IWebExtension):
 
         logger.info("Adding security middleware and rate limiting")
 
-        # Detect environment from MYFY_FRONTEND_ENVIRONMENT or default to production
-        environment = os.getenv("MYFY_FRONTEND_ENVIRONMENT", "production")
+        # Get environment from FrontendSettings (defaults to "development")
+        frontend_settings = container.get(FrontendSettings)
+        environment = frontend_settings.environment
 
         # Set up rate limiter
         app.state.limiter = self.limiter
@@ -155,9 +156,14 @@ class SecurityModule(Module, IWebExtension):
         app.add_middleware(SecurityHeadersMiddleware, environment=environment)
 
         # Add trusted host middleware
+        # In development, allow all hosts for Vite HMR WebSocket connections
+        if environment == "development":
+            allowed_hosts = ["*"]
+        else:
+            allowed_hosts = self._settings.allowed_hosts.split(",")
         app.add_middleware(
             TrustedHostMiddleware,
-            allowed_hosts=self._settings.allowed_hosts.split(","),
+            allowed_hosts=allowed_hosts,
         )
 
         # Add error handlers

@@ -707,12 +707,14 @@ version = "0.1.2"
 source = { editable = "packages/myfy-web" }
 dependencies = [
     { name = "myfy-core" },
+    { name = "python-multipart" },
     { name = "starlette" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "myfy-core", editable = "packages/myfy-core" },
+    { name = "python-multipart", specifier = ">=0.0.20" },
     { name = "starlette", specifier = ">=0.40" },
 ]
 
