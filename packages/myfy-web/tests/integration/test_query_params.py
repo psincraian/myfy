@@ -681,7 +681,7 @@ class TestQueryParamClass:
         param = QueryParam()  # Required
 
         with pytest.raises(ValueError) as exc_info:
-            param.validate(None, "test_param", str)
+            param.validate(None, "test_param")
 
         assert "required" in str(exc_info.value).lower()
 
@@ -689,7 +689,7 @@ class TestQueryParamClass:
         """Test that validating None for optional param returns default."""
         param = QueryParam(default="default_value")
 
-        result = param.validate(None, "test_param", str)
+        result = param.validate(None, "test_param")
         assert result == "default_value"
 
     def test_validate_ge_constraint(self):
@@ -697,78 +697,78 @@ class TestQueryParamClass:
         param = QueryParam(default=0, ge=5)
 
         # Valid
-        assert param.validate(5, "test", int) == 5
-        assert param.validate(10, "test", int) == 10
+        assert param.validate(5, "test") == 5
+        assert param.validate(10, "test") == 10
 
         # Invalid
         with pytest.raises(ValueError):
-            param.validate(4, "test", int)
+            param.validate(4, "test")
 
     def test_validate_le_constraint(self):
         """Test le validation on numbers."""
         param = QueryParam(default=0, le=10)
 
         # Valid
-        assert param.validate(10, "test", int) == 10
-        assert param.validate(5, "test", int) == 5
+        assert param.validate(10, "test") == 10
+        assert param.validate(5, "test") == 5
 
         # Invalid
         with pytest.raises(ValueError):
-            param.validate(11, "test", int)
+            param.validate(11, "test")
 
     def test_validate_gt_constraint(self):
         """Test gt validation on numbers."""
         param = QueryParam(default=0, gt=5)
 
         # Valid
-        assert param.validate(6, "test", int) == 6
+        assert param.validate(6, "test") == 6
 
-        # Invalid (equal is not allowed)
+        # Invalid - equal is not allowed
         with pytest.raises(ValueError):
-            param.validate(5, "test", int)
+            param.validate(5, "test")
 
     def test_validate_lt_constraint(self):
         """Test lt validation on numbers."""
         param = QueryParam(default=0, lt=10)
 
         # Valid
-        assert param.validate(9, "test", int) == 9
+        assert param.validate(9, "test") == 9
 
-        # Invalid (equal is not allowed)
+        # Invalid - equal is not allowed
         with pytest.raises(ValueError):
-            param.validate(10, "test", int)
+            param.validate(10, "test")
 
     def test_validate_min_length_constraint(self):
         """Test min_length validation on strings."""
         param = QueryParam(default="", min_length=3)
 
         # Valid
-        assert param.validate("abc", "test", str) == "abc"
+        assert param.validate("abc", "test") == "abc"
 
         # Invalid
         with pytest.raises(ValueError):
-            param.validate("ab", "test", str)
+            param.validate("ab", "test")
 
     def test_validate_max_length_constraint(self):
         """Test max_length validation on strings."""
         param = QueryParam(default="", max_length=5)
 
         # Valid
-        assert param.validate("hello", "test", str) == "hello"
+        assert param.validate("hello", "test") == "hello"
 
         # Invalid
         with pytest.raises(ValueError):
-            param.validate("toolong", "test", str)
+            param.validate("toolong", "test")
 
     def test_validate_pattern_constraint(self):
         """Test pattern (regex) validation on strings."""
         param = QueryParam(default="", pattern=r"^\d{3}$")
 
         # Valid
-        assert param.validate("123", "test", str) == "123"
+        assert param.validate("123", "test") == "123"
 
         # Invalid
         with pytest.raises(ValueError):
-            param.validate("12", "test", str)
+            param.validate("12", "test")
         with pytest.raises(ValueError):
-            param.validate("abc", "test", str)
+            param.validate("abc", "test")

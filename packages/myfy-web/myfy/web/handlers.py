@@ -200,7 +200,7 @@ class HandlerExecutor:
 
         # Apply validation constraints
         try:
-            spec.validate(converted, param_name, type_hint)
+            spec.validate(converted, param_name)
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
 

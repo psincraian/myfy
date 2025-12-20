@@ -14,7 +14,8 @@ Usage:
         return await service.search(q, limit)
 """
 
-from dataclasses import dataclass, field
+import re
+from dataclasses import dataclass
 from typing import Any
 
 
@@ -53,14 +54,13 @@ class QueryParam:
         """Check if this parameter is required."""
         return self.default is ...
 
-    def validate(self, value: Any, param_name: str, param_type: type) -> Any:
+    def validate(self, value: Any, param_name: str) -> Any:
         """
         Validate the value against constraints.
 
         Args:
             value: The value to validate
             param_name: Parameter name for error messages
-            param_type: The expected type of the parameter
 
         Returns:
             The validated value
@@ -102,18 +102,15 @@ class QueryParam:
                 raise ValueError(
                     f"Query parameter '{param_name}' must have at most {self.max_length} characters"
                 )
-            if self.pattern is not None:
-                import re
-
-                if not re.match(self.pattern, value):
-                    raise ValueError(
-                        f"Query parameter '{param_name}' must match pattern '{self.pattern}'"
-                    )
+            if self.pattern is not None and not re.match(self.pattern, value):
+                raise ValueError(
+                    f"Query parameter '{param_name}' must match pattern '{self.pattern}'"
+                )
 
         return value
 
 
-def Query(
+def Query(  # noqa: N802 - FastAPI-style naming convention
     default: Any = ...,
     *,
     ge: float | int | None = None,
