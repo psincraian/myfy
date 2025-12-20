@@ -13,6 +13,8 @@ from typing import Any, get_type_hints
 
 from myfy.core.config import BaseSettings
 
+from .params import QueryParam, QueryParamInfo
+
 
 class HTTPMethod(str, Enum):
     """HTTP methods."""
@@ -41,6 +43,7 @@ class Route:
     dependencies: list[str] = field(default_factory=list)
     path_params: list[str] = field(default_factory=list)
     body_param: str | None = None
+    query_params: list[QueryParamInfo] = field(default_factory=list)
 
     def __repr__(self) -> str:
         handler_name = getattr(self.handler, "__name__", "<lambda>")
@@ -153,22 +156,35 @@ class Router:
         """
         Analyze handler signature to determine DI dependencies and parameters.
 
-        Parameters are classified as:
-        - Path parameters (from URL template)
-        - Body parameter (annotated with a Pydantic model or dict)
-        - DI dependencies (everything else - resolved from container)
+        Parameters are classified as (in order of precedence):
+        1. Path parameters (from URL template)
+        2. Query parameters (annotated with Query(...) or primitive types with defaults)
+        3. Body parameter (annotated with a Pydantic model or dict)
+        4. DI dependencies (everything else - resolved from container)
         """
         sig = signature(route.handler)
         hints = get_type_hints(route.handler)
 
-        for param_name in sig.parameters:
+        for param_name, param in sig.parameters.items():
             # Skip if it's a path parameter
             if param_name in route.path_params:
                 continue
 
-            # Check if it's a body parameter (has type annotation that's not a builtin)
             param_type = hints.get(param_name)
-            if param_type and self._is_body_type(param_type):
+            default = param.default
+
+            # Check if it's explicitly a Query parameter
+            if isinstance(default, QueryParam):
+                route.query_params.append(
+                    QueryParamInfo(
+                        name=param_name,
+                        type_hint=param_type or str,
+                        spec=default,
+                        alias=default.alias,
+                    )
+                )
+            # Check if it's a body parameter
+            elif param_type and self._is_body_type(param_type):
                 route.body_param = param_name
             else:
                 # It's a DI dependency

@@ -21,6 +21,7 @@ from starlette.responses import JSONResponse, Response
 from myfy.core.config import CoreSettings
 
 from .context import RequestContext, get_request_context
+from .params import QueryParam
 from .routing import Route
 
 
@@ -56,14 +57,27 @@ class HandlerExecutor:
                 # Convert to appropriate type with validation
                 kwargs[param_name] = self._convert_param(raw_value, param_type, param_name)
 
-            # 2. Inject request body if needed
+            # 2. Inject query parameters
+            for query_info in route.query_params:
+                query_name = query_info.query_name
+                raw_value = request.query_params.get(query_name)
+
+                # Convert and validate query parameter
+                kwargs[query_info.name] = self._convert_query_param(
+                    raw_value,
+                    query_info.type_hint,
+                    query_info.name,
+                    query_info.spec,
+                )
+
+            # 3. Inject request body if needed
             if route.body_param:
                 body_type = hints.get(route.body_param)
                 if body_type is not None:
                     body_data = await self._parse_body(request, body_type)
                     kwargs[route.body_param] = body_data
 
-            # 3. Inject dependencies from container
+            # 4. Inject dependencies from container
             for param_name in route.dependencies:
                 param_type = hints.get(param_name)
                 if param_type:
@@ -82,7 +96,7 @@ class HandlerExecutor:
                             status_code=500,
                         )
 
-            # 4. Execute handler
+            # 5. Execute handler
             try:
                 if iscoroutinefunction(route.handler):
                     result = await route.handler(**kwargs)
@@ -135,6 +149,62 @@ class HandlerExecutor:
                 status_code=400,
                 detail=f"Invalid value for parameter '{param_name}': expected {type_hint.__name__}, got '{value}'",
             ) from e
+
+    def _convert_query_param(
+        self,
+        value: str | None,
+        type_hint: type,
+        param_name: str,
+        spec: QueryParam,
+    ) -> Any:
+        """
+        Convert and validate query parameter.
+
+        Args:
+            value: Raw string value from query string (None if not present)
+            type_hint: Expected type of the parameter
+            param_name: Parameter name for error messages
+            spec: Query parameter specification with validation constraints
+
+        Returns:
+            Converted and validated value
+
+        Raises:
+            HTTPException: If value is invalid or fails validation
+        """
+        # Handle missing values
+        if value is None:
+            if spec.is_required:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Query parameter '{param_name}' is required",
+                )
+            return spec.default
+
+        # Convert to target type
+        converted: int | float | bool | str
+        try:
+            if type_hint is int:
+                converted = int(value)
+            elif type_hint is float:
+                converted = float(value)
+            elif type_hint is bool:
+                converted = value.lower() in ("true", "1", "yes")
+            else:
+                converted = str(value)
+        except (ValueError, AttributeError) as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid value for query parameter '{param_name}': expected {type_hint.__name__}, got '{value}'",
+            ) from e
+
+        # Apply validation constraints
+        try:
+            spec.validate(converted, param_name, type_hint)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+
+        return converted
 
     async def _parse_body(self, request: Request, body_type: type) -> Any:
         """Parse request body with proper error handling."""
