@@ -422,12 +422,36 @@ class TestErrorHandling:
         assert body["detail"] == "Not found"
 
     @pytest.mark.asyncio
-    async def test_generic_exception_returns_500(self, service_container: Container):
-        """Test that generic exceptions return 500."""
+    async def test_value_error_returns_400(self, service_container: Container):
+        """Test that ValueError is handled and returns 400 via exception handler."""
         executor = HandlerExecutor(service_container)
 
         async def handler():
-            raise ValueError("Something went wrong")
+            raise ValueError("Invalid value")
+
+        route = Route(path="/test", method=HTTPMethod.GET, handler=handler, name="test")
+        executor.compile_route(route)
+
+        response = await executor.execute_route(route, make_mock_request(), {})
+
+        # ValueError is now handled by exception handler registry -> 400
+        assert response.status_code == 400
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
+        assert body["detail"] == "Invalid value"
+
+    @pytest.mark.asyncio
+    async def test_unhandled_exception_returns_500(self, service_container: Container):
+        """Test that unhandled exceptions return 500."""
+        from myfy.web.exception_handlers import ExceptionHandlerRegistry
+
+        # Use a custom registry without RuntimeError handling
+        custom_registry = ExceptionHandlerRegistry()
+        custom_registry._handlers.clear()
+
+        executor = HandlerExecutor(service_container, exception_registry=custom_registry)
+
+        async def handler():
+            raise RuntimeError("Something went wrong")
 
         route = Route(path="/test", method=HTTPMethod.GET, handler=handler, name="test")
         executor.compile_route(route)
@@ -438,11 +462,17 @@ class TestErrorHandling:
 
     @pytest.mark.asyncio
     async def test_error_hides_details_in_production(self, service_container: Container):
-        """Test that error details are hidden in production."""
-        executor = HandlerExecutor(service_container)
+        """Test that error details are hidden in production for unhandled exceptions."""
+        from myfy.web.exception_handlers import ExceptionHandlerRegistry
+
+        # Use a custom registry without RuntimeError handling
+        custom_registry = ExceptionHandlerRegistry()
+        custom_registry._handlers.clear()
+
+        executor = HandlerExecutor(service_container, exception_registry=custom_registry)
 
         async def handler():
-            raise ValueError("Secret error details")
+            raise RuntimeError("Secret error details")
 
         route = Route(path="/test", method=HTTPMethod.GET, handler=handler, name="test")
         executor.compile_route(route)
@@ -456,11 +486,17 @@ class TestErrorHandling:
 
     @pytest.mark.asyncio
     async def test_error_shows_details_in_debug(self, debug_container: Container):
-        """Test that error details are shown in debug mode."""
-        executor = HandlerExecutor(debug_container)
+        """Test that error details are shown in debug mode for unhandled exceptions."""
+        from myfy.web.exception_handlers import ExceptionHandlerRegistry
+
+        # Use a custom registry without RuntimeError handling
+        custom_registry = ExceptionHandlerRegistry()
+        custom_registry._handlers.clear()
+
+        executor = HandlerExecutor(debug_container, exception_registry=custom_registry)
 
         async def handler():
-            raise ValueError("Debug error details")
+            raise RuntimeError("Debug error details")
 
         route = Route(path="/test", method=HTTPMethod.GET, handler=handler, name="test")
         executor.compile_route(route)

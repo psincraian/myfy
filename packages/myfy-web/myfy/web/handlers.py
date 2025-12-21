@@ -21,6 +21,7 @@ from starlette.responses import JSONResponse, Response
 from myfy.core.config import CoreSettings
 
 from .context import RequestContext, get_request_context
+from .exception_handlers import ExceptionHandlerRegistry, exception_handlers
 from .routing import Route
 
 
@@ -30,10 +31,35 @@ class HandlerExecutor:
 
     Resolves dependencies from the DI container and injects them
     along with path parameters and request body.
+
+    Exception Handling:
+        The executor uses an ExceptionHandlerRegistry to convert domain
+        exceptions to HTTP responses. By default, it uses the global
+        exception_handlers registry, which includes handlers for:
+        - HTTPMappedException and subclasses (ValidationException, NotFoundException, etc.)
+        - ValueError -> 400 Bad Request
+        - PermissionError -> 403 Forbidden
+        - LookupError -> 404 Not Found
+
+        Custom handlers can be registered on the registry before creating
+        the executor, or a custom registry can be provided.
     """
 
-    def __init__(self, container: Any):
+    def __init__(
+        self,
+        container: Any,
+        exception_registry: ExceptionHandlerRegistry | None = None,
+    ):
+        """
+        Initialize the handler executor.
+
+        Args:
+            container: DI container (must be compiled)
+            exception_registry: Optional custom exception handler registry.
+                              If not provided, uses the global exception_handlers.
+        """
         self.container = container
+        self.exception_registry = exception_registry or exception_handlers
         self._execution_plans: dict[str, Callable] = {}
         self._logger = logging.getLogger(__name__)
 
@@ -93,13 +119,18 @@ class HandlerExecutor:
                 return self._make_response(result)
 
             except HTTPException as e:
-                # Known HTTP exceptions - safe to expose
+                # Starlette HTTP exceptions - safe to expose
                 return JSONResponse(
                     {"detail": e.detail},
                     status_code=e.status_code,
                 )
             except Exception as e:
-                # Unknown errors - sanitize based on environment
+                # Try registered exception handlers first
+                response = await self.exception_registry.handle(request, e)
+                if response is not None:
+                    return response
+
+                # Fall back to generic error handling (sanitized in production)
                 return self._make_error_response(e)
 
         self._execution_plans[self._route_key(route)] = execute

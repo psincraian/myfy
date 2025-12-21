@@ -293,7 +293,114 @@ app.add_module(WebModule(
 
 ## Exception Handling
 
-### HTTP Exceptions
+myfy-web provides centralized exception handling through domain exceptions that automatically map to HTTP status codes, eliminating the need for repetitive try/except blocks in route handlers.
+
+### Domain Exceptions
+
+Use built-in domain exceptions that map to standard HTTP status codes:
+
+```python
+from myfy.web import NotFoundException, ValidationException
+
+@route.get("/users/{user_id}")
+async def get_user(user_id: int, service: UserService) -> User:
+    user = await service.get_user(user_id)
+    if not user:
+        # Automatically returns 404 Not Found
+        raise NotFoundException(resource_type="User", resource_id=user_id)
+    return user
+
+@route.post("/users")
+async def create_user(body: CreateUserDTO, service: UserService) -> User:
+    if not is_valid_email(body.email):
+        # Automatically returns 400 Bad Request
+        raise ValidationException("Invalid email format")
+    return await service.create_user(body)
+```
+
+### Available Exceptions
+
+| Exception | Status Code | Use Case |
+|-----------|-------------|----------|
+| `ValidationException` | 400 | Invalid input, validation failures |
+| `UnauthorizedException` | 401 | Missing or invalid authentication |
+| `ForbiddenException` | 403 | User lacks permission |
+| `NotFoundException` | 404 | Resource not found |
+| `ConflictException` | 409 | Resource conflict (duplicates) |
+| `GoneException` | 410 | Permanently deleted resource |
+| `UnprocessableEntityException` | 422 | Semantic validation errors |
+| `TooManyRequestsException` | 429 | Rate limit exceeded |
+| `ServiceUnavailableException` | 503 | Service temporarily unavailable |
+
+### Exception Features
+
+Some exceptions support additional features:
+
+```python
+# 404 with resource info
+raise NotFoundException(resource_type="Project", resource_id="my-project")
+# Returns: {"detail": "Project 'my-project' not found"}
+
+# 401 with WWW-Authenticate header
+raise UnauthorizedException(www_authenticate="Bearer realm='api'")
+# Includes WWW-Authenticate header in response
+
+# 429 with Retry-After header
+raise TooManyRequestsException(retry_after=60)
+# Includes Retry-After: 60 header
+
+# 503 with Retry-After header
+raise ServiceUnavailableException(
+    detail="Database maintenance in progress",
+    retry_after=300
+)
+```
+
+### Default Exception Handlers
+
+The framework automatically handles common Python exceptions:
+
+| Python Exception | HTTP Status | Behavior |
+|-----------------|-------------|----------|
+| `ValueError` | 400 | Returns error message |
+| `TypeError` | 400 | Returns error message |
+| `PermissionError` | 403 | Returns "Permission denied" |
+| `KeyError`, `IndexError` | 404 | Returns "Resource not found" |
+| `NotImplementedError` | 501 | Returns "Not implemented" |
+
+```python
+@route.get("/users/{user_id}")
+async def get_user(user_id: int) -> User:
+    # ValueError automatically returns 400 Bad Request
+    normalized = ProjectName.of(project_name)  # Raises ValueError if invalid
+    return await service.get_user(user_id)
+```
+
+### Custom Exception Handlers
+
+Register custom handlers for your domain exceptions:
+
+```python
+from myfy.web import exception_handlers
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+
+class RateLimitError(Exception):
+    def __init__(self, retry_after: int):
+        self.retry_after = retry_after
+
+@exception_handlers.handler(RateLimitError)
+async def handle_rate_limit(request: Request, exc: RateLimitError) -> JSONResponse:
+    return JSONResponse(
+        status_code=429,
+        content={"error": "Rate limit exceeded", "retry_after": exc.retry_after},
+        headers={"Retry-After": str(exc.retry_after)}
+    )
+```
+
+### HTTP Exceptions (Legacy)
+
+You can still use Starlette's HTTPException directly:
 
 ```python
 from starlette.exceptions import HTTPException
@@ -306,26 +413,29 @@ async def get_user(user_id: int) -> User:
     return user
 ```
 
-### Custom Exception Handlers
+### Exception Handler Inheritance
+
+Handlers are matched by type, with inheritance support:
 
 ```python
-from starlette.requests import Request
-from starlette.responses import JSONResponse
-
-class CustomError(Exception):
+class BaseAPIError(Exception):
     pass
 
-async def custom_error_handler(request: Request, exc: CustomError):
-    return JSONResponse(
-        status_code=400,
-        content={"error": str(exc)}
-    )
+class UserNotFoundError(BaseAPIError):
+    pass
 
-app.add_module(WebModule(
-    exception_handlers={
-        CustomError: custom_error_handler
-    }
-))
+class ProjectNotFoundError(BaseAPIError):
+    pass
+
+# Register handler for base class
+@exception_handlers.handler(BaseAPIError)
+def handle_api_error(request, exc):
+    return JSONResponse(status_code=400, content={"error": str(exc)})
+
+# All subclasses are automatically handled
+@route.get("/users/{id}")
+async def get_user(id: int):
+    raise UserNotFoundError("User not found")  # Handled by base handler
 ```
 
 ## WebModule Configuration
