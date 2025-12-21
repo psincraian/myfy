@@ -9,9 +9,12 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from inspect import signature
-from typing import Any, get_type_hints
+from typing import Any, ParamSpec, TypeVar, get_type_hints
 
 from myfy.core.config import BaseSettings
+
+T = TypeVar("T")
+P = ParamSpec("P")
 
 
 class HTTPMethod(str, Enum):
@@ -36,7 +39,7 @@ class Route:
 
     path: str
     method: HTTPMethod
-    handler: Callable
+    handler: Callable[..., Any]
     name: str | None = None
     dependencies: list[str] = field(default_factory=list)
     path_params: list[str] = field(default_factory=list)
@@ -57,13 +60,13 @@ class Router:
             ...
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._routes: list[Route] = []
 
     def add_route(
         self,
         path: str,
-        handler: Callable,
+        handler: Callable[..., Any],
         method: HTTPMethod,
         name: str | None = None,
     ) -> Route:
@@ -95,30 +98,36 @@ class Router:
         self._routes.append(route)
         return route
 
-    def get(self, path: str, name: str | None = None) -> Callable:
+    def get(self, path: str, name: str | None = None) -> Callable[[Callable[P, T]], Callable[P, T]]:
         """Decorator for GET routes."""
         return self._method_decorator(path, HTTPMethod.GET, name)
 
-    def post(self, path: str, name: str | None = None) -> Callable:
+    def post(self, path: str, name: str | None = None) -> Callable[[Callable[P, T]], Callable[P, T]]:
         """Decorator for POST routes."""
         return self._method_decorator(path, HTTPMethod.POST, name)
 
-    def put(self, path: str, name: str | None = None) -> Callable:
+    def put(self, path: str, name: str | None = None) -> Callable[[Callable[P, T]], Callable[P, T]]:
         """Decorator for PUT routes."""
         return self._method_decorator(path, HTTPMethod.PUT, name)
 
-    def delete(self, path: str, name: str | None = None) -> Callable:
+    def delete(
+        self, path: str, name: str | None = None
+    ) -> Callable[[Callable[P, T]], Callable[P, T]]:
         """Decorator for DELETE routes."""
         return self._method_decorator(path, HTTPMethod.DELETE, name)
 
-    def patch(self, path: str, name: str | None = None) -> Callable:
+    def patch(
+        self, path: str, name: str | None = None
+    ) -> Callable[[Callable[P, T]], Callable[P, T]]:
         """Decorator for PATCH routes."""
         return self._method_decorator(path, HTTPMethod.PATCH, name)
 
-    def _method_decorator(self, path: str, method: HTTPMethod, name: str | None) -> Callable:
+    def _method_decorator(
+        self, path: str, method: HTTPMethod, name: str | None
+    ) -> Callable[[Callable[P, T]], Callable[P, T]]:
         """Generic decorator factory for HTTP methods."""
 
-        def decorator(handler: Callable) -> Callable:
+        def decorator(handler: Callable[P, T]) -> Callable[P, T]:
             self.add_route(path, handler, method, name)
             return handler
 

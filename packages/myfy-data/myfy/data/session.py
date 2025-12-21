@@ -20,14 +20,14 @@ class SessionFactory:
     a clean interface for session creation.
     """
 
-    def __init__(self, sessionmaker: async_sessionmaker[AsyncSession]):
+    def __init__(self, sessionmaker: async_sessionmaker[AsyncSession]) -> None:
         """
         Initialize session factory.
 
         Args:
             sessionmaker: SQLAlchemy async sessionmaker instance
         """
-        self._sessionmaker = sessionmaker
+        self._sessionmaker: async_sessionmaker[AsyncSession] = sessionmaker
 
     def create_session(self) -> AsyncSession:
         """

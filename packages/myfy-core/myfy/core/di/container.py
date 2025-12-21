@@ -6,7 +6,7 @@ No heavy reflection on the hot path - all type analysis happens at startup.
 """
 
 import threading
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from inspect import Parameter, signature
 from typing import Any, TypeVar, get_type_hints
@@ -28,17 +28,19 @@ T = TypeVar("T")
 class ProviderRegistration:
     """Internal representation of a registered provider."""
 
+    __slots__ = ("key", "factory", "scope", "reloadable_fields", "dependencies", "injection_plan")
+
     def __init__(
         self,
         key: ProviderKey,
-        factory: ProviderFactory,
+        factory: ProviderFactory[Any],
         scope: Scope,
         reloadable_fields: tuple[str, ...] = (),
-    ):
-        self.key = key
-        self.factory = factory
-        self.scope = scope
-        self.reloadable_fields = reloadable_fields
+    ) -> None:
+        self.key: ProviderKey = key
+        self.factory: ProviderFactory[Any] = factory
+        self.scope: Scope = scope
+        self.reloadable_fields: tuple[str, ...] = reloadable_fields
         self.dependencies: list[ProviderKey] = []
         self.injection_plan: Callable[[], Any] | None = None
 
@@ -55,13 +57,13 @@ class Container:
     - Test-friendly overrides
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._providers: dict[ProviderKey, ProviderRegistration] = {}
         self._singletons: dict[ProviderKey, Any] = {}
         self._singleton_locks: dict[ProviderKey, threading.Lock] = {}
-        self._frozen = False
-        self._override_stack: list[dict[type, ProviderFactory]] = []
-        self._has_active_overrides = False
+        self._frozen: bool = False
+        self._override_stack: list[dict[type[Any], ProviderFactory[Any]]] = []
+        self._has_active_overrides: bool = False
 
     def register(
         self,
@@ -160,7 +162,9 @@ class Container:
         return self._resolve(registration)
 
     @contextmanager
-    def override(self, overrides: dict[type, ProviderFactory]):
+    def override(
+        self, overrides: dict[type[Any], ProviderFactory[Any]]
+    ) -> Iterator[None]:
         """
         Temporarily override providers for testing.
 
@@ -254,7 +258,7 @@ class Container:
                         str(key),
                     )
 
-    def _build_injection_plan(self, registration: ProviderRegistration) -> Callable:
+    def _build_injection_plan(self, registration: ProviderRegistration) -> Callable[[], Any]:
         """Build a compiled injection plan for fast resolution."""
 
         def plan() -> Any:

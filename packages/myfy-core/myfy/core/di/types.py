@@ -3,9 +3,13 @@ Type definitions and protocols for the DI system.
 """
 
 from collections.abc import Callable
-from typing import Any, Protocol, TypeVar, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, TypedDict, TypeVar, runtime_checkable
+
+if TYPE_CHECKING:
+    from .scopes import Scope
 
 T = TypeVar("T")
+T_co = TypeVar("T_co", covariant=True)
 
 
 class Qualifier(str):
@@ -29,6 +33,16 @@ class Provider(Protocol):
 
 # Type alias for provider factories
 ProviderFactory = Callable[..., T]
+
+
+class ProviderMetadata(TypedDict):
+    """Metadata stored for each @provider decorated function."""
+
+    factory: Callable[..., Any]
+    scope: "Scope"
+    qualifier: str | None
+    name: str | None
+    reloadable: tuple[str, ...]
 
 
 class ProviderKey:

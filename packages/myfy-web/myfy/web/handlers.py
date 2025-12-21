@@ -7,11 +7,9 @@ Compiles injection plans for routes at startup.
 import json
 import logging
 import traceback
+from collections.abc import Awaitable, Callable
 from inspect import iscoroutinefunction
 from typing import TYPE_CHECKING, Any, get_type_hints
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
 
 from pydantic import ValidationError
 from starlette.exceptions import HTTPException
@@ -23,6 +21,12 @@ from myfy.core.config import CoreSettings
 from .context import RequestContext, get_request_context
 from .routing import Route
 
+if TYPE_CHECKING:
+    from myfy.core.di import Container
+
+# Type alias for execution plan functions
+ExecutionPlan = Callable[[Request, dict[str, Any]], Awaitable[Response]]
+
 
 class HandlerExecutor:
     """
@@ -32,10 +36,10 @@ class HandlerExecutor:
     along with path parameters and request body.
     """
 
-    def __init__(self, container: Any):
-        self.container = container
-        self._execution_plans: dict[str, Callable] = {}
-        self._logger = logging.getLogger(__name__)
+    def __init__(self, container: "Container") -> None:
+        self.container: Container = container
+        self._execution_plans: dict[str, ExecutionPlan] = {}
+        self._logger: logging.Logger = logging.getLogger(__name__)
 
     def compile_route(self, route: Route) -> None:
         """
@@ -117,7 +121,7 @@ class HandlerExecutor:
         """Generate a unique key for a route."""
         return f"{route.method}:{route.path}"
 
-    def _convert_param(self, value: Any, type_hint: type, param_name: str) -> Any:
+    def _convert_param(self, value: Any, type_hint: type[Any], param_name: str) -> Any:
         """Convert path parameter with validation."""
         if value is None:
             return None
@@ -136,7 +140,7 @@ class HandlerExecutor:
                 detail=f"Invalid value for parameter '{param_name}': expected {type_hint.__name__}, got '{value}'",
             ) from e
 
-    async def _parse_body(self, request: Request, body_type: type) -> Any:
+    async def _parse_body(self, request: Request, body_type: type[Any]) -> Any:
         """Parse request body with proper error handling."""
         try:
             if body_type in (dict, dict):

@@ -4,9 +4,10 @@ Application kernel - the heart of myfy.
 Coordinates DI, modules, configuration, and lifecycle.
 """
 
+from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from importlib.metadata import entry_points
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from ..config import BaseSettings, CoreSettings, load_settings
 from ..di import SINGLETON, Container, register_providers_in_container
@@ -16,6 +17,9 @@ from .module import Module
 
 T = TypeVar("T")
 ModuleType = TypeVar("ModuleType", bound=Module)
+
+# Type alias for ASGI lifespan context manager factory
+LifespanFactory = Callable[[Any], "AsyncIterator[None]"]
 
 
 class Application:
@@ -40,7 +44,7 @@ class Application:
         self,
         settings_class: type[BaseSettings] = CoreSettings,
         auto_discover: bool = True,
-    ):
+    ) -> None:
         """
         Create a new application.
 
@@ -48,16 +52,16 @@ class Application:
             settings_class: Settings class to load
             auto_discover: Automatically discover modules via entry points
         """
-        self.container = Container()
-        self.settings = load_settings(settings_class)
+        self.container: Container = Container()
+        self.settings: BaseSettings = load_settings(settings_class)
 
         # Get shutdown timeout from settings or use default
-        shutdown_timeout = getattr(self.settings, "shutdown_timeout", 10.0)
-        self.lifecycle = LifecycleManager(timeout=shutdown_timeout)
+        shutdown_timeout: float = getattr(self.settings, "shutdown_timeout", 10.0)
+        self.lifecycle: LifecycleManager = LifecycleManager(timeout=shutdown_timeout)
 
-        self._initialized = False
+        self._initialized: bool = False
         self._modules: list[Module] = []
-        self._auto_discover = auto_discover
+        self._auto_discover: bool = auto_discover
 
     def add_module(self, module: Module) -> None:
         """
@@ -97,7 +101,7 @@ class Application:
                 return module  # type: ignore
         raise MyfyModuleNotFoundError(module_type)
 
-    def has_module(self, module_type: type) -> bool:
+    def has_module(self, module_type: type[Module]) -> bool:
         """
         Check if a module type is registered.
 
@@ -135,7 +139,7 @@ class Application:
                 result.append(module)  # type: ignore
         return result
 
-    def create_lifespan(self):
+    def create_lifespan(self) -> Callable[[Any], "AsyncIterator[None]"]:
         """
         Create lifespan context manager.
 
@@ -151,7 +155,7 @@ class Application:
         """
 
         @asynccontextmanager
-        async def lifespan(app):  # noqa: ARG001
+        async def lifespan(app: Any) -> AsyncIterator[None]:  # noqa: ARG001
             """lifespan that manages all module lifecycles."""
             await self.lifecycle.start_all()
             try:
@@ -281,8 +285,8 @@ class Application:
 
                     # Create a proper factory closure
                     # This avoids default argument issues with container DI inspection
-                    def make_factory(val):
-                        def factory():
+                    def make_factory(val: BaseSettings) -> Callable[[], BaseSettings]:
+                        def factory() -> BaseSettings:
                             return val
 
                         return factory
@@ -337,15 +341,15 @@ class Application:
                     )
 
         # Check for circular dependencies using DFS
-        visited = set()
-        rec_stack = set()
+        visited: set[type[Module]] = set()
+        rec_stack: set[type[Module]] = set()
 
-        def has_cycle(module_type):
+        def has_cycle(module_type: type[Module]) -> bool:
             visited.add(module_type)
             rec_stack.add(module_type)
 
             module = module_types[module_type]
-            requires = getattr(module, "requires", [])
+            requires: list[type[Module]] = getattr(module, "requires", [])
 
             for required_type in requires:
                 if required_type not in visited:

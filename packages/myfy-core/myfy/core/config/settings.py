@@ -132,7 +132,7 @@ class CoreSettings(BaseSettings):
         env_file=".env",
     )
 
-    def __init__(self, **kwargs: Any):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         # Override debug based on profile if not explicitly set
         if "debug" not in kwargs and Profile.is_dev():

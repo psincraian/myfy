@@ -31,7 +31,7 @@ from .errors import (
 )
 from .provider import provider, register_providers_in_container
 from .scopes import REQUEST, SINGLETON, TASK, Scope, ScopeContext
-from .types import ProviderKey, Qualifier
+from .types import ProviderFactory, ProviderKey, ProviderMetadata, Qualifier
 
 __all__ = [
     "REQUEST",
@@ -42,7 +42,9 @@ __all__ = [
     "ContainerFrozenError",
     "DIError",
     "DuplicateProviderError",
+    "ProviderFactory",
     "ProviderKey",
+    "ProviderMetadata",
     "ProviderNotFoundError",
     "Qualifier",
     "Scope",

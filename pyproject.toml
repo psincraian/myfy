@@ -138,3 +138,35 @@ python-version = "3.12"
 # Ignore unresolved-import as ty has issues with workspace packages
 # Keep other type checking rules enabled
 unresolved-import = "ignore"
+
+[tool.mypy]
+# Type checking with mypy
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_configs = true
+show_error_codes = true
+namespace_packages = true
+explicit_package_bases = true
+
+# Allow third-party packages without stubs
+[[tool.mypy.overrides]]
+module = [
+    "starlette.*",
+    "uvicorn.*",
+    "pydantic.*",
+    "pydantic_settings.*",
+    "sqlalchemy.*",
+    "alembic.*",
+    "typer.*",
+    "rich.*",
+    "httpx.*",
+    "jinja2.*",
+]
+ignore_missing_imports = true

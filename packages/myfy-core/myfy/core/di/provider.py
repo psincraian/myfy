@@ -6,15 +6,19 @@ This is the "sugar" layer over the explicit container.register() API.
 
 from collections.abc import Callable
 from functools import wraps
-from typing import Any, TypeVar, get_type_hints
+from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar, get_type_hints
 
 from .scopes import SINGLETON, Scope
-from .types import Qualifier
+from .types import ProviderMetadata, Qualifier
+
+if TYPE_CHECKING:
+    from .container import Container
 
 T = TypeVar("T")
+P = ParamSpec("P")
 
 # Global registry for providers decorated before container is created
-_pending_providers: list[tuple[Callable, dict[str, Any]]] = []
+_pending_providers: list[tuple[Callable[..., Any], ProviderMetadata]] = []
 
 
 def provider(
@@ -22,7 +26,7 @@ def provider(
     qualifier: str | None = None,
     name: str | None = None,
     reloadable: tuple[str, ...] = (),
-) -> Callable[[Callable[..., T]], Callable[..., T]]:
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """
     Decorator to register a function as a dependency provider.
 
@@ -49,9 +53,9 @@ def provider(
         Decorator that registers the provider
     """
 
-    def decorator(func: Callable[..., T]) -> Callable[..., T]:
+    def decorator(func: Callable[P, T]) -> Callable[P, T]:
         # Store provider metadata for later registration
-        metadata = {
+        metadata: ProviderMetadata = {
             "factory": func,
             "scope": scope,
             "qualifier": qualifier,
@@ -61,10 +65,10 @@ def provider(
         _pending_providers.append((func, metadata))
 
         # Mark the function with metadata (useful for introspection)
-        func.__myfy_provider__ = metadata  # type: ignore
+        func.__myfy_provider__ = metadata  # type: ignore[attr-defined]
 
         @wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> T:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             # During normal calls, just execute the function
             # (The container will handle injection)
             return func(*args, **kwargs)
@@ -74,7 +78,7 @@ def provider(
     return decorator
 
 
-def get_pending_providers() -> list[tuple[Callable, dict[str, Any]]]:
+def get_pending_providers() -> list[tuple[Callable[..., Any], ProviderMetadata]]:
     """
     Get all providers that have been decorated but not yet registered.
 
@@ -89,7 +93,7 @@ def clear_pending_providers() -> None:
     _pending_providers.clear()
 
 
-def register_providers_in_container(container: Any) -> None:
+def register_providers_in_container(container: "Container") -> None:
     """
     Register all pending providers in the given container.
 
