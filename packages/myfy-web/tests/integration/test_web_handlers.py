@@ -6,7 +6,7 @@ These tests verify:
 - Path parameter conversion
 - Request body parsing
 - Response generation
-- Error handling
+- Error handling (including WebError exceptions)
 """
 
 import json
@@ -21,6 +21,12 @@ from starlette.responses import JSONResponse, Response
 
 from myfy.core.config import CoreSettings
 from myfy.core.di import SINGLETON, Container
+from myfy.web.exceptions import (
+    ConflictError,
+    NotFoundError,
+    ValidationError,
+    WebError,
+)
 from myfy.web.handlers import HandlerExecutor
 from myfy.web.routing import HTTPMethod, Route
 
@@ -470,6 +476,132 @@ class TestErrorHandling:
         body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert "Debug error details" in body.get("detail", "")
         assert "traceback" in body
+
+
+# =============================================================================
+# WebError Exception Handling Tests
+# =============================================================================
+
+
+class TestWebErrorHandling:
+    """Test WebError exception handling in handlers.
+
+    Verifies that WebError exceptions are correctly caught and converted
+    to Problem Details format responses with appropriate status codes.
+    """
+
+    @pytest.mark.asyncio
+    async def test_not_found_error_returns_404(self, service_container: Container):
+        """NotFoundError should return 404 with Problem Details."""
+        executor = HandlerExecutor(service_container)
+
+        async def handler():
+            raise NotFoundError("Resource not found")
+
+        route = Route(path="/test", method=HTTPMethod.GET, handler=handler, name="test")
+        executor.compile_route(route)
+
+        response = await executor.execute_route(route, make_mock_request(), {})
+
+        assert response.status_code == 404
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
+        assert body["status"] == 404
+        assert body["detail"] == "Resource not found"
+        assert body["type"] == "not_found"
+        assert body["title"] == "NotFoundError"
+
+    @pytest.mark.asyncio
+    async def test_validation_error_returns_400(self, service_container: Container):
+        """ValidationError should return 400 with Problem Details."""
+        executor = HandlerExecutor(service_container)
+
+        async def handler():
+            raise ValidationError("Invalid input")
+
+        route = Route(path="/test", method=HTTPMethod.GET, handler=handler, name="test")
+        executor.compile_route(route)
+
+        response = await executor.execute_route(route, make_mock_request(), {})
+
+        assert response.status_code == 400
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
+        assert body["status"] == 400
+        assert body["type"] == "validation_error"
+
+    @pytest.mark.asyncio
+    async def test_web_error_with_extra_fields(self, service_container: Container):
+        """WebError extra fields should be included in response."""
+        executor = HandlerExecutor(service_container)
+
+        async def handler():
+            raise ValidationError("Invalid email format", field="email", provided="not-an-email")
+
+        route = Route(path="/test", method=HTTPMethod.GET, handler=handler, name="test")
+        executor.compile_route(route)
+
+        response = await executor.execute_route(route, make_mock_request(), {})
+
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
+        assert body["field"] == "email"
+        assert body["provided"] == "not-an-email"
+
+    @pytest.mark.asyncio
+    async def test_custom_web_error_subclass(self, service_container: Container):
+        """User-defined WebError subclasses should work correctly."""
+        executor = HandlerExecutor(service_container)
+
+        class CustomDomainError(WebError):
+            status_code = 422
+            error_type = "custom_validation"
+
+        async def handler():
+            raise CustomDomainError("Custom domain error")
+
+        route = Route(path="/test", method=HTTPMethod.GET, handler=handler, name="test")
+        executor.compile_route(route)
+
+        response = await executor.execute_route(route, make_mock_request(), {})
+
+        assert response.status_code == 422
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
+        assert body["type"] == "custom_validation"
+        assert body["title"] == "CustomDomainError"
+
+    @pytest.mark.asyncio
+    async def test_conflict_error_returns_409(self, service_container: Container):
+        """ConflictError should return 409 with Problem Details."""
+        executor = HandlerExecutor(service_container)
+
+        async def handler():
+            raise ConflictError("Username already taken", username="john_doe")
+
+        route = Route(path="/test", method=HTTPMethod.GET, handler=handler, name="test")
+        executor.compile_route(route)
+
+        response = await executor.execute_route(route, make_mock_request(), {})
+
+        assert response.status_code == 409
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
+        assert body["type"] == "conflict"
+        assert body["username"] == "john_doe"
+
+    @pytest.mark.asyncio
+    async def test_base_web_error_returns_500(self, service_container: Container):
+        """Base WebError defaults to 500."""
+        executor = HandlerExecutor(service_container)
+
+        async def handler():
+            raise WebError("Generic web error")
+
+        route = Route(path="/test", method=HTTPMethod.GET, handler=handler, name="test")
+        executor.compile_route(route)
+
+        response = await executor.execute_route(route, make_mock_request(), {})
+
+        assert response.status_code == 500
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
+        assert body["status"] == 500
+        assert body["type"] == "about:blank"
 
 
 # =============================================================================
