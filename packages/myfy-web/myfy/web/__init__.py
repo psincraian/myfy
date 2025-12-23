@@ -27,6 +27,7 @@ from .context import RequestContext, get_request_context
 from .extensions import IMiddlewareProvider, IWebExtension
 from .factory import create_asgi_app_with_lifespan
 from .module import WebModule, web_module
+from .params import Query, QueryParam
 from .routing import HTTPMethod, Route, Router, route
 from .version import __version__
 
@@ -35,6 +36,8 @@ __all__ = [
     "HTTPMethod",
     "IMiddlewareProvider",
     "IWebExtension",
+    "Query",
+    "QueryParam",
     "RequestContext",
     "Route",
     "Router",
