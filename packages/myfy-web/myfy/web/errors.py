@@ -18,26 +18,24 @@ For creating custom exceptions, import from myfy.web.exceptions:
         error_type = "teapot"
 """
 
-from .exceptions import (
-    ConflictError as Conflict,
-    ForbiddenError as Forbidden,
-    NotFoundError as NotFound,
-    RateLimitError as RateLimit,
-    ServiceUnavailableError as ServiceUnavailable,
-    UnauthorizedError as Unauthorized,
-    UnprocessableEntityError as UnprocessableEntity,
-    ValidationError as BadRequest,
-    WebError as Base,
-)
+from .exceptions import ConflictError as Conflict
+from .exceptions import ForbiddenError as Forbidden
+from .exceptions import NotFoundError as NotFound
+from .exceptions import RateLimitError as RateLimit
+from .exceptions import ServiceUnavailableError as ServiceUnavailable
+from .exceptions import UnauthorizedError as Unauthorized
+from .exceptions import UnprocessableEntityError as UnprocessableEntity
+from .exceptions import ValidationError as BadRequest
+from .exceptions import WebError as Base
 
 __all__ = [
-    "Base",
     "BadRequest",
-    "Unauthorized",
+    "Base",
+    "Conflict",
     "Forbidden",
     "NotFound",
-    "Conflict",
-    "UnprocessableEntity",
     "RateLimit",
     "ServiceUnavailable",
+    "Unauthorized",
+    "UnprocessableEntity",
 ]

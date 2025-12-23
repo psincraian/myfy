@@ -35,7 +35,7 @@ class TestStatusCodeMapping:
     """Verify abort() raises the correct exception type for each status code."""
 
     @pytest.mark.parametrize(
-        "status_code,expected_class",
+        ("status_code", "expected_class"),
         [
             (400, ValidationError),
             (401, UnauthorizedError),
@@ -87,7 +87,7 @@ class TestMessageHandling:
         assert str(exc_info.value) == "Not Found"
 
     @pytest.mark.parametrize(
-        "status_code,expected_default",
+        ("status_code", "expected_default"),
         [
             (400, "Bad Request"),
             (401, "Unauthorized"),

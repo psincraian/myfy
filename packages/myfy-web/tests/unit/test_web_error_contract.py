@@ -34,7 +34,7 @@ class TestBuiltinExceptionDefaults:
     """Verify each built-in error class has correct status_code and error_type."""
 
     @pytest.mark.parametrize(
-        "error_class,expected_status,expected_type",
+        ("error_class", "expected_status", "expected_type"),
         [
             (WebError, 500, "about:blank"),
             (ValidationError, 400, "validation_error"),
