@@ -19,8 +19,26 @@ Usage:
     app = Application()
     app.add_module(WebModule())
     await app.run()
+
+Exception Handling:
+    from myfy.web import abort, errors
+
+    # Using abort() for quick errors
+    abort(404, "User not found")
+
+    # Using errors namespace
+    raise errors.NotFound("User not found")
+    raise errors.BadRequest("Invalid email", field="email")
+
+    # Custom exceptions (import from exceptions module)
+    from myfy.web.exceptions import WebError
+
+    class CustomError(WebError):
+        status_code = 418
+        error_type = "teapot"
 """
 
+from . import errors
 from .asgi import ASGIApp
 from .config import WebSettings
 from .context import RequestContext, get_request_context
@@ -29,6 +47,7 @@ from .factory import create_asgi_app_with_lifespan
 from .module import WebModule, web_module
 from .params import Query, QueryParam
 from .routing import HTTPMethod, Route, Router, route
+from .shortcuts import abort
 from .version import __version__
 
 __all__ = [
@@ -44,7 +63,9 @@ __all__ = [
     "WebModule",
     "WebSettings",
     "__version__",
+    "abort",
     "create_asgi_app_with_lifespan",
+    "errors",
     "get_request_context",
     "route",
     "web_module",

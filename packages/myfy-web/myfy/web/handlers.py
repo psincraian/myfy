@@ -21,6 +21,7 @@ from starlette.responses import JSONResponse, Response
 from myfy.core.config import CoreSettings
 
 from .context import RequestContext, get_request_context
+from .exceptions import WebError
 from .params import QueryParam
 from .routing import Route
 
@@ -107,9 +108,15 @@ class HandlerExecutor:
                 return self._make_response(result)
 
             except HTTPException as e:
-                # Known HTTP exceptions - safe to expose
+                # Starlette HTTP exceptions - safe to expose
                 return JSONResponse(
                     {"detail": e.detail},
+                    status_code=e.status_code,
+                )
+            except WebError as e:
+                # myfy WebError exceptions - convert to Problem Details
+                return JSONResponse(
+                    e.to_problem_detail(),
                     status_code=e.status_code,
                 )
             except Exception as e:
