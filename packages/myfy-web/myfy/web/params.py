@@ -84,13 +84,9 @@ class QueryParam:
                     f"Query parameter '{param_name}' must be <= {self.le}, got {value}"
                 )
             if self.gt is not None and value <= self.gt:
-                raise ValueError(
-                    f"Query parameter '{param_name}' must be > {self.gt}, got {value}"
-                )
+                raise ValueError(f"Query parameter '{param_name}' must be > {self.gt}, got {value}")
             if self.lt is not None and value >= self.lt:
-                raise ValueError(
-                    f"Query parameter '{param_name}' must be < {self.lt}, got {value}"
-                )
+                raise ValueError(f"Query parameter '{param_name}' must be < {self.lt}, got {value}")
 
         # String constraints
         if isinstance(value, str):

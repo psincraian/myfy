@@ -23,7 +23,7 @@ from myfy.core.config import CoreSettings
 from myfy.core.di import SINGLETON, Container
 from myfy.web.handlers import HandlerExecutor
 from myfy.web.params import Query, QueryParam
-from myfy.web.routing import HTTPMethod, Route, Router
+from myfy.web.routing import Router
 
 pytestmark = pytest.mark.integration
 
@@ -187,26 +187,6 @@ class TestQueryParameterInjection:
     async def test_inject_string_query_param(self, container: Container):
         """Test injecting a string query parameter."""
         executor = HandlerExecutor(container)
-
-        async def handler(q: str = Query(default="")):
-            return {"q": q}
-
-        route = Route(
-            path="/search",
-            method=HTTPMethod.GET,
-            handler=handler,
-            name="search",
-            query_params=[
-                {
-                    "name": "q",
-                    "type_hint": str,
-                    "spec": Query(default=""),
-                    "alias": None,
-                }
-            ],
-        )
-
-        # Re-analyze to populate query_params properly
         router = Router()
 
         @router.get("/search")
@@ -220,7 +200,7 @@ class TestQueryParameterInjection:
         response = await executor.execute_route(route, request, {})
 
         assert isinstance(response, JSONResponse)
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]  # type: ignore[union-attr]
         assert body["q"] == "hello"
 
     @pytest.mark.asyncio
@@ -239,7 +219,7 @@ class TestQueryParameterInjection:
         request = make_mock_request(query_params={"limit": "50"})
         response = await executor.execute_route(route, request, {})
 
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["limit"] == 50
         assert body["type"] == "int"
 
@@ -259,7 +239,7 @@ class TestQueryParameterInjection:
         request = make_mock_request(query_params={"price": "19.99"})
         response = await executor.execute_route(route, request, {})
 
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["price"] == 19.99
 
     @pytest.mark.asyncio
@@ -278,19 +258,19 @@ class TestQueryParameterInjection:
         # Test 'true'
         request = make_mock_request(query_params={"include_hidden": "true"})
         response = await executor.execute_route(route, request, {})
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["include_hidden"] is True
 
         # Test '1'
         request = make_mock_request(query_params={"include_hidden": "1"})
         response = await executor.execute_route(route, request, {})
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["include_hidden"] is True
 
         # Test 'false'
         request = make_mock_request(query_params={"include_hidden": "false"})
         response = await executor.execute_route(route, request, {})
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["include_hidden"] is False
 
     @pytest.mark.asyncio
@@ -309,7 +289,7 @@ class TestQueryParameterInjection:
         request = make_mock_request(query_params={})  # No limit provided
         response = await executor.execute_route(route, request, {})
 
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["limit"] == 20
 
     @pytest.mark.asyncio
@@ -330,8 +310,8 @@ class TestQueryParameterInjection:
         with pytest.raises(HTTPException) as exc_info:
             await executor.execute_route(route, request, {})
 
-        assert exc_info.value.status_code == 400
-        assert "required" in exc_info.value.detail.lower()
+        assert exc_info.value.status_code == 400  # type: ignore[union-attr]
+        assert "required" in exc_info.value.detail  # type: ignore[union-attr].lower()
 
     @pytest.mark.asyncio
     async def test_alias_extraction(self, container: Container):
@@ -350,7 +330,7 @@ class TestQueryParameterInjection:
         request = make_mock_request(query_params={"q": "test search"})
         response = await executor.execute_route(route, request, {})
 
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["q"] == "test search"
 
 
@@ -378,7 +358,7 @@ class TestQueryParameterValidation:
         request = make_mock_request(query_params={"limit": "5"})
         response = await executor.execute_route(route, request, {})
 
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["limit"] == 5
 
     @pytest.mark.asyncio
@@ -399,8 +379,8 @@ class TestQueryParameterValidation:
         with pytest.raises(HTTPException) as exc_info:
             await executor.execute_route(route, request, {})
 
-        assert exc_info.value.status_code == 400
-        assert ">=" in exc_info.value.detail
+        assert exc_info.value.status_code == 400  # type: ignore[union-attr]
+        assert ">=" in exc_info.value.detail  # type: ignore[union-attr]
 
     @pytest.mark.asyncio
     async def test_le_constraint_passes(self, container: Container):
@@ -418,7 +398,7 @@ class TestQueryParameterValidation:
         request = make_mock_request(query_params={"limit": "50"})
         response = await executor.execute_route(route, request, {})
 
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["limit"] == 50
 
     @pytest.mark.asyncio
@@ -439,8 +419,8 @@ class TestQueryParameterValidation:
         with pytest.raises(HTTPException) as exc_info:
             await executor.execute_route(route, request, {})
 
-        assert exc_info.value.status_code == 400
-        assert "<=" in exc_info.value.detail
+        assert exc_info.value.status_code == 400  # type: ignore[union-attr]
+        assert "<=" in exc_info.value.detail  # type: ignore[union-attr]
 
     @pytest.mark.asyncio
     async def test_combined_ge_le_constraints(self, container: Container):
@@ -458,20 +438,20 @@ class TestQueryParameterValidation:
         # Valid value
         request = make_mock_request(query_params={"limit": "50"})
         response = await executor.execute_route(route, request, {})
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["limit"] == 50
 
         # Too low
         request = make_mock_request(query_params={"limit": "0"})
         with pytest.raises(HTTPException) as exc_info:
             await executor.execute_route(route, request, {})
-        assert exc_info.value.status_code == 400
+        assert exc_info.value.status_code == 400  # type: ignore[union-attr]
 
         # Too high
         request = make_mock_request(query_params={"limit": "200"})
         with pytest.raises(HTTPException) as exc_info:
             await executor.execute_route(route, request, {})
-        assert exc_info.value.status_code == 400
+        assert exc_info.value.status_code == 400  # type: ignore[union-attr]
 
     @pytest.mark.asyncio
     async def test_gt_constraint(self, container: Container):
@@ -490,13 +470,13 @@ class TestQueryParameterValidation:
         request = make_mock_request(query_params={"offset": "0"})
         with pytest.raises(HTTPException) as exc_info:
             await executor.execute_route(route, request, {})
-        assert exc_info.value.status_code == 400
-        assert ">" in exc_info.value.detail
+        assert exc_info.value.status_code == 400  # type: ignore[union-attr]
+        assert ">" in exc_info.value.detail  # type: ignore[union-attr]
 
         # Greater value should pass
         request = make_mock_request(query_params={"offset": "1"})
         response = await executor.execute_route(route, request, {})
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["offset"] == 1
 
     @pytest.mark.asyncio
@@ -516,13 +496,13 @@ class TestQueryParameterValidation:
         request = make_mock_request(query_params={"priority": "10"})
         with pytest.raises(HTTPException) as exc_info:
             await executor.execute_route(route, request, {})
-        assert exc_info.value.status_code == 400
-        assert "<" in exc_info.value.detail
+        assert exc_info.value.status_code == 400  # type: ignore[union-attr]
+        assert "<" in exc_info.value.detail  # type: ignore[union-attr]
 
         # Lesser value should pass
         request = make_mock_request(query_params={"priority": "5"})
         response = await executor.execute_route(route, request, {})
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["priority"] == 5
 
     @pytest.mark.asyncio
@@ -542,13 +522,13 @@ class TestQueryParameterValidation:
         request = make_mock_request(query_params={"q": "ab"})
         with pytest.raises(HTTPException) as exc_info:
             await executor.execute_route(route, request, {})
-        assert exc_info.value.status_code == 400
-        assert "at least" in exc_info.value.detail.lower()
+        assert exc_info.value.status_code == 400  # type: ignore[union-attr]
+        assert "at least" in exc_info.value.detail  # type: ignore[union-attr].lower()
 
         # Valid length
         request = make_mock_request(query_params={"q": "abc"})
         response = await executor.execute_route(route, request, {})
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["q"] == "abc"
 
     @pytest.mark.asyncio
@@ -568,13 +548,13 @@ class TestQueryParameterValidation:
         request = make_mock_request(query_params={"q": "a" * 15})
         with pytest.raises(HTTPException) as exc_info:
             await executor.execute_route(route, request, {})
-        assert exc_info.value.status_code == 400
-        assert "at most" in exc_info.value.detail.lower()
+        assert exc_info.value.status_code == 400  # type: ignore[union-attr]
+        assert "at most" in exc_info.value.detail  # type: ignore[union-attr].lower()
 
         # Valid length
         request = make_mock_request(query_params={"q": "hello"})
         response = await executor.execute_route(route, request, {})
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["q"] == "hello"
 
     @pytest.mark.asyncio
@@ -594,13 +574,13 @@ class TestQueryParameterValidation:
         request = make_mock_request(query_params={"email": "not-an-email"})
         with pytest.raises(HTTPException) as exc_info:
             await executor.execute_route(route, request, {})
-        assert exc_info.value.status_code == 400
-        assert "pattern" in exc_info.value.detail.lower()
+        assert exc_info.value.status_code == 400  # type: ignore[union-attr]
+        assert "pattern" in exc_info.value.detail  # type: ignore[union-attr].lower()
 
         # Valid email
         request = make_mock_request(query_params={"email": "test@example.com"})
         response = await executor.execute_route(route, request, {})
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["email"] == "test@example.com"
 
 
@@ -630,8 +610,8 @@ class TestTypeConversionErrors:
         with pytest.raises(HTTPException) as exc_info:
             await executor.execute_route(route, request, {})
 
-        assert exc_info.value.status_code == 400
-        assert "expected int" in exc_info.value.detail.lower()
+        assert exc_info.value.status_code == 400  # type: ignore[union-attr]
+        assert "expected int" in exc_info.value.detail  # type: ignore[union-attr].lower()
 
     @pytest.mark.asyncio
     async def test_invalid_float_raises_error(self, container: Container):
@@ -651,8 +631,8 @@ class TestTypeConversionErrors:
         with pytest.raises(HTTPException) as exc_info:
             await executor.execute_route(route, request, {})
 
-        assert exc_info.value.status_code == 400
-        assert "expected float" in exc_info.value.detail.lower()
+        assert exc_info.value.status_code == 400  # type: ignore[union-attr]
+        assert "expected float" in exc_info.value.detail  # type: ignore[union-attr].lower()
 
 
 # =============================================================================
