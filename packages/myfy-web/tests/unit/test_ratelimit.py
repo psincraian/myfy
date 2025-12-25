@@ -436,6 +436,7 @@ class TestRateLimitDecorator:
 
     def test_decorator_ordering_with_route(self):
         """Decorator works correctly when stacked with other decorators."""
+
         # Simulate @route.get decorator (simplified)
         def mock_route(func):
             func._route_info = {"method": "GET", "path": "/test"}

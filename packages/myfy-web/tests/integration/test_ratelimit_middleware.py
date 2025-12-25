@@ -60,6 +60,7 @@ class TestGlobalRateLimiting:
 
     def test_requests_allowed_until_global_limit(self, router, store, settings):
         """Requests are allowed until global limit is reached."""
+
         # Register a simple route
         @router.get("/api/data")
         async def get_data():
