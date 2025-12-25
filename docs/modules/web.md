@@ -69,6 +69,20 @@ async def create_user(body: CreateUserDTO, service: UserService) -> User:
     return await service.create_user(body)
 ```
 
+### Rate Limiting
+
+Flexible rate limiting with decorator and middleware support:
+
+```python
+from myfy.web import route
+from myfy.web.ratelimit import rate_limit, RateLimitKey
+
+@route.get("/api/data")
+@rate_limit(100, key=RateLimitKey.IP)  # 100 req/min per IP
+async def get_data() -> dict:
+    return {"data": "value"}
+```
+
 ### WebModule
 
 The main module that provides HTTP server functionality:
@@ -430,6 +444,263 @@ app.add_module(WebModule(
         CustomError: custom_error_handler
     }
 ))
+```
+
+## Rate Limiting
+
+myfy-web includes a flexible rate limiting system with middleware for global protection and decorators for per-route customization.
+
+### Basic Usage
+
+Use the `@rate_limit` decorator to add rate limits to specific routes:
+
+```python
+from myfy.web import route
+from myfy.web.ratelimit import rate_limit
+
+@route.get("/api/data")
+@rate_limit(100)  # 100 requests per 60 seconds
+async def get_data() -> dict:
+    return {"data": "value"}
+
+@route.post("/api/expensive")
+@rate_limit(10, window_seconds=3600)  # 10 requests per hour
+async def expensive_operation() -> dict:
+    return {"result": "done"}
+```
+
+### Key Strategies
+
+Rate limit by different identifiers using `RateLimitKey`:
+
+```python
+from myfy.web.ratelimit import rate_limit, RateLimitKey
+
+# Rate limit by client IP (default)
+@rate_limit(100, key=RateLimitKey.IP)
+async def by_ip(): ...
+
+# Rate limit by user ID (requires authentication)
+@rate_limit(100, key=RateLimitKey.USER)
+async def by_user(): ...
+
+# Rate limit by API key header
+@rate_limit(100, key=RateLimitKey.API_KEY)
+async def by_api_key(): ...
+
+# Rate limit by session ID
+@rate_limit(100, key=RateLimitKey.SESSION)
+async def by_session(): ...
+
+# Rate limit by endpoint (same limit for all clients)
+@rate_limit(1000, key=RateLimitKey.ENDPOINT)
+async def by_endpoint(): ...
+
+# Custom key string
+@rate_limit(100, key="custom:bucket")
+async def custom_key(): ...
+```
+
+**Available keys:**
+
+| Key | Description |
+|-----|-------------|
+| `RateLimitKey.IP` | Client IP address (default) |
+| `RateLimitKey.USER` | Authenticated user ID |
+| `RateLimitKey.API_KEY` | X-API-Key header value |
+| `RateLimitKey.SESSION` | Session ID from cookie |
+| `RateLimitKey.ENDPOINT` | Route path (shared by all clients) |
+| `RateLimitKey.GLOBAL` | Single global counter |
+
+### Dynamic Key Override
+
+Inject `RateLimitContext` to override keys based on business logic:
+
+```python
+from myfy.web import route
+from myfy.web.ratelimit import rate_limit, RateLimitContext
+
+@route.get("/api/org/{org_id}/data")
+@rate_limit(100)
+async def get_org_data(org_id: int, rl: RateLimitContext) -> dict:
+    # Rate limit by organization instead of IP
+    rl.override_key(f"org:{org_id}")
+    return {"org_id": org_id, "data": "value"}
+
+@route.get("/api/premium")
+@rate_limit(100)
+async def premium_endpoint(user: User, rl: RateLimitContext) -> dict:
+    # Different limits for different tiers
+    if user.is_premium:
+        rl.override_key(f"premium:{user.id}")
+    else:
+        rl.override_key(f"free:{user.id}")
+    return {"data": "premium content"}
+```
+
+### Skip Rate Limiting
+
+Skip rate limiting for specific requests:
+
+```python
+@route.get("/api/health")
+@rate_limit(100)
+async def health_check(rl: RateLimitContext) -> dict:
+    # Skip rate limiting for internal health checks
+    rl.skip()
+    return {"status": "ok"}
+```
+
+### Scoped Rate Limits
+
+Group routes under the same rate limit bucket:
+
+```python
+# Both routes share the same rate limit bucket
+@route.get("/api/v1/users")
+@rate_limit(100, scope="users-api")
+async def list_users(): ...
+
+@route.get("/api/v1/users/{id}")
+@rate_limit(100, scope="users-api")
+async def get_user(id: int): ...
+```
+
+### Module Setup
+
+Add the `RateLimitModule` for automatic middleware integration:
+
+```python
+from myfy.core import Application
+from myfy.web import WebModule
+from myfy.web.ratelimit import RateLimitModule, RateLimitSettings
+
+settings = RateLimitSettings(
+    enabled=True,
+    default_requests=100,
+    default_window_seconds=60,
+    global_requests=1000,
+    global_window_seconds=60,
+)
+
+app = Application(auto_discover=False)
+app.add_module(WebModule())
+app.add_module(RateLimitModule(settings=settings))
+```
+
+### Configuration
+
+Configure via environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MYFY_RATELIMIT_ENABLED` | `true` | Enable/disable rate limiting |
+| `MYFY_RATELIMIT_DEFAULT_REQUESTS` | `100` | Default requests per window |
+| `MYFY_RATELIMIT_DEFAULT_WINDOW_SECONDS` | `60` | Default window in seconds |
+| `MYFY_RATELIMIT_GLOBAL_REQUESTS` | `1000` | Global limit (all routes) |
+| `MYFY_RATELIMIT_GLOBAL_WINDOW_SECONDS` | `60` | Global window in seconds |
+| `MYFY_RATELIMIT_INCLUDE_HEADERS` | `true` | Include X-RateLimit-* headers |
+
+Or via `RateLimitSettings`:
+
+```python
+from myfy.web.ratelimit import RateLimitSettings, RateLimitKey
+
+settings = RateLimitSettings(
+    enabled=True,
+    default_requests=100,
+    default_window_seconds=60,
+    default_key=RateLimitKey.IP,
+    global_requests=1000,
+    global_window_seconds=60,
+    include_headers=True,
+    backend="memory",  # "memory" or "redis"
+)
+```
+
+### Response Headers
+
+When `include_headers=True`, responses include rate limit headers:
+
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 99
+X-RateLimit-Reset: 1703520000
+```
+
+When rate limited (HTTP 429):
+
+```
+Retry-After: 30
+```
+
+### Error Response Format
+
+Rate limit errors follow RFC 7807 Problem Details:
+
+```json
+{
+    "type": "rate_limit_exceeded",
+    "title": "Rate Limit Exceeded",
+    "status": 429,
+    "detail": "Rate limit exceeded. Please retry after 30 seconds.",
+    "retry_after": 30
+}
+```
+
+### Manual Middleware Setup
+
+For fine-grained control, add middleware directly:
+
+```python
+from myfy.web import WebModule
+from myfy.web.ratelimit import (
+    RateLimitMiddleware,
+    RateLimitSettings,
+    InMemoryRateLimitStore,
+)
+from starlette.middleware import Middleware
+
+store = InMemoryRateLimitStore()
+settings = RateLimitSettings(enabled=True)
+
+app.add_module(WebModule(
+    middleware=[
+        Middleware(RateLimitMiddleware, store=store, settings=settings)
+    ]
+))
+```
+
+### Custom Storage Backend
+
+Implement `RateLimitStore` for custom backends (e.g., Redis):
+
+```python
+from myfy.web.ratelimit import RateLimitStore, RateLimitResult
+
+class RedisRateLimitStore:
+    def __init__(self, redis_client):
+        self.redis = redis_client
+
+    async def check_and_increment(
+        self,
+        key: str,
+        limit: int,
+        window_seconds: int,
+    ) -> RateLimitResult:
+        # Implement sliding window counter with Redis
+        ...
+
+    async def get_remaining(
+        self,
+        key: str,
+        limit: int,
+        window_seconds: int,
+    ) -> RateLimitResult:
+        ...
+
+    async def reset(self, key: str) -> None:
+        await self.redis.delete(key)
 ```
 
 ## WebModule Configuration
