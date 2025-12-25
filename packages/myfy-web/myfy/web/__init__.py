@@ -36,6 +36,19 @@ Exception Handling:
     class CustomError(WebError):
         status_code = 418
         error_type = "teapot"
+
+Rate Limiting:
+    from myfy.web.ratelimit import RateLimitModule, rate_limit, RateLimitKey
+
+    @route.get("/api/data")
+    @rate_limit(100)  # 100 requests per minute per IP
+    async def get_data() -> dict:
+        ...
+
+    @route.get("/api/profile")
+    @rate_limit(50, key=RateLimitKey.USER)  # By authenticated user
+    async def get_profile(user: User) -> Profile:
+        ...
 """
 
 from . import errors
