@@ -42,6 +42,9 @@ github_repo = "https://github.com/psincraian/myfy"
 Home = "index.md"
 
 [[project.nav]]
+Reference = "reference.md"
+
+[[project.nav]]
 "Getting Started" = [
   { Installation = "getting-started/installation.md" },
   { Tutorial = "getting-started/tutorial.md" },
