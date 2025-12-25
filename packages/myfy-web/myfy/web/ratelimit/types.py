@@ -2,10 +2,14 @@
 Shared types for rate limiting.
 """
 
-from dataclasses import dataclass, field
-from typing import Callable
+from collections.abc import Callable
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from .keys import RateLimitKey
+
+if TYPE_CHECKING:
+    from myfy.web.context import RequestContext
 
 
 @dataclass(frozen=True)
@@ -68,4 +72,4 @@ class RateLimitResult:
 
 
 # Type alias for custom key extraction functions
-KeyExtractor = Callable[["RequestContext"], str]  # type: ignore[name-defined]
+KeyExtractor = Callable[["RequestContext"], str]

@@ -7,15 +7,11 @@ These tests verify the complete rate limiting flow with ASGI app.
 import pytest
 from starlette.testclient import TestClient
 
-from myfy.core import Application
 from myfy.core.di import Container
-from myfy.web import WebModule, route
 from myfy.web.asgi import ASGIApp
 from myfy.web.ratelimit import (
     InMemoryRateLimitStore,
-    RateLimitContext,
     RateLimitKey,
-    RateLimitModule,
     RateLimitSettings,
     rate_limit,
 )
@@ -77,8 +73,6 @@ class TestGlobalRateLimiting:
         app = ASGIApp(container, router)
 
         # Add middleware manually for testing
-        from starlette.middleware import Middleware
-
         from myfy.web.ratelimit.middleware import RateLimitMiddleware
 
         app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)
@@ -110,8 +104,6 @@ class TestGlobalRateLimiting:
         container.compile()
 
         app = ASGIApp(container, router)
-
-        from starlette.middleware import Middleware
 
         from myfy.web.ratelimit.middleware import RateLimitMiddleware
 

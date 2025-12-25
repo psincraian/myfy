@@ -5,6 +5,7 @@ Provides protocol and implementations for storing rate limit state.
 """
 
 import asyncio
+import contextlib
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -116,10 +117,8 @@ class InMemoryRateLimitStore:
         """Stop background cleanup task."""
         if self._cleanup_task is not None:
             self._cleanup_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._cleanup_task
-            except asyncio.CancelledError:
-                pass
             self._cleanup_task = None
 
     async def _cleanup_loop(self) -> None:

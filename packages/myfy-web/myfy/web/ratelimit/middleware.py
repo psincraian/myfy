@@ -118,34 +118,25 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         Per-route key strategies are handled by the executor.
         """
         key_strategy = self.settings.default_key
+        client_ip = self._get_client_ip(request)
 
-        if key_strategy == RateLimitKey.IP:
-            return self._get_client_ip(request)
-
-        if key_strategy == RateLimitKey.API_KEY:
-            api_key = request.headers.get("X-API-Key", "")
-            if api_key:
-                return f"api:{api_key}"
-            # Fallback to IP if no API key
-            return self._get_client_ip(request)
-
-        if key_strategy == RateLimitKey.SESSION:
-            session_id = request.cookies.get("session_id", "")
-            if session_id:
-                return f"session:{session_id}"
-            # Fallback to IP if no session
-            return self._get_client_ip(request)
-
-        if key_strategy == RateLimitKey.ENDPOINT:
-            ip = self._get_client_ip(request)
-            return f"endpoint:{ip}:{request.url.path}"
-
+        # Handle special key strategies
         if key_strategy == RateLimitKey.GLOBAL:
             return "global"
 
-        # USER key requires auth context (handled by executor)
-        # Fallback to IP at middleware level
-        return self._get_client_ip(request)
+        if key_strategy == RateLimitKey.ENDPOINT:
+            return f"endpoint:{client_ip}:{request.url.path}"
+
+        if key_strategy == RateLimitKey.API_KEY:
+            api_key = request.headers.get("X-API-Key", "")
+            return f"api:{api_key}" if api_key else client_ip
+
+        if key_strategy == RateLimitKey.SESSION:
+            session_id = request.cookies.get("session_id", "")
+            return f"session:{session_id}" if session_id else client_ip
+
+        # Default: IP-based (also fallback for USER which requires auth context)
+        return client_ip
 
     def _get_client_ip(self, request: Request) -> str:
         """Extract client IP, respecting proxy headers."""

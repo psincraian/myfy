@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from starlette.middleware import Middleware
 
 from myfy.core.config import load_settings
+from myfy.core.di import REQUEST, SINGLETON
 
 from ..extensions import IMiddlewareProvider
 from .config import RateLimitSettings
@@ -69,7 +70,7 @@ class RateLimitModule:
     @property
     def requires(self) -> list[type]:
         # Depends on WebModule for middleware integration
-        from ..module import WebModule
+        from ..module import WebModule  # noqa: PLC0415
 
         return [WebModule]
 
@@ -85,17 +86,15 @@ class RateLimitModule:
         settings = self._settings
         if settings is None:
             key = ProviderKey(RateLimitSettings)
+            # Only load settings if not already registered (e.g., from nested app settings)
             if key not in container._providers:
                 settings = load_settings(RateLimitSettings)
-            else:
-                # Settings already registered (e.g., from nested app settings)
-                settings = None  # Will be resolved from container
 
         if settings is not None:
             container.register(
                 type_=RateLimitSettings,
                 factory=lambda s=settings: s,
-                scope="singleton",
+                scope=SINGLETON,
             )
 
         # Register or use provided store
@@ -103,7 +102,7 @@ class RateLimitModule:
             container.register(
                 type_=RateLimitStore,
                 factory=lambda: self._store,
-                scope="singleton",
+                scope=SINGLETON,
             )
         else:
             # Create default in-memory store
@@ -111,14 +110,14 @@ class RateLimitModule:
             container.register(
                 type_=RateLimitStore,
                 factory=lambda: self._owned_store,
-                scope="singleton",
+                scope=SINGLETON,
             )
 
         # Register RateLimitContext as request-scoped
         container.register(
             type_=RateLimitContext,
             factory=lambda: RateLimitContext(),
-            scope="request",
+            scope=REQUEST,
         )
 
     def extend(self, container: "Container") -> None:
