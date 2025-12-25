@@ -210,6 +210,37 @@ async def list_users(
 # Call with: GET /users?page=2&limit=20&sort=created_at
 ```
 
+### Query Parameters with Validation
+
+Use `Query()` for built-in validation constraints:
+
+```python
+from myfy.web import route, Query
+
+@route.get("/search")
+async def search(
+    q: str = Query(min_length=1, max_length=100),
+    limit: int = Query(default=20, ge=1, le=100),
+    page: int = Query(default=1, ge=1),
+) -> list[Result]:
+    return await service.search(q, limit, page)
+```
+
+**Available constraints:**
+
+| Constraint | Type | Description |
+|------------|------|-------------|
+| `default` | Any | Default value (use `...` for required) |
+| `ge` | int/float | Greater than or equal |
+| `le` | int/float | Less than or equal |
+| `gt` | int/float | Greater than |
+| `lt` | int/float | Less than |
+| `min_length` | int | Minimum string length |
+| `max_length` | int | Maximum string length |
+| `pattern` | str | Regex pattern for validation |
+| `alias` | str | Alternative query param name |
+| `description` | str | Parameter description for docs |
+
 ### Request Body
 
 ```python
@@ -293,7 +324,80 @@ app.add_module(WebModule(
 
 ## Exception Handling
 
-### HTTP Exceptions
+### WebError Hierarchy
+
+myfy provides a built-in exception hierarchy with RFC 7807 Problem Details format:
+
+```python
+from myfy.web import errors
+
+@route.get("/users/{user_id}")
+async def get_user(user_id: int) -> User:
+    user = await service.get_user(user_id)
+    if not user:
+        raise errors.NotFound("User not found")
+    return user
+```
+
+**Available errors:**
+
+| Error | Status | Use Case |
+|-------|--------|----------|
+| `errors.BadRequest` | 400 | Invalid input, validation failures |
+| `errors.Unauthorized` | 401 | Missing or invalid authentication |
+| `errors.Forbidden` | 403 | Authenticated but not authorized |
+| `errors.NotFound` | 404 | Resource doesn't exist |
+| `errors.Conflict` | 409 | Duplicate entries, state conflicts |
+| `errors.UnprocessableEntity` | 422 | Valid syntax, invalid semantics |
+| `errors.RateLimit` | 429 | Too many requests |
+| `errors.ServiceUnavailable` | 503 | Temporary outage |
+
+### Errors with Extra Fields
+
+Include additional context in your errors:
+
+```python
+raise errors.NotFound("User not found", user_id=user_id)
+raise errors.BadRequest("Invalid email format", field="email")
+raise errors.Conflict("Username already taken", username="john_doe")
+raise errors.RateLimit("Too many requests", retry_after=60)
+```
+
+These produce RFC 7807 Problem Details responses:
+
+```json
+{
+    "type": "not_found",
+    "title": "NotFoundError",
+    "status": 404,
+    "detail": "User not found",
+    "user_id": 123
+}
+```
+
+### Custom Errors
+
+Create domain-specific errors by subclassing `WebError`:
+
+```python
+from myfy.web.exceptions import WebError
+
+class PaymentRequiredError(WebError):
+    status_code = 402
+    error_type = "payment_required"
+
+class InsufficientCreditsError(WebError):
+    status_code = 402
+    error_type = "insufficient_credits"
+
+# Usage
+raise PaymentRequiredError("Payment required to access this feature")
+raise InsufficientCreditsError("Insufficient credits", required=100, current=25)
+```
+
+### HTTP Exceptions (Legacy)
+
+You can still use Starlette's HTTPException:
 
 ```python
 from starlette.exceptions import HTTPException

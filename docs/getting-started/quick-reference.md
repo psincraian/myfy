@@ -189,6 +189,35 @@ async def list_users(
 # Call with: GET /users?page=2&limit=20&sort=created_at
 ```
 
+### Query Parameters with Validation
+
+Use `Query()` for built-in validation:
+
+```python
+from myfy.web import route, Query
+
+@route.get("/search")
+async def search(
+    q: str = Query(min_length=1, max_length=100),
+    limit: int = Query(default=20, ge=1, le=100),
+    page: int = Query(default=1, ge=1),
+) -> list[Result]:
+    return await service.search(q, limit, page)
+```
+
+**Query constraints:**
+
+| Constraint | Type | Description |
+|------------|------|-------------|
+| `ge` | int/float | Greater than or equal |
+| `le` | int/float | Less than or equal |
+| `gt` | int/float | Greater than |
+| `lt` | int/float | Less than |
+| `min_length` | int | Minimum string length |
+| `max_length` | int | Maximum string length |
+| `pattern` | str | Regex pattern |
+| `alias` | str | Alternative query param name |
+
 ---
 
 ## Modules
@@ -264,7 +293,55 @@ uv run myfy doctor
 
 ## Error Handling
 
-### HTTP Exceptions
+### WebError Hierarchy
+
+Use built-in errors with RFC 7807 Problem Details format:
+
+```python
+from myfy.web import errors
+
+@route.get("/users/{user_id}")
+async def get_user(user_id: int, db: Database) -> User:
+    user = await db.get_user(user_id)
+    if not user:
+        raise errors.NotFound("User not found")
+    return user
+```
+
+**Available errors:**
+
+| Error | Status | Use Case |
+|-------|--------|----------|
+| `errors.BadRequest` | 400 | Invalid input, validation failures |
+| `errors.Unauthorized` | 401 | Missing or invalid authentication |
+| `errors.Forbidden` | 403 | Authenticated but not authorized |
+| `errors.NotFound` | 404 | Resource doesn't exist |
+| `errors.Conflict` | 409 | Duplicate entries, state conflicts |
+| `errors.UnprocessableEntity` | 422 | Valid syntax, invalid semantics |
+| `errors.RateLimit` | 429 | Too many requests |
+| `errors.ServiceUnavailable` | 503 | Temporary outage |
+
+### Error with Extra Fields
+
+```python
+raise errors.NotFound("User not found", user_id=user_id)
+raise errors.BadRequest("Invalid email format", field="email")
+raise errors.RateLimit("Too many requests", retry_after=60)
+```
+
+### Custom Errors
+
+```python
+from myfy.web.exceptions import WebError
+
+class PaymentRequiredError(WebError):
+    status_code = 402
+    error_type = "payment_required"
+
+raise PaymentRequiredError("Insufficient credits", required=100)
+```
+
+### HTTP Exceptions (Legacy)
 
 ```python
 from starlette.exceptions import HTTPException

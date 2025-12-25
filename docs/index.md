@@ -169,13 +169,13 @@ One file. No config. Just run.
 
     [:octicons-arrow-right-24: Full Tutorial](getting-started/tutorial.md)
 
--   :material-lightning-bolt:{ .lg .middle } __Quick Reference__
+-   :material-lightning-bolt:{ .lg .middle } __Reference__
 
     ---
 
-    Common patterns and code snippets
+    Single-page reference for all myfy features
 
-    [:octicons-arrow-right-24: Cheat Sheet](getting-started/quick-reference.md)
+    [:octicons-arrow-right-24: Reference](reference.md)
 
 -   :material-cog:{ .lg .middle } __Core Concepts__
 
@@ -196,7 +196,10 @@ One file. No config. Just run.
 | **Type-Safe DI** | Constructor injection with `SINGLETON`, `REQUEST`, and `TASK` scopes |
 | **Module System** | First-class modules with lifecycle hooks (start/stop) |
 | **FastAPI-Style Routes** | Decorators, path params, automatic body parsing |
+| **Query Validation** | Built-in query parameter parsing with constraints (ge, le, min_length, pattern) |
+| **WebError Hierarchy** | RFC 7807 Problem Details errors (NotFound, BadRequest, Conflict, etc.) |
 | **Configuration Profiles** | Environment-based config (dev/test/prod) with Pydantic validation |
+| **Data Module** | Async SQLAlchemy 2.0+ with REQUEST-scoped sessions |
 | **CLI Tools** | Built-in commands: `run`, `routes`, `modules`, `doctor` |
 | **Zero Reflection** | All DI resolution at compile-time, not request-time |
 | **Async-Native** | ASGI + AnyIO throughout |
