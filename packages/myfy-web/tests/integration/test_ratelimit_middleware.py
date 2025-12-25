@@ -7,7 +7,7 @@ These tests verify the complete rate limiting flow with ASGI app.
 import pytest
 from starlette.testclient import TestClient
 
-from myfy.core.di import Container
+from myfy.core.di import SINGLETON, Container
 from myfy.web.asgi import ASGIApp
 from myfy.web.ratelimit import (
     InMemoryRateLimitStore,
@@ -68,7 +68,7 @@ class TestGlobalRateLimiting:
 
         # Create app with rate limiting
         container = Container()
-        container.register(type_=Router, factory=lambda: router, scope="singleton")
+        container.register(type_=Router, factory=lambda: router, scope=SINGLETON)
         container.compile()
 
         app = ASGIApp(container, router)
@@ -101,7 +101,7 @@ class TestGlobalRateLimiting:
             return {"data": "value"}
 
         container = Container()
-        container.register(type_=Router, factory=lambda: router, scope="singleton")
+        container.register(type_=Router, factory=lambda: router, scope=SINGLETON)
         container.compile()
 
         app = ASGIApp(container, router)
@@ -127,7 +127,7 @@ class TestGlobalRateLimiting:
             return {"data": "value"}
 
         container = Container()
-        container.register(type_=Router, factory=lambda: router, scope="singleton")
+        container.register(type_=Router, factory=lambda: router, scope=SINGLETON)
         container.compile()
 
         app = ASGIApp(container, router)
@@ -160,7 +160,7 @@ class TestKeyStrategies:
             return {"data": "value"}
 
         container = Container()
-        container.register(type_=Router, factory=lambda: router, scope="singleton")
+        container.register(type_=Router, factory=lambda: router, scope=SINGLETON)
         container.compile()
 
         app = ASGIApp(container, router)
@@ -198,7 +198,7 @@ class TestKeyStrategies:
             return {"data": "value"}
 
         container = Container()
-        container.register(type_=Router, factory=lambda: router, scope="singleton")
+        container.register(type_=Router, factory=lambda: router, scope=SINGLETON)
         container.compile()
 
         app = ASGIApp(container, router)
@@ -277,7 +277,7 @@ class TestRateLimitResponse:
             return {"data": "value"}
 
         container = Container()
-        container.register(type_=Router, factory=lambda: router, scope="singleton")
+        container.register(type_=Router, factory=lambda: router, scope=SINGLETON)
         container.compile()
 
         app = ASGIApp(container, router)

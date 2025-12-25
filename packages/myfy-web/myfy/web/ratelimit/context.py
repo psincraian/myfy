@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from .types import RateLimitResult
 
 # Context variable for the current request's rate limit context
-_rate_limit_context: ContextVar["RateLimitContext | None"] = ContextVar(
+_rate_limit_context: ContextVar["RateLimitContext | None"] = ContextVar["RateLimitContext | None"](
     "_rate_limit_context", default=None
 )
 
