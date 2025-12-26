@@ -426,6 +426,8 @@ async def get_user(user_id: int) -> User:
 
 ### Custom Exception Handlers
 
+For custom exception handling, use Starlette's exception handler mechanism by extending the ASGI app after creation:
+
 ```python
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -439,11 +441,15 @@ async def custom_error_handler(request: Request, exc: CustomError):
         content={"error": str(exc)}
     )
 
-app.add_module(WebModule(
-    exception_handlers={
-        CustomError: custom_error_handler
-    }
-))
+# Add exception handlers after creating the app
+app = Application(auto_discover=False)
+app.add_module(WebModule())
+app.initialize()
+
+# Get the ASGI app and add handlers
+web_module = app.get_module(WebModule)
+asgi_app = web_module.get_asgi_app(app.container)
+asgi_app.app.add_exception_handler(CustomError, custom_error_handler)
 ```
 
 ## Rate Limiting
@@ -705,19 +711,37 @@ class RedisRateLimitStore:
 
 ## WebModule Configuration
 
-Configure the WebModule with custom settings:
+Configure the WebModule with a custom router and middleware:
 
 ```python
-from myfy.web import WebModule
+from myfy.web import WebModule, Router
 from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
+
+# Custom router (optional)
+custom_router = Router()
 
 app.add_module(WebModule(
-    host="0.0.0.0",              # Bind address
-    port=8000,                   # Port number
-    middleware=[...],            # Custom middleware
-    exception_handlers={...},    # Exception handlers
-    debug=True                   # Debug mode
+    router=custom_router,        # Custom router (optional)
+    middleware=[                 # Custom middleware (optional)
+        Middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_methods=["*"],
+            allow_headers=["*"]
+        )
+    ]
 ))
+```
+
+**Server configuration** is done via environment variables or WebSettings:
+
+```bash
+# .env
+MYFY_WEB_HOST=0.0.0.0
+MYFY_WEB_PORT=8000
+MYFY_WEB_CORS_ENABLED=true
+MYFY_WEB_CORS_ALLOWED_ORIGINS=["https://example.com"]
 ```
 
 ## Common Patterns

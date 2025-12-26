@@ -32,7 +32,13 @@ class ASGIApp:
     Bridges myfy routes and DI with Starlette's ASGI implementation.
     """
 
-    def __init__(self, container: Any, router: Router, lifespan: Any = None):
+    def __init__(
+        self,
+        container: Any,
+        router: Router,
+        lifespan: Any = None,
+        middleware: list[Middleware] | None = None,
+    ):
         """
         Create ASGI app.
 
@@ -40,10 +46,12 @@ class ASGIApp:
             container: DI container (must be compiled)
             router: Router with registered routes
             lifespan: Lifespan context manager (optional)
+            middleware: Optional list of Starlette Middleware to add
         """
         self.container = container
         self.router = router
         self.executor = HandlerExecutor(container)
+        self._custom_middleware = middleware or []
 
         # Compile all routes
         for route in router.get_routes():
@@ -65,8 +73,10 @@ class ASGIApp:
             for route in self.router.get_routes()
         ]
 
-        # Get CORS settings from container
-        middleware = []
+        # Build middleware list: custom middleware first, then auto-configured
+        middleware = list(self._custom_middleware)
+
+        # Get CORS settings from container (auto-configured via env vars)
         try:
             web_settings = self.container.get(WebSettings)
 
