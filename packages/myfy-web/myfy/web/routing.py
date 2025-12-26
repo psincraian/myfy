@@ -40,6 +40,7 @@ class Route:
     method: HTTPMethod
     handler: Callable
     name: str | None = None
+    status_code: int | None = None
     dependencies: list[str] = field(default_factory=list)
     path_params: list[str] = field(default_factory=list)
     body_param: str | None = None
@@ -69,6 +70,7 @@ class Router:
         handler: Callable,
         method: HTTPMethod,
         name: str | None = None,
+        status_code: int | None = None,
     ) -> Route:
         """
         Register a route.
@@ -78,6 +80,7 @@ class Router:
             handler: Handler function
             method: HTTP method
             name: Optional route name
+            status_code: Optional HTTP status code for successful responses
 
         Returns:
             The created Route
@@ -87,6 +90,7 @@ class Router:
             method=method,
             handler=handler,
             name=name or getattr(handler, "__name__", None),
+            status_code=status_code,
         )
 
         # Parse path parameters
@@ -98,31 +102,43 @@ class Router:
         self._routes.append(route)
         return route
 
-    def get(self, path: str, name: str | None = None) -> Callable:
+    def get(
+        self, path: str, name: str | None = None, status_code: int | None = None
+    ) -> Callable:
         """Decorator for GET routes."""
-        return self._method_decorator(path, HTTPMethod.GET, name)
+        return self._method_decorator(path, HTTPMethod.GET, name, status_code)
 
-    def post(self, path: str, name: str | None = None) -> Callable:
+    def post(
+        self, path: str, name: str | None = None, status_code: int | None = None
+    ) -> Callable:
         """Decorator for POST routes."""
-        return self._method_decorator(path, HTTPMethod.POST, name)
+        return self._method_decorator(path, HTTPMethod.POST, name, status_code)
 
-    def put(self, path: str, name: str | None = None) -> Callable:
+    def put(
+        self, path: str, name: str | None = None, status_code: int | None = None
+    ) -> Callable:
         """Decorator for PUT routes."""
-        return self._method_decorator(path, HTTPMethod.PUT, name)
+        return self._method_decorator(path, HTTPMethod.PUT, name, status_code)
 
-    def delete(self, path: str, name: str | None = None) -> Callable:
+    def delete(
+        self, path: str, name: str | None = None, status_code: int | None = None
+    ) -> Callable:
         """Decorator for DELETE routes."""
-        return self._method_decorator(path, HTTPMethod.DELETE, name)
+        return self._method_decorator(path, HTTPMethod.DELETE, name, status_code)
 
-    def patch(self, path: str, name: str | None = None) -> Callable:
+    def patch(
+        self, path: str, name: str | None = None, status_code: int | None = None
+    ) -> Callable:
         """Decorator for PATCH routes."""
-        return self._method_decorator(path, HTTPMethod.PATCH, name)
+        return self._method_decorator(path, HTTPMethod.PATCH, name, status_code)
 
-    def _method_decorator(self, path: str, method: HTTPMethod, name: str | None) -> Callable:
+    def _method_decorator(
+        self, path: str, method: HTTPMethod, name: str | None, status_code: int | None = None
+    ) -> Callable:
         """Generic decorator factory for HTTP methods."""
 
         def decorator(handler: Callable) -> Callable:
-            self.add_route(path, handler, method, name)
+            self.add_route(path, handler, method, name, status_code)
             return handler
 
         return decorator

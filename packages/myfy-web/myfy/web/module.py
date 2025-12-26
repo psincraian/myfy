@@ -4,12 +4,17 @@ Web module for myfy.
 Provides HTTP/ASGI capabilities with routing and DI-powered handlers.
 """
 
+from typing import TYPE_CHECKING
+
 from myfy.core.config import load_settings
 
 from .asgi import ASGIApp
 from .config import WebSettings
 from .routing import Router
 from .routing import route as default_router
+
+if TYPE_CHECKING:
+    from starlette.middleware import Middleware
 
 
 class WebModule:
@@ -21,16 +26,38 @@ class WebModule:
     - Automatic DI injection in handlers
     - Request-scoped dependencies
     - ASGI standard (works with uvicorn, hypercorn, etc.)
+    - Custom middleware support
     """
 
-    def __init__(self, router: Router | None = None):
+    def __init__(
+        self,
+        router: Router | None = None,
+        middleware: list["Middleware"] | None = None,
+    ):
         """
         Create web module.
 
         Args:
             router: Custom router (defaults to global route decorator instance)
+            middleware: Optional list of Starlette Middleware to add to the app
+
+        Example:
+            from starlette.middleware import Middleware
+            from starlette.middleware.cors import CORSMiddleware
+
+            app.add_module(WebModule(
+                middleware=[
+                    Middleware(
+                        CORSMiddleware,
+                        allow_origins=["*"],
+                        allow_methods=["*"],
+                        allow_headers=["*"]
+                    )
+                ]
+            ))
         """
         self.router = router or default_router
+        self.middleware = middleware or []
         self._asgi_app: ASGIApp | None = None
 
     @property
@@ -75,9 +102,11 @@ class WebModule:
         )
 
         # Register ASGI app factory
-        # Note: container is captured from closure, router is the dependency
+        # Note: container and middleware are captured from closure, router is the dependency
+        middleware = self.middleware
+
         def create_asgi_app(router: Router) -> ASGIApp:
-            return ASGIApp(container, router)
+            return ASGIApp(container, router, middleware=middleware)
 
         container.register(
             type_=ASGIApp,
@@ -116,7 +145,9 @@ class WebModule:
             if lifespan is not None:
                 # Create new ASGI app with lifespan
                 router = container.get(Router)
-                self._asgi_app = ASGIApp(container, router, lifespan=lifespan)
+                self._asgi_app = ASGIApp(
+                    container, router, lifespan=lifespan, middleware=self.middleware
+                )
             else:
                 # Get from DI container (no lifespan)
                 self._asgi_app = container.get(ASGIApp)

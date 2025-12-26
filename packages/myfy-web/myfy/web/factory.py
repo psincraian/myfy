@@ -65,7 +65,7 @@ def create_asgi_app_with_lifespan(
 
     # Get web module and router
     try:
-        _ = application.get_module(WebModule)
+        web_module = application.get_module(WebModule)
     except MyfyModuleNotFoundError as e:
         raise RuntimeError(
             "WebModule not found. "
@@ -79,8 +79,13 @@ def create_asgi_app_with_lifespan(
     if lifespan is None:
         lifespan = application.create_lifespan()
 
-    # Create ASGI app with lifespan
-    asgi_app = ASGIApp(application.container, router, lifespan=lifespan)
+    # Create ASGI app with lifespan and middleware from WebModule
+    asgi_app = ASGIApp(
+        application.container,
+        router,
+        lifespan=lifespan,
+        middleware=web_module.middleware,
+    )
     logger.debug("Created ASGI app with lifespan")
 
     # Allow modules to extend the ASGI app

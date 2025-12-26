@@ -557,7 +557,10 @@ from myfy.core import Application
 
 @pytest.fixture
 def app():
-    return Application(settings_class=TestSettings, auto_discover=False)
+    app = Application(settings_class=TestSettings, auto_discover=False)
+    app.add_module(WebModule())
+    app.initialize()
+    return app
 
 def test_repository(app):
     repo = app.container.get(TaskRepository)
@@ -569,9 +572,11 @@ def test_repository(app):
 
 ```python
 from starlette.testclient import TestClient
+from myfy.web import WebModule
 
 def test_get_users(app):
-    client = TestClient(app.web_module.get_asgi_app(app.container))
+    web_module = app.get_module(WebModule)
+    client = TestClient(web_module.get_asgi_app(app.container))
     response = client.get("/users")
     assert response.status_code == 200
 ```

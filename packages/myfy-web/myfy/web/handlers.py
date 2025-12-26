@@ -105,7 +105,7 @@ class HandlerExecutor:
                     result = route.handler(**kwargs)
 
                 # Convert result to response
-                return self._make_response(result)
+                return self._make_response(result, route.status_code)
 
             except HTTPException as e:
                 # Starlette HTTP exceptions - safe to expose
@@ -259,23 +259,35 @@ class HandlerExecutor:
                 status_code=400, detail=f"Failed to parse request body: {e!s}"
             ) from e
 
-    def _make_response(self, result: Any) -> Response:
-        """Convert handler result to HTTP response."""
+    def _make_response(self, result: Any, status_code: int | None = None) -> Response:
+        """Convert handler result to HTTP response.
+
+        Args:
+            result: The handler's return value
+            status_code: Optional HTTP status code to use (from route decorator)
+        """
         if isinstance(result, Response):
+            # If a custom status code was specified and result is a Response,
+            # we respect the Response's own status code
             return result
         if isinstance(result, (dict, list)):
-            return JSONResponse(result)
+            return JSONResponse(result, status_code=status_code or 200)
         if hasattr(result, "model_dump"):
             # Pydantic model
-            return JSONResponse(result.model_dump())
+            return JSONResponse(result.model_dump(), status_code=status_code or 200)
         if result is None:
-            return Response(status_code=204)
+            # For None results, use specified status_code or default to 204
+            return Response(status_code=status_code or 204)
         # Try to serialize as JSON
         try:
-            return JSONResponse(result)
+            return JSONResponse(result, status_code=status_code or 200)
         except (TypeError, ValueError):
             # Fallback to string
-            return Response(content=str(result), media_type="text/plain")
+            return Response(
+                content=str(result),
+                media_type="text/plain",
+                status_code=status_code or 200,
+            )
 
     def _make_error_response(self, error: Exception) -> JSONResponse:
         """Create error response with appropriate detail level based on debug mode."""
