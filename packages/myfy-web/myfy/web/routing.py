@@ -102,21 +102,15 @@ class Router:
         self._routes.append(route)
         return route
 
-    def get(
-        self, path: str, name: str | None = None, status_code: int | None = None
-    ) -> Callable:
+    def get(self, path: str, name: str | None = None, status_code: int | None = None) -> Callable:
         """Decorator for GET routes."""
         return self._method_decorator(path, HTTPMethod.GET, name, status_code)
 
-    def post(
-        self, path: str, name: str | None = None, status_code: int | None = None
-    ) -> Callable:
+    def post(self, path: str, name: str | None = None, status_code: int | None = None) -> Callable:
         """Decorator for POST routes."""
         return self._method_decorator(path, HTTPMethod.POST, name, status_code)
 
-    def put(
-        self, path: str, name: str | None = None, status_code: int | None = None
-    ) -> Callable:
+    def put(self, path: str, name: str | None = None, status_code: int | None = None) -> Callable:
         """Decorator for PUT routes."""
         return self._method_decorator(path, HTTPMethod.PUT, name, status_code)
 
@@ -126,9 +120,7 @@ class Router:
         """Decorator for DELETE routes."""
         return self._method_decorator(path, HTTPMethod.DELETE, name, status_code)
 
-    def patch(
-        self, path: str, name: str | None = None, status_code: int | None = None
-    ) -> Callable:
+    def patch(self, path: str, name: str | None = None, status_code: int | None = None) -> Callable:
         """Decorator for PATCH routes."""
         return self._method_decorator(path, HTTPMethod.PATCH, name, status_code)
 
