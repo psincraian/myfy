@@ -151,6 +151,7 @@ class WebModule:
             else:
                 # Get from DI container (no lifespan)
                 self._asgi_app = container.get(ASGIApp)
+        assert self._asgi_app is not None  # Guaranteed by logic above
         return self._asgi_app
 
     def __repr__(self) -> str:
