@@ -92,10 +92,12 @@ class HandlerExecutor:
                             # Resolve from DI container
                             kwargs[param_name] = self.container.get(param_type)
                     except Exception as e:
-                        return JSONResponse(
-                            {"error": f"Failed to inject {param_name}: {e!s}"},
-                            status_code=500,
+                        self._logger.exception(
+                            "Dependency injection failed",
+                            exc_info=e,
+                            extra={"param_name": param_name, "param_type": str(param_type)},
                         )
+                        return self._make_error_response(e)
 
             # 5. Execute handler
             try:
