@@ -1,8 +1,14 @@
 """
 Fixtures for web+frontend integration tests.
+
+These tests require jinja2 to be installed.
 """
 
 import pytest
+
+# Skip all tests in this module if jinja2 is not installed
+pytest.importorskip("jinja2", reason="jinja2 required for web_frontend tests")
+
 from starlette.testclient import TestClient
 
 from myfy.core.di import ScopeContext

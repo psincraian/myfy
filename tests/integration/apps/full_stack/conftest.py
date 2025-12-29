@@ -1,8 +1,16 @@
 """
 Fixtures for full stack integration tests.
+
+These tests require sqlalchemy, aiosqlite, and jinja2 to be installed.
 """
 
 import pytest
+
+# Skip all tests in this module if dependencies are not installed
+pytest.importorskip("sqlalchemy", reason="sqlalchemy required for full_stack tests")
+pytest.importorskip("aiosqlite", reason="aiosqlite required for full_stack tests")
+pytest.importorskip("jinja2", reason="jinja2 required for full_stack tests")
+
 from starlette.testclient import TestClient
 
 from myfy.core.di import ScopeContext
