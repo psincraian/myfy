@@ -1,15 +1,6 @@
-"""
-Fixtures for web+data integration tests.
-
-These tests require sqlalchemy and aiosqlite to be installed.
-"""
+"""Fixtures for web+data integration tests."""
 
 import pytest
-
-# Skip all tests in this module if sqlalchemy is not installed
-pytest.importorskip("sqlalchemy", reason="sqlalchemy required for web_data tests")
-pytest.importorskip("aiosqlite", reason="aiosqlite required for web_data tests")
-
 from starlette.testclient import TestClient
 
 from myfy.core.di import ScopeContext
