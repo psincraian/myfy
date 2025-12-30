@@ -354,3 +354,129 @@ class TestReloadModuleSetup:
 
         assert env_vars["MYFY_APP_MODULE"] == "main"
         assert env_vars["MYFY_APP_VAR"] == "app"
+
+    def test_setup_reload_module_with_app_dir(self):
+        """Test reload module setup with custom app directory."""
+        from myfy_cli.main import _setup_reload_module
+
+        import_path, env_vars = _setup_reload_module(
+            "app.py", "application", app_dir=Path("/custom/path")
+        )
+
+        assert import_path == "myfy_cli.asgi_factory:create_app"
+        assert env_vars["MYFY_APP_MODULE"] == "app"
+        assert env_vars["MYFY_APP_VAR"] == "application"
+        assert env_vars["MYFY_APP_DIR"] == "/custom/path"
+
+
+# =============================================================================
+# App Path Parsing Tests
+# =============================================================================
+
+
+class TestAppPathParsing:
+    """Test app_path argument parsing."""
+
+    def test_parse_directory_path(self):
+        """Test parsing a directory path."""
+        from myfy_cli.main import _parse_app_path
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app_dir, uvicorn_path = _parse_app_path(tmpdir)
+
+            assert app_dir == Path(tmpdir).resolve()
+            assert uvicorn_path is None
+
+    def test_parse_python_file_path(self):
+        """Test parsing a Python file path."""
+        from myfy_cli.main import _parse_app_path
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app_file = Path(tmpdir) / "app.py"
+            app_file.write_text("# test")
+
+            app_dir, uvicorn_path = _parse_app_path(str(app_file))
+
+            assert app_dir == Path(tmpdir).resolve()
+            assert uvicorn_path is None
+
+    def test_parse_module_attr_format(self):
+        """Test parsing module:attr format."""
+        from myfy_cli.main import _parse_app_path
+
+        app_dir, uvicorn_path = _parse_app_path("mymodule:app")
+
+        assert app_dir is None
+        assert uvicorn_path == "mymodule:app"
+
+    def test_parse_invalid_path_exits(self):
+        """Test that invalid path causes exit."""
+        from myfy_cli.main import _parse_app_path
+
+        with pytest.raises(SystemExit):
+            _parse_app_path("nonexistent_path_without_colon")
+
+
+# =============================================================================
+# External App Path Tests
+# =============================================================================
+
+
+class TestExternalAppPath:
+    """Test running apps from external directories."""
+
+    def test_find_application_in_external_dir(self):
+        """Test finding application in an external directory."""
+        from myfy_cli.main import find_application
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app_file = Path(tmpdir) / "app.py"
+            app_file.write_text(
+                """
+from myfy.core import Application
+
+app = Application(auto_discover=False)
+"""
+            )
+
+            app_instance, filename, var_name = find_application(search_dir=Path(tmpdir))
+
+            assert filename == "app.py"
+            assert var_name == "app"
+
+    def test_find_application_external_dir_no_app(self):
+        """Test that missing app in external dir causes exit."""
+        from myfy_cli.main import find_application
+
+        with tempfile.TemporaryDirectory() as tmpdir, pytest.raises(SystemExit):
+            find_application(search_dir=Path(tmpdir))
+
+    def test_find_application_with_sibling_imports(self):
+        """Test that app can import from sibling files in the same directory."""
+        from myfy_cli.main import find_application
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create a sibling module
+            services_file = Path(tmpdir) / "services.py"
+            services_file.write_text(
+                """
+class MyService:
+    pass
+"""
+            )
+
+            # Create app that imports from sibling
+            app_file = Path(tmpdir) / "app.py"
+            app_file.write_text(
+                """
+from myfy.core import Application
+from services import MyService
+
+app = Application(auto_discover=False)
+"""
+            )
+
+            app_instance, filename, var_name = find_application(search_dir=Path(tmpdir))
+
+            assert filename == "app.py"
+            assert var_name == "app"

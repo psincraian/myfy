@@ -11,7 +11,11 @@ import sys
 from pathlib import Path
 
 
-def create_app(app_module: str | None = None, app_var: str | None = None):
+def create_app(
+    app_module: str | None = None,
+    app_var: str | None = None,
+    app_dir: str | None = None,
+):
     """
     Factory function for creating ASGI app with lifespan.
 
@@ -21,10 +25,12 @@ def create_app(app_module: str | None = None, app_var: str | None = None):
     - Initialization if needed
     - Lifespan integration with module lifecycle
     - ASGI app creation via factory pattern
+    - Support for apps in different directories
 
     Args:
         app_module: Module path (e.g., "app" or "myapp.main"), defaults to env var MYFY_APP_MODULE
         app_var: Variable name in module (default: "app"), defaults to env var MYFY_APP_VAR
+        app_dir: Directory containing the app, defaults to env var MYFY_APP_DIR
 
     Returns:
         ASGI application instance (Starlette)
@@ -37,10 +43,16 @@ def create_app(app_module: str | None = None, app_var: str | None = None):
     Example:
         uvicorn myfy_cli.asgi_factory:create_app --factory \
             --env MYFY_APP_MODULE=app --env MYFY_APP_VAR=application
+
+        # For external apps:
+        uvicorn myfy_cli.asgi_factory:create_app --factory \
+            --env MYFY_APP_MODULE=app --env MYFY_APP_VAR=app \
+            --env MYFY_APP_DIR=/path/to/external/app
     """
-    # Get module and variable from environment if not provided
+    # Get module, variable, and directory from environment if not provided
     app_module = app_module or os.getenv("MYFY_APP_MODULE")
     app_var = app_var or os.getenv("MYFY_APP_VAR", "app")
+    app_dir = app_dir or os.getenv("MYFY_APP_DIR")
 
     if not app_module:
         raise RuntimeError(
@@ -52,10 +64,20 @@ def create_app(app_module: str | None = None, app_var: str | None = None):
     if not app_var or not app_var.isidentifier():
         raise RuntimeError(f"Invalid app_var: '{app_var}'. Must be a valid Python identifier.")
 
-    # Ensure current directory is in path for imports
-    cwd = str(Path.cwd())
-    if cwd not in sys.path:
-        sys.path.insert(0, cwd)
+    # If app_dir is specified, add it to the path and change to it
+    if app_dir:
+        app_dir_path = Path(app_dir).resolve()
+        if not app_dir_path.is_dir():
+            raise RuntimeError(f"App directory does not exist: {app_dir}")
+        # Add app directory to Python path for imports
+        app_dir_str = str(app_dir_path)
+        if app_dir_str not in sys.path:
+            sys.path.insert(0, app_dir_str)
+    else:
+        # Ensure current directory is in path for imports
+        cwd = str(Path.cwd())
+        if cwd not in sys.path:
+            sys.path.insert(0, cwd)
 
     # Import the application with better error handling
     try:

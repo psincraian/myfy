@@ -46,23 +46,27 @@ app.add_typer(data_app, name="data")
 app.add_typer(frontend_app, name="frontend")
 
 
-def find_application():
+def find_application(search_dir: Path | None = None):
     """
-    Discover the Application instance in the current directory.
+    Discover the Application instance in a directory.
 
     Only checks whitelisted files for security:
     - app.py
     - main.py
     - application.py
 
+    Args:
+        search_dir: Directory to search in. If None, uses current directory.
+
     Returns:
         tuple: (Application instance, filename, variable_name)
     """
     # Only check explicitly safe files (no glob scanning for security)
     safe_files = ["app.py", "main.py", "application.py"]
+    base_dir = search_dir or Path.cwd()
 
     for filename in safe_files:
-        file_path = Path(filename)
+        file_path = base_dir / filename
         if file_path.exists() and file_path.is_file():
             # Validate it's actually a Python file
             if not filename.endswith(".py"):
@@ -71,10 +75,12 @@ def find_application():
             result = _load_app_from_file(str(file_path))
             if result:
                 app_instance, var_name = result
-                console.print(f"[green]✓ Found application in {filename}[/green]")
+                console.print(f"[green]✓ Found application in {file_path}[/green]")
                 return app_instance, filename, var_name
 
     console.print("[red]Error: Could not find Application instance[/red]")
+    if search_dir:
+        console.print(f"Searched in: {search_dir}")
     console.print("Create an app.py, main.py, or application.py with an Application instance")
     sys.exit(1)
 
@@ -83,33 +89,55 @@ def _load_app_from_file(filepath: str):
     """
     Load and return Application instance from a Python file.
 
+    Adds the file's directory to sys.path to enable imports from sibling files.
+
     Returns:
         tuple: (Application instance, variable_name) or None
     """
     try:
-        spec = importlib.util.spec_from_file_location("app_module", filepath)
-        if spec and spec.loader:
-            module = importlib.util.module_from_spec(spec)
-            sys.modules["app_module"] = module
-            spec.loader.exec_module(module)
+        # Add the file's directory to sys.path so sibling imports work
+        file_dir = str(Path(filepath).parent.resolve())
+        path_added = False
+        if file_dir not in sys.path:
+            sys.path.insert(0, file_dir)
+            path_added = True
 
-            # Look for Application instance
-            for name in dir(module):
-                obj = getattr(module, name)
-                if isinstance(obj, Application):
-                    return obj, name
+        try:
+            spec = importlib.util.spec_from_file_location("app_module", filepath)
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                sys.modules["app_module"] = module
+                spec.loader.exec_module(module)
+
+                # Look for Application instance
+                for name in dir(module):
+                    obj = getattr(module, name)
+                    if isinstance(obj, Application):
+                        return obj, name
+        finally:
+            # Clean up sys.path if we added it (discovery phase only)
+            # The factory will add it again for the actual runtime
+            if path_added and file_dir in sys.path:
+                sys.path.remove(file_dir)
     except Exception as e:
         console.print(f"[yellow]Warning: Failed to load {filepath}: {e}[/yellow]")
 
     return None
 
 
-def _setup_reload_module(filename: str, var_name: str) -> tuple[str, dict[str, str]]:
+def _setup_reload_module(
+    filename: str, var_name: str, app_dir: Path | None = None
+) -> tuple[str, dict[str, str]]:
     """
     Set up environment for reloadable ASGI factory.
 
     Instead of generating code, we use the asgi_factory module with
     environment variables to configure the application.
+
+    Args:
+        filename: The app filename (e.g., "app.py")
+        var_name: The variable name containing the Application instance
+        app_dir: Optional directory where the app is located. If None, uses cwd.
 
     Returns:
         Tuple of (import_path, env_vars)
@@ -122,6 +150,10 @@ def _setup_reload_module(filename: str, var_name: str) -> tuple[str, dict[str, s
         "MYFY_APP_MODULE": module_name,
         "MYFY_APP_VAR": var_name,
     }
+
+    # If app is in a different directory, set the path for the factory
+    if app_dir:
+        env_vars["MYFY_APP_DIR"] = str(app_dir.resolve())
 
     # Use the factory function instead of generated code
     return "myfy_cli.asgi_factory:create_app", env_vars
@@ -180,17 +212,57 @@ def _resolve_host_and_port(
     return host, port
 
 
+def _parse_app_path(app_path: str) -> tuple[Path | None, str | None]:
+    """
+    Parse the app_path argument to determine if it's a directory, file, or module path.
+
+    Args:
+        app_path: The --app-path argument value
+
+    Returns:
+        Tuple of (app_directory, uvicorn_path):
+        - If directory/file: (Path to app dir, None)
+        - If module:attr format: (None, "module:attr")
+    """
+    path = Path(app_path)
+
+    # Check if it's a directory
+    if path.is_dir():
+        return path.resolve(), None
+
+    # Check if it's a Python file
+    if path.is_file() and path.suffix == ".py":
+        return path.parent.resolve(), None
+
+    # Otherwise, treat as module:attr format for raw ASGI apps
+    if ":" in app_path:
+        return None, app_path
+
+    # It might be a directory that doesn't exist yet, or invalid path
+    console.print(f"[red]Error: '{app_path}' is not a valid path or module:attr format[/red]")
+    console.print("Use either:")
+    console.print("  - A directory path: --app-path /path/to/app")
+    console.print("  - A module:attribute format: --app-path mymodule:app")
+    sys.exit(1)
+
+
 @app.command()
 def run(
     host: str | None = typer.Option(None, help="Server host"),
     port: int | None = typer.Option(None, help="Server port"),
     reload: bool = typer.Option(True, help="Enable auto-reload"),
-    app_path: str | None = typer.Option(None, help="Path to app (e.g., main:app)"),
+    app_path: str | None = typer.Option(
+        None, help="Path to app directory or module:attr (e.g., /path/to/app or main:app)"
+    ),
 ):
     """
     Start the development server.
 
     Runs the ASGI application with uvicorn.
+
+    The --app-path option supports:
+    - Directory path: Auto-discovers app.py, main.py, or application.py in that directory
+    - Module:attribute format: Loads a raw ASGI app directly (e.g., myapp:app)
     """
     klyne.track(
         "myfy_run",
@@ -203,84 +275,98 @@ def run(
     )
     console.print("🚀 Starting myfy development server...")
 
+    # Determine the app directory (None means current directory)
+    app_dir: Path | None = None
+    uvicorn_path: str | None = None
+
     if app_path:
-        # Use provided app path
-        host, port = _resolve_host_and_port(host, port, application=None)
+        app_dir, uvicorn_path = _parse_app_path(app_path)
 
-        uvicorn.run(
-            app_path,
-            host=host,
-            port=port,
-            reload=reload,
-            log_level="info",
-        )
-    else:
-        # Auto-discover and run
-        application, filename, var_name = find_application()
+        if uvicorn_path:
+            # Raw ASGI app path (module:attr format)
+            host, port = _resolve_host_and_port(host, port, application=None)
 
-        # Initialize if not already done
-        if not application._initialized:
-            application.initialize()
-
-        # Get ASGI app from web module
-        web_module = None
-        for module in application._modules:
-            if module.name == "web":
-                web_module = module
-                break
-
-        if web_module is None:
-            console.print("[red]Error: No web module found[/red]")
-            console.print("Add WebModule() to your application")
-            sys.exit(1)
-
-        # Resolve host and port (respects CLI flags > env vars > WebSettings defaults)
-        host, port = _resolve_host_and_port(host, port, application)
-
-        console.print(f"📡 Listening on http://{host}:{port}")
-        console.print(f"📦 Loaded {len(application._modules)} module(s)")
-
-        if reload:
-            # Set up reloadable module for uvicorn using factory
-            import_path, env_vars = _setup_reload_module(filename, var_name)
-            console.print("🔄 Reload enabled - watching for file changes")
-
-            # Use subprocess to call uvicorn CLI with environment variables
-            # This ensures the worker subprocess has the correct environment
-            cmd = [
-                "uvicorn",
-                import_path,
-                "--factory",  # Tell uvicorn to call the function
-                "--host",
-                host,
-                "--port",
-                str(port),
-                "--reload",
-                "--log-level",
-                "info",
-            ]
-
-            # Merge environment variables
-            env = os.environ.copy()
-            env.update(env_vars)
-
-            # Run uvicorn via subprocess
-            subprocess.run(cmd, env=env, check=True)
-        else:
-            # When reload is disabled, we can pass the app object directly
-            assert web_module is not None  # Already checked above
-
-            # Use centralized lifespan creation
-            lifespan = application.create_lifespan()
-
-            asgi_app = web_module.get_asgi_app(application.container, lifespan=lifespan)
             uvicorn.run(
-                asgi_app.app,  # Use the underlying Starlette app
+                uvicorn_path,
                 host=host,
                 port=port,
-                reload=False,
+                reload=reload,
                 log_level="info",
             )
+            return
+
+    # Auto-discover and run (either from app_dir or current directory)
+    application, filename, var_name = find_application(search_dir=app_dir)
+
+    # Initialize if not already done
+    if not application._initialized:
+        application.initialize()
+
+    # Get ASGI app from web module
+    web_module = None
+    for module in application._modules:
+        if module.name == "web":
+            web_module = module
+            break
+
+    if web_module is None:
+        console.print("[red]Error: No web module found[/red]")
+        console.print("Add WebModule() to your application")
+        sys.exit(1)
+
+    # Resolve host and port (respects CLI flags > env vars > WebSettings defaults)
+    host, port = _resolve_host_and_port(host, port, application)
+
+    console.print(f"📡 Listening on http://{host}:{port}")
+    console.print(f"📦 Loaded {len(application._modules)} module(s)")
+    if app_dir:
+        console.print(f"📂 App directory: {app_dir}")
+
+    if reload:
+        # Set up reloadable module for uvicorn using factory
+        import_path, env_vars = _setup_reload_module(filename, var_name, app_dir=app_dir)
+        console.print("🔄 Reload enabled - watching for file changes")
+
+        # Use subprocess to call uvicorn CLI with environment variables
+        # This ensures the worker subprocess has the correct environment
+        cmd = [
+            "uvicorn",
+            import_path,
+            "--factory",  # Tell uvicorn to call the function
+            "--host",
+            host,
+            "--port",
+            str(port),
+            "--reload",
+            "--log-level",
+            "info",
+        ]
+
+        # If running from a different directory, watch that directory
+        if app_dir:
+            cmd.extend(["--reload-dir", str(app_dir)])
+
+        # Merge environment variables
+        env = os.environ.copy()
+        env.update(env_vars)
+
+        # Run uvicorn via subprocess
+        subprocess.run(cmd, env=env, check=True)
+    else:
+        # When reload is disabled, we can pass the app object directly
+        assert web_module is not None  # Already checked above
+
+        # Use centralized lifespan creation
+        lifespan = application.create_lifespan()
+
+        asgi_app = web_module.get_asgi_app(application.container, lifespan=lifespan)
+        uvicorn.run(
+            asgi_app.app,  # Use the underlying Starlette app
+            host=host,
+            port=port,
+            reload=False,
+            log_level="info",
+        )
 
 
 @app.command()
