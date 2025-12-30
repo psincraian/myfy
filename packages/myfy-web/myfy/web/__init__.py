@@ -49,10 +49,31 @@ Rate Limiting:
     @rate_limit(50, key=RateLimitKey.USER)  # By authenticated user
     async def get_profile(user: User) -> Profile:
         ...
+
+Authentication:
+    from myfy.web.auth import AuthModule, Anonymous, Authenticated
+    from dataclasses import dataclass
+
+    @dataclass
+    class User(Authenticated):
+        email: str
+
+    def my_auth(request: Request) -> User | None:
+        token = request.headers.get("Authorization")
+        if not token:
+            return None  # -> 401
+        return User(id="123", email="user@example.com")
+
+    app.add_module(AuthModule(authenticated_provider=my_auth))
+
+    @route.get("/profile")
+    async def profile(user: User) -> dict:
+        return {"id": user.id, "email": user.email}
 """
 
 from . import errors
 from .asgi import ASGIApp
+from .auth import Anonymous, Authenticated, AuthModule
 from .config import WebSettings
 from .context import RequestContext, get_request_context
 from .extensions import IMiddlewareProvider, IWebExtension
@@ -65,6 +86,9 @@ from .version import __version__
 
 __all__ = [
     "ASGIApp",
+    "Anonymous",
+    "AuthModule",
+    "Authenticated",
     "HTTPMethod",
     "IMiddlewareProvider",
     "IWebExtension",

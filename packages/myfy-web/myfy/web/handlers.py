@@ -13,6 +13,8 @@ from typing import TYPE_CHECKING, Any, get_type_hints
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from myfy.web.auth.registry import ProtectedTypesRegistry
+
 from pydantic import ValidationError
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
@@ -38,6 +40,24 @@ class HandlerExecutor:
         self.container = container
         self._execution_plans: dict[str, Callable] = {}
         self._logger = logging.getLogger(__name__)
+        self._protected_registry: ProtectedTypesRegistry | None = None
+        self._protected_registry_checked = False
+
+    def _get_protected_registry(self) -> "ProtectedTypesRegistry | None":
+        """
+        Lazy load protected types registry.
+
+        Returns None if AuthModule is not configured.
+        """
+        if not self._protected_registry_checked:
+            self._protected_registry_checked = True
+            try:
+                from myfy.web.auth.registry import ProtectedTypesRegistry  # noqa: PLC0415
+
+                self._protected_registry = self.container.get(ProtectedTypesRegistry)
+            except Exception:
+                pass  # No AuthModule configured
+        return self._protected_registry
 
     def compile_route(self, route: Route) -> None:
         """
@@ -90,7 +110,22 @@ class HandlerExecutor:
                             kwargs[param_name] = get_request_context()
                         else:
                             # Resolve from DI container
-                            kwargs[param_name] = self.container.get(param_type)
+                            value = self.container.get(param_type)
+
+                            # Check if protected type returned None
+                            if value is None:
+                                registry = self._get_protected_registry()
+                                if registry:
+                                    status_code = registry.get_status_code(param_type)
+                                    if status_code:
+                                        return JSONResponse(
+                                            {"detail": registry.get_error_detail(status_code)},
+                                            status_code=status_code,
+                                        )
+
+                            kwargs[param_name] = value
+                    except HTTPException:
+                        raise  # Let HTTP exceptions bubble up
                     except Exception as e:
                         self._logger.exception(
                             "Dependency injection failed",
