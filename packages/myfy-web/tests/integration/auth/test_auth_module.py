@@ -9,8 +9,8 @@ Tests verify:
 """
 
 import json
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Iterator
 
 import pytest
 from starlette.requests import Request
