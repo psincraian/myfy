@@ -14,7 +14,7 @@ Usage:
     curl http://127.0.0.1:8000/health
 """
 
-from myfy.core import Application, SINGLETON, provider
+from myfy.core import SINGLETON, Application, provider
 from myfy.web import WebModule, route
 
 

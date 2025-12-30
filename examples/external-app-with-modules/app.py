@@ -5,11 +5,11 @@ This tests that when using --app-path, other Python files
 in the same directory can be imported correctly.
 """
 
-from myfy.core import Application, SINGLETON, provider
-from myfy.web import WebModule, route
-
 # Import from sibling file - this is the key test
-from services import UserService, ProductService
+from services import ProductService, UserService
+
+from myfy.core import SINGLETON, Application, provider
+from myfy.web import WebModule, route
 
 
 @provider(scope=SINGLETON)
