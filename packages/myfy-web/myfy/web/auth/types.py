@@ -38,7 +38,6 @@ class Anonymous:
     """
 
 
-
 @dataclass
 class Authenticated(Anonymous):
     """

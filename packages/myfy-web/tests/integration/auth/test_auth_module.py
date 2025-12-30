@@ -172,7 +172,9 @@ class TestAuthenticatedType:
     """Test Authenticated type behavior."""
 
     @pytest.mark.asyncio
-    async def test_authenticated_returns_401_when_none(self, base_container: Container, request_scope):
+    async def test_authenticated_returns_401_when_none(
+        self, base_container: Container, request_scope
+    ):
         """Authenticated type should return 401 when provider returns None."""
 
         def no_auth() -> User | None:
@@ -215,7 +217,9 @@ class TestAuthenticatedType:
         assert body["detail"] == "Authentication required"
 
     @pytest.mark.asyncio
-    async def test_authenticated_succeeds_when_valid(self, base_container: Container, request_scope):
+    async def test_authenticated_succeeds_when_valid(
+        self, base_container: Container, request_scope
+    ):
         """Authenticated type should succeed when provider returns user."""
 
         def valid_auth() -> User:
@@ -268,7 +272,9 @@ class TestCustomProtectedTypes:
     """Test custom protected types with custom status codes."""
 
     @pytest.mark.asyncio
-    async def test_custom_type_returns_configured_code(self, base_container: Container, request_scope):
+    async def test_custom_type_returns_configured_code(
+        self, base_container: Container, request_scope
+    ):
         """Custom types should return configured status codes."""
 
         def no_admin() -> AdminUser | None:
@@ -367,7 +373,9 @@ class TestNoAuthModule:
     """Test behavior when AuthModule is not configured."""
 
     @pytest.mark.asyncio
-    async def test_no_auth_module_none_not_intercepted(self, base_container: Container, request_scope):
+    async def test_no_auth_module_none_not_intercepted(
+        self, base_container: Container, request_scope
+    ):
         """Without AuthModule, None values are not intercepted (normal DI behavior)."""
 
         def returns_none() -> User | None:
