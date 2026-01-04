@@ -106,14 +106,13 @@ def rate_limit(
 
             setattr(async_wrapper, RATE_LIMIT_ATTR, config)
             return async_wrapper  # type: ignore[return-value]
-        else:
 
-            @wraps(func)
-            def sync_wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-                return func(*args, **kwargs)
+        @wraps(func)
+        def sync_wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+            return func(*args, **kwargs)
 
-            setattr(sync_wrapper, RATE_LIMIT_ATTR, config)
-            return sync_wrapper  # type: ignore[return-value]
+        setattr(sync_wrapper, RATE_LIMIT_ATTR, config)
+        return sync_wrapper  # type: ignore[return-value]
 
     return decorator
 

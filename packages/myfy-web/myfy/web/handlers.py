@@ -80,6 +80,36 @@ class HandlerExecutor:
                 pass  # No RateLimitModule configured
         return self._rate_limit_store
 
+    async def _check_rate_limit(
+        self,
+        request: Request,
+        rate_limit_config: Any,
+        route_path: str,
+    ) -> Response | None:
+        """
+        Check per-route rate limit if configured.
+
+        Returns a 429 response if rate limit exceeded, None otherwise.
+        """
+        store = self._get_rate_limit_store()
+        if store is None:
+            return None
+
+        # Build rate limit key
+        client_key = self._get_client_key(request, rate_limit_config.key)
+        scope = rate_limit_config.scope or route_path
+        rate_key = f"route:{scope}:{client_key}"
+
+        result = await store.check_and_increment(
+            rate_key,
+            rate_limit_config.requests,
+            rate_limit_config.window_seconds,
+        )
+
+        if not result.allowed:
+            return self._rate_limit_response(result)
+        return None
+
     def compile_route(self, route: Route) -> None:
         """
         Compile an execution plan for a route.
@@ -92,26 +122,18 @@ class HandlerExecutor:
         rate_limit_config = get_rate_limit_config(route.handler)
 
         # Build execution plan
-        async def execute(request: Request, path_params: dict[str, Any]) -> Response:
+        async def execute(  # noqa: PLR0911
+            request: Request, path_params: dict[str, Any]
+        ) -> Response:
             kwargs = {}
 
             # 0. Check per-route rate limit if configured
             if rate_limit_config is not None:
-                store = self._get_rate_limit_store()
-                if store is not None:
-                    # Build rate limit key
-                    client_key = self._get_client_key(request, rate_limit_config.key)
-                    scope = rate_limit_config.scope or route.path
-                    rate_key = f"route:{scope}:{client_key}"
-
-                    result = await store.check_and_increment(
-                        rate_key,
-                        rate_limit_config.requests,
-                        rate_limit_config.window_seconds,
-                    )
-
-                    if not result.allowed:
-                        return self._rate_limit_response(result)
+                rate_limit_response = await self._check_rate_limit(
+                    request, rate_limit_config, route.path
+                )
+                if rate_limit_response is not None:
+                    return rate_limit_response
 
             # 1. Inject path parameters
             for param_name in route.path_params:
