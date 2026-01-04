@@ -99,9 +99,7 @@ def rate_limit(
         if iscoroutinefunction(func):
 
             @wraps(func)
-            async def async_wrapper(
-                *args: P.args, **kwargs: P.kwargs
-            ) -> Coroutine[Any, Any, R]:
+            async def async_wrapper(*args: P.args, **kwargs: P.kwargs) -> Coroutine[Any, Any, R]:
                 return await func(*args, **kwargs)  # type: ignore[misc]
 
             setattr(async_wrapper, RATE_LIMIT_ATTR, config)
