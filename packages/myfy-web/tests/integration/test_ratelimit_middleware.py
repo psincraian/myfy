@@ -260,6 +260,46 @@ class TestDecoratorIntegration:
         config = get_rate_limit_config(routes[0].handler)
         assert config is None
 
+    def test_per_route_rate_limit_enforced(self, router, store):
+        """Per-route @rate_limit decorator should enforce limits."""
+        from myfy.web.ratelimit.store import RateLimitStore
+
+        # Settings with high global limit but we want per-route to enforce
+        settings = RateLimitSettings(
+            enabled=True,
+            global_requests=100,  # High global limit
+            global_window_seconds=60,
+        )
+
+        @router.get("/api/limited")
+        @rate_limit(2)  # Only 2 requests allowed per minute
+        async def limited_handler():
+            return {"status": "ok"}
+
+        container = Container()
+        container.register(type_=Router, factory=lambda: router, scope=SINGLETON)
+        # Register store in container so HandlerExecutor can access it
+        container.register(type_=RateLimitStore, factory=lambda: store, scope=SINGLETON)
+        container.compile()
+
+        app = ASGIApp(container, router)
+
+        from myfy.web.ratelimit.middleware import RateLimitMiddleware
+
+        app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)
+
+        client = TestClient(app.app)
+
+        # First 2 requests should succeed
+        r1 = client.get("/api/limited")
+        r2 = client.get("/api/limited")
+        assert r1.status_code == 200, "First request should succeed"
+        assert r2.status_code == 200, "Second request should succeed"
+
+        # Third request should be rate limited (per-route limit of 2)
+        r3 = client.get("/api/limited")
+        assert r3.status_code == 429, "Per-route rate limit should be enforced after 2 requests"
+
 
 # =============================================================================
 # 429 Response Format Tests

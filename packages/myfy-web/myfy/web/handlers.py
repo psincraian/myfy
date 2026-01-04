@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from myfy.web.auth.registry import ProtectedTypesRegistry
+    from myfy.web.ratelimit.store import RateLimitStore
 
 from pydantic import ValidationError
 from starlette.exceptions import HTTPException
@@ -25,6 +26,8 @@ from myfy.core.config import CoreSettings
 from .context import RequestContext, get_request_context
 from .exceptions import WebError
 from .params import QueryParam
+from .ratelimit.decorator import get_rate_limit_config
+from .ratelimit.keys import RateLimitKey
 from .routing import Route
 
 
@@ -42,6 +45,8 @@ class HandlerExecutor:
         self._logger = logging.getLogger(__name__)
         self._protected_registry: ProtectedTypesRegistry | None = None
         self._protected_registry_checked = False
+        self._rate_limit_store: RateLimitStore | None = None
+        self._rate_limit_store_checked = False
 
     def _get_protected_registry(self) -> "ProtectedTypesRegistry | None":
         """
@@ -59,6 +64,52 @@ class HandlerExecutor:
                 pass  # No AuthModule configured
         return self._protected_registry
 
+    def _get_rate_limit_store(self) -> "RateLimitStore | None":
+        """
+        Lazy load rate limit store.
+
+        Returns None if RateLimitModule is not configured.
+        """
+        if not self._rate_limit_store_checked:
+            self._rate_limit_store_checked = True
+            try:
+                from myfy.web.ratelimit.store import RateLimitStore  # noqa: PLC0415
+
+                self._rate_limit_store = self.container.get(RateLimitStore)
+            except Exception:
+                pass  # No RateLimitModule configured
+        return self._rate_limit_store
+
+    async def _check_rate_limit(
+        self,
+        request: Request,
+        rate_limit_config: Any,
+        route_path: str,
+    ) -> Response | None:
+        """
+        Check per-route rate limit if configured.
+
+        Returns a 429 response if rate limit exceeded, None otherwise.
+        """
+        store = self._get_rate_limit_store()
+        if store is None:
+            return None
+
+        # Build rate limit key
+        client_key = self._get_client_key(request, rate_limit_config.key)
+        scope = rate_limit_config.scope or route_path
+        rate_key = f"route:{scope}:{client_key}"
+
+        result = await store.check_and_increment(
+            rate_key,
+            rate_limit_config.requests,
+            rate_limit_config.window_seconds,
+        )
+
+        if not result.allowed:
+            return self._rate_limit_response(result)
+        return None
+
     def compile_route(self, route: Route) -> None:
         """
         Compile an execution plan for a route.
@@ -67,9 +118,22 @@ class HandlerExecutor:
         """
         hints = get_type_hints(route.handler)
 
+        # Get rate limit config if decorated
+        rate_limit_config = get_rate_limit_config(route.handler)
+
         # Build execution plan
-        async def execute(request: Request, path_params: dict[str, Any]) -> Response:
+        async def execute(  # noqa: PLR0911
+            request: Request, path_params: dict[str, Any]
+        ) -> Response:
             kwargs = {}
+
+            # 0. Check per-route rate limit if configured
+            if rate_limit_config is not None:
+                rate_limit_response = await self._check_rate_limit(
+                    request, rate_limit_config, route.path
+                )
+                if rate_limit_response is not None:
+                    return rate_limit_response
 
             # 1. Inject path parameters
             for param_name in route.path_params:
@@ -360,4 +424,72 @@ class HandlerExecutor:
                 "detail": "An unexpected error occurred. Please contact support.",
             },
             status_code=500,
+        )
+
+    def _get_client_key(self, request: Request, key_strategy: RateLimitKey | str) -> str:
+        """
+        Extract client identifier from request based on key strategy.
+
+        Args:
+            request: The incoming request
+            key_strategy: Strategy for identifying the client
+
+        Returns:
+            Client identifier string
+        """
+        client_ip = self._get_client_ip(request)
+
+        # Handle string keys (static bucket)
+        if isinstance(key_strategy, str):
+            return key_strategy
+
+        # Handle special key strategies
+        if key_strategy == RateLimitKey.GLOBAL:
+            return "global"
+
+        if key_strategy == RateLimitKey.ENDPOINT:
+            return f"endpoint:{client_ip}:{request.url.path}"
+
+        if key_strategy == RateLimitKey.API_KEY:
+            api_key = request.headers.get("X-API-Key", "")
+            return f"api:{api_key}" if api_key else client_ip
+
+        if key_strategy == RateLimitKey.SESSION:
+            session_id = request.cookies.get("session_id", "")
+            return f"session:{session_id}" if session_id else client_ip
+
+        # Default: IP-based (also fallback for USER which requires auth context)
+        return client_ip
+
+    def _get_client_ip(self, request: Request) -> str:
+        """Extract client IP, respecting proxy headers."""
+        # Check X-Forwarded-For header (set by proxies)
+        forwarded_for = request.headers.get("X-Forwarded-For")
+        if forwarded_for:
+            # Take the first IP (original client)
+            return forwarded_for.split(",")[0].strip()
+
+        # Check X-Real-IP header (nginx)
+        real_ip = request.headers.get("X-Real-IP")
+        if real_ip:
+            return real_ip.strip()
+
+        # Fallback to direct client
+        if request.client:
+            return request.client.host
+
+        return "unknown"
+
+    def _rate_limit_response(self, result: Any) -> JSONResponse:
+        """Create rate limit exceeded response."""
+        return JSONResponse(
+            content={
+                "type": "rate_limit_exceeded",
+                "title": "Rate Limit Exceeded",
+                "status": 429,
+                "detail": "Too many requests. Please slow down.",
+                "retry_after": result.retry_after,
+            },
+            status_code=429,
+            headers=result.headers,
         )
