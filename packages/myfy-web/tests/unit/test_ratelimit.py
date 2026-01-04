@@ -453,6 +453,24 @@ class TestRateLimitDecorator:
         assert config is not None
         assert config.requests == 100
 
+    @pytest.mark.asyncio
+    async def test_decorator_preserves_async_nature(self):
+        """Decorator should preserve async nature and return correct result."""
+        from inspect import iscoroutinefunction
+
+        @rate_limit(100)
+        async def handler():
+            return {"status": "ok", "value": 42}
+
+        # Verify async nature is preserved for iscoroutinefunction checks
+        assert iscoroutinefunction(handler), (
+            "Decorated async handler should be recognized as coroutine function"
+        )
+
+        # Verify handler executes correctly and returns expected result
+        result = await handler()
+        assert result == {"status": "ok", "value": 42}, "Handler should return correct result"
+
 
 # =============================================================================
 # RateLimitSettings Tests

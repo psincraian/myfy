@@ -4,9 +4,10 @@ Rate limit decorator for routes.
 Attaches rate limit configuration to handler functions.
 """
 
-from collections.abc import Callable
+from collections.abc import Callable, Coroutine
 from functools import wraps
-from typing import ParamSpec, TypeVar
+from inspect import iscoroutinefunction
+from typing import Any, ParamSpec, TypeVar
 
 from .keys import RateLimitKey
 from .types import RateLimitConfig
@@ -94,13 +95,25 @@ def rate_limit(
         # Attach config as metadata (analyzed at startup)
         setattr(func, RATE_LIMIT_ATTR, config)
 
-        @wraps(func)
-        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-            return func(*args, **kwargs)
+        # Use async wrapper for async functions to preserve iscoroutinefunction behavior
+        if iscoroutinefunction(func):
 
-        # Also set on wrapper to handle decorator ordering
-        setattr(wrapper, RATE_LIMIT_ATTR, config)
-        return wrapper  # type: ignore[return-value]
+            @wraps(func)
+            async def async_wrapper(
+                *args: P.args, **kwargs: P.kwargs
+            ) -> Coroutine[Any, Any, R]:
+                return await func(*args, **kwargs)  # type: ignore[misc]
+
+            setattr(async_wrapper, RATE_LIMIT_ATTR, config)
+            return async_wrapper  # type: ignore[return-value]
+        else:
+
+            @wraps(func)
+            def sync_wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+                return func(*args, **kwargs)
+
+            setattr(sync_wrapper, RATE_LIMIT_ATTR, config)
+            return sync_wrapper  # type: ignore[return-value]
 
     return decorator
 
