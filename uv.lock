@@ -9,6 +9,7 @@ members = [
     "myfy-core",
     "myfy-data",
     "myfy-frontend",
+    "myfy-tasks",
     "myfy-web",
     "myfy-website",
     "myfy-workspace",
@@ -702,6 +703,21 @@ requires-dist = [
 provides-extras = ["dev"]
 
 [[package]]
+name = "myfy-tasks"
+version = "0.1.0"
+source = { editable = "packages/myfy-tasks" }
+dependencies = [
+    { name = "myfy-core" },
+    { name = "myfy-data" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "myfy-core", editable = "packages/myfy-core" },
+    { name = "myfy-data", editable = "packages/myfy-data" },
+]
+
+[[package]]
 name = "myfy-web"
 version = "0.1.2"
 source = { editable = "packages/myfy-web" }
@@ -773,12 +789,16 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "aiosqlite" },
     { name = "commitizen" },
     { name = "httpx" },
+    { name = "jinja2" },
+    { name = "myfy", extra = ["all"] },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-xdist" },
     { name = "ruff" },
+    { name = "sqlalchemy", extra = ["asyncio"] },
     { name = "ty" },
 ]
 docs = [
@@ -793,12 +813,16 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "aiosqlite", specifier = ">=0.19.0" },
     { name = "commitizen", specifier = ">=4.0.0" },
     { name = "httpx", specifier = ">=0.27.0" },
+    { name = "jinja2", specifier = ">=3.1.0" },
+    { name = "myfy", extras = ["all"], editable = "packages/myfy" },
     { name = "pytest", specifier = ">=8.0.0" },
     { name = "pytest-asyncio", specifier = ">=0.23.0" },
     { name = "pytest-xdist", specifier = ">=3.5.0" },
     { name = "ruff", specifier = ">=0.8.0" },
+    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.0" },
     { name = "ty", specifier = ">=0.0.1a24" },
 ]
 docs = [{ name = "zensical", specifier = ">=0.0.11" }]
