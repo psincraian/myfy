@@ -14,6 +14,7 @@ import pytest
 from pydantic import BaseModel
 
 from myfy.core.config import BaseSettings
+from myfy.web.auth import Anonymous, Authenticated
 from myfy.web.routing import HTTPMethod, Router
 
 pytestmark = pytest.mark.integration
@@ -43,6 +44,13 @@ class AppSettings(BaseSettings):
     """Settings class for testing DI detection."""
 
     app_name: str = "test"
+
+
+@dataclass
+class AuthenticatedUser(Authenticated):
+    """User type extending Authenticated for testing DI detection."""
+
+    email: str
 
 
 # =============================================================================
@@ -278,6 +286,54 @@ class TestHandlerAnalysis:
         routes = router.get_routes()
         assert "service" in routes[0].dependencies
         assert routes[0].body_param is None
+
+    def test_authenticated_subclass_detected_as_dependency_not_body(self):
+        """Test that Authenticated subclasses are DI dependencies, not request body.
+
+        This is a regression test for a bug where dataclass-based auth types
+        (like AuthenticatedUser extending Authenticated) were incorrectly
+        classified as request body parameters because _is_body_type() checked
+        for __dataclass_fields__ without excluding auth types.
+
+        When this happens, GET requests without a body fail with 400 because
+        the framework tries to parse the non-existent request body.
+        """
+        router = Router()
+
+        @router.get("/profile")
+        async def get_profile(user: AuthenticatedUser):
+            return {"id": user.id, "email": user.email}
+
+        routes = router.get_routes()
+        route = routes[0]
+
+        # AuthenticatedUser should be a DI dependency, not a body param
+        assert route.body_param is None, (
+            f"AuthenticatedUser was incorrectly classified as body_param. "
+            f"Expected body_param=None, got body_param='{route.body_param}'"
+        )
+        assert "user" in route.dependencies, (
+            f"AuthenticatedUser should be in dependencies list. "
+            f"Got dependencies={route.dependencies}"
+        )
+
+    def test_anonymous_subclass_detected_as_dependency_not_body(self):
+        """Test that Anonymous subclasses are DI dependencies, not request body."""
+        router = Router()
+
+        @dataclass
+        class CustomAnonymous(Anonymous):
+            ip: str
+
+        @router.get("/info")
+        async def get_info(identity: CustomAnonymous):
+            return {"ip": identity.ip}
+
+        routes = router.get_routes()
+        route = routes[0]
+
+        assert route.body_param is None
+        assert "identity" in route.dependencies
 
     def test_mixed_params(self):
         """Test handler with path params, body, and DI dependencies."""

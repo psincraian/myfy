@@ -13,6 +13,7 @@ from typing import Any, get_type_hints
 
 from myfy.core.config import BaseSettings
 
+from .auth.types import Anonymous
 from .params import QueryParam, QueryParamInfo
 
 
@@ -205,11 +206,20 @@ class Router:
         For now, we'll use a simple heuristic:
         - If it's a dict, list, or has a model_validate method (Pydantic), it's a body
         - EXCEPT if it's a Settings class (BaseSettings subclass) - those are DI dependencies
+        - EXCEPT if it's an Anonymous/Authenticated subclass - those are DI dependencies
         - Otherwise, it's a DI dependency
         """
         # BaseSettings subclasses are always DI dependencies, never request bodies
         try:
             if isinstance(type_hint, type) and issubclass(type_hint, BaseSettings):
+                return False
+        except TypeError:
+            pass
+
+        # Anonymous/Authenticated subclasses are DI dependencies, not request bodies
+        # These are dataclasses but should be injected by the auth system
+        try:
+            if isinstance(type_hint, type) and issubclass(type_hint, Anonymous):
                 return False
         except TypeError:
             pass
