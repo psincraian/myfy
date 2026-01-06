@@ -304,7 +304,7 @@ class TaskQueue:
         result = await session.execute(stmt)
         await session.commit()
 
-        cancelled = result.rowcount > 0
+        cancelled = result.rowcount > 0  # type: ignore[union-attr]
         if cancelled:
             logger.info(f"Task {task_id} cancelled")
         return cancelled
@@ -395,7 +395,7 @@ class TaskQueue:
         result = await session.execute(stmt)
         await session.commit()
 
-        count = result.rowcount
+        count = result.rowcount  # type: ignore[union-attr]
         if count > 0:
             logger.info(f"Reclaimed {count} stale task(s)")
         return count

@@ -109,8 +109,8 @@ def render_template(
 
     # Create dummy request if not provided (for compatibility)
     if request is None:
-        from starlette.datastructures import URL, Headers  # noqa: PLC0415
-        from starlette.requests import Request as StarletteRequest  # noqa: PLC0415
+        from starlette.datastructures import URL, Headers
+        from starlette.requests import Request as StarletteRequest
 
         request = StarletteRequest(
             {

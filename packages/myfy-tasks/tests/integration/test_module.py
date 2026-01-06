@@ -122,11 +122,11 @@ class TestTasksModuleNotConfigured:
         task_py = sys.modules["myfy.tasks.task"]
 
         # Save current state
-        old_queue = task_py._task_queue
+        old_queue = task_py._task_queue  # type: ignore[attr-defined]
 
         try:
             # Clear the queue reference
-            task_py._task_queue = None
+            task_py._task_queue = None  # type: ignore[attr-defined]
 
             with pytest.raises(TasksModuleNotConfiguredError) as exc:
                 _get_queue()
@@ -134,7 +134,7 @@ class TestTasksModuleNotConfigured:
             assert "TaskQueue" in str(exc.value)
         finally:
             # Restore state
-            task_py._task_queue = old_queue
+            task_py._task_queue = old_queue  # type: ignore[attr-defined]
 
     def test_get_session_factory_before_module_start_raises(self):
         """Test that _get_session_factory() raises before module is started."""
@@ -144,11 +144,11 @@ class TestTasksModuleNotConfigured:
         task_py = sys.modules["myfy.tasks.task"]
 
         # Save current state
-        old_sf = task_py._session_factory
+        old_sf = task_py._session_factory  # type: ignore[attr-defined]
 
         try:
             # Clear the session factory reference
-            task_py._session_factory = None
+            task_py._session_factory = None  # type: ignore[attr-defined]
 
             with pytest.raises(TasksModuleNotConfiguredError) as exc:
                 _get_session_factory()
@@ -156,7 +156,7 @@ class TestTasksModuleNotConfigured:
             assert "SessionFactory" in str(exc.value)
         finally:
             # Restore state
-            task_py._session_factory = old_sf
+            task_py._session_factory = old_sf  # type: ignore[attr-defined]
 
 
 class TestTasksModuleSettings:

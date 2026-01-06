@@ -12,7 +12,7 @@ except ImportError:
     from importlib_resources import files  # type: ignore
 
 
-def scaffold_frontend(  # noqa: PLR0915
+def scaffold_frontend(
     _templates_dir: str = "frontend/templates",
     _static_dir: str = "frontend/static",
 ) -> None:

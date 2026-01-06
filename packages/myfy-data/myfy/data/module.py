@@ -129,7 +129,7 @@ class DataModule:
         Note: In nested settings pattern (ADR-0007), DatabaseSettings is registered
         by Application. Otherwise, load standalone DatabaseSettings.
         """
-        from myfy.core.di.types import ProviderKey  # noqa: PLC0415
+        from myfy.core.di.types import ProviderKey
 
         logger.debug("Configuring DataModule...")
 

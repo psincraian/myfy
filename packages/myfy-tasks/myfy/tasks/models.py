@@ -8,13 +8,18 @@ from __future__ import annotations
 
 import json
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
 from sqlalchemy import DateTime, Index, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.types import TypeDecorator
+
+
+def _utc_now() -> datetime:
+    """Return current UTC time as naive datetime for database compatibility."""
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class JSONType(TypeDecorator):
@@ -113,7 +118,7 @@ class TaskRecord(TasksBase):
     scheduled_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,
-        default=datetime.utcnow,
+        default=_utc_now,
     )
     started_at: Mapped[datetime | None] = mapped_column(
         DateTime,
@@ -164,13 +169,13 @@ class TaskRecord(TasksBase):
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,
-        default=datetime.utcnow,
+        default=_utc_now,
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        default=_utc_now,
+        onupdate=_utc_now,
     )
 
     __table_args__ = (Index("idx_myfy_tasks_status_scheduled", "status", "scheduled_at"),)

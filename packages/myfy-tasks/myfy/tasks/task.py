@@ -135,7 +135,7 @@ class Task(Generic[P, R]):
             retry_on: Exception types that should trigger retry
         """
         self._func = func
-        self._name = name or f"{func.__module__}.{func.__qualname__}"
+        self._name = name or f"{func.__module__}.{func.__qualname__}"  # type: ignore[union-attr]
         self._max_retries = max_retries
         self._retry_on = retry_on or []
         self._is_async = inspect.iscoroutinefunction(func)

@@ -99,7 +99,7 @@ def create_app(
         ) from e
 
     # Validate it's an Application instance
-    from myfy.core import Application  # noqa: PLC0415
+    from myfy.core import Application
 
     if not isinstance(application, Application):
         raise RuntimeError(
@@ -109,6 +109,6 @@ def create_app(
 
     # Use the factory pattern for clean ASGI app creation with lifespan
     # This avoids the initialization ordering issues that caused static asset 404s
-    from myfy.web.factory import create_asgi_app_with_lifespan  # noqa: PLC0415
+    from myfy.web.factory import create_asgi_app_with_lifespan
 
     return create_asgi_app_with_lifespan(application)

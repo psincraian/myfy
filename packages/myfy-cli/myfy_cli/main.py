@@ -489,7 +489,7 @@ def _run_with_gunicorn(app_path: str, host: str, port: int, workers: int):
         workers: Number of worker processes
     """
     try:
-        import gunicorn.app.base  # noqa: F401, PLC0415  # pyright: ignore[reportMissingModuleSource]
+        import gunicorn.app.base  # noqa: F401  # pyright: ignore[reportMissingModuleSource]
     except ImportError:
         console.print("[red]Error: gunicorn not installed[/red]")
         console.print("Install with: pip install gunicorn")

@@ -10,7 +10,7 @@ from rich.table import Table
 
 # Check if tasks module is available
 try:
-    from myfy.tasks import TasksModule, TasksSettings, TaskQueue, TaskRegistry, TaskWorker
+    from myfy.tasks import TaskRegistry, TasksModule, TasksSettings, TaskWorker
     from myfy.tasks.models import TaskStatus
 
     HAS_TASKS = True
@@ -105,19 +105,13 @@ def worker(
     # Override settings if provided via CLI
     if concurrency is not None:
         # Create a copy with updated concurrency
-        settings = TasksSettings(
-            **{
-                **settings.model_dump(),
-                "worker_concurrency": concurrency,
-            }
-        )
+        config = settings.model_dump()
+        config["worker_concurrency"] = concurrency
+        settings = TasksSettings(**config)  # type: ignore[arg-type]
     if worker_id is not None:
-        settings = TasksSettings(
-            **{
-                **settings.model_dump(),
-                "worker_id": worker_id,
-            }
-        )
+        config = settings.model_dump()
+        config["worker_id"] = worker_id
+        settings = TasksSettings(**config)  # type: ignore[arg-type]
 
     # Get dependencies
     from myfy.data import SessionFactory
@@ -204,9 +198,11 @@ def list_tasks(
     table.add_column("Has Context", style="magenta")
 
     for name, task_def in tasks.items():
+        func = task_def.func
+        func_name = f"{func.__module__}.{func.__qualname__}"  # type: ignore[union-attr]
         table.add_row(
             name,
-            f"{task_def.func.__module__}.{task_def.func.__qualname__}",
+            func_name,
             str(task_def.max_retries or "default"),
             "Yes" if task_def.has_context else "No",
         )

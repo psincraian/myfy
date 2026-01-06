@@ -52,7 +52,7 @@ class HandlerExecutor:
         if not self._protected_registry_checked:
             self._protected_registry_checked = True
             try:
-                from myfy.web.auth.registry import ProtectedTypesRegistry  # noqa: PLC0415
+                from myfy.web.auth.registry import ProtectedTypesRegistry
 
                 self._protected_registry = self.container.get(ProtectedTypesRegistry)
             except Exception:
