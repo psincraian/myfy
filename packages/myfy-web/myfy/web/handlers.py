@@ -73,7 +73,7 @@ class HandlerExecutor:
         if not self._rate_limit_store_checked:
             self._rate_limit_store_checked = True
             try:
-                from myfy.web.ratelimit.store import RateLimitStore  # noqa: PLC0415
+                from myfy.web.ratelimit.store import RateLimitStore
 
                 self._rate_limit_store = self.container.get(RateLimitStore)
             except Exception:
