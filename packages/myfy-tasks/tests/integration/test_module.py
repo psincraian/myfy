@@ -122,11 +122,14 @@ class TestTasksModuleNotConfigured:
     def test_get_queue_before_module_start_raises(self):
         """Test that _get_queue() raises before module is started."""
         # Save current state
-        old_queue = _task_module._task_queue
+        # Note: Using getattr/setattr because _task_module is ModuleType and ty type
+        # checker doesn't know about the module-level globals. Direct attribute access
+        # would fail ty checks with "unresolved-attribute" errors.
+        old_queue = getattr(_task_module, "_task_queue")  # noqa: B009
 
         try:
             # Clear the queue reference
-            _task_module._task_queue = None
+            setattr(_task_module, "_task_queue", None)  # noqa: B010
 
             with pytest.raises(TasksModuleNotConfiguredError) as exc:
                 _get_queue()
@@ -134,16 +137,16 @@ class TestTasksModuleNotConfigured:
             assert "TaskQueue" in str(exc.value)
         finally:
             # Restore state
-            _task_module._task_queue = old_queue
+            setattr(_task_module, "_task_queue", old_queue)  # noqa: B010
 
     def test_get_session_factory_before_module_start_raises(self):
         """Test that _get_session_factory() raises before module is started."""
-        # Save current state
-        old_sf = _task_module._session_factory
+        # Save current state (see note above about getattr/setattr usage)
+        old_sf = getattr(_task_module, "_session_factory")  # noqa: B009
 
         try:
             # Clear the session factory reference
-            _task_module._session_factory = None
+            setattr(_task_module, "_session_factory", None)  # noqa: B010
 
             with pytest.raises(TasksModuleNotConfiguredError) as exc:
                 _get_session_factory()
@@ -151,7 +154,7 @@ class TestTasksModuleNotConfigured:
             assert "SessionFactory" in str(exc.value)
         finally:
             # Restore state
-            _task_module._session_factory = old_sf
+            setattr(_task_module, "_session_factory", old_sf)  # noqa: B010
 
 
 class TestTasksModuleSettings:

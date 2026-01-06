@@ -316,11 +316,7 @@ async def test_reclaim_stale_tasks(queue_with_short_stale_timeout):
     # The stale_task_timeout is 60 seconds for this test
     stale_time = _utc_now() - timedelta(seconds=120)  # 120 seconds ago (> 60s threshold)
     async with session_factory.session_context() as session:
-        stmt = (
-            update(TaskRecord)
-            .where(TaskRecord.id == task_id)
-            .values(started_at=stale_time)
-        )
+        stmt = update(TaskRecord).where(TaskRecord.id == task_id).values(started_at=stale_time)
         await session.execute(stmt)
         await session.commit()
 

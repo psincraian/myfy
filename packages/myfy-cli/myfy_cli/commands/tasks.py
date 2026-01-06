@@ -333,7 +333,9 @@ def purge(
         sys.exit(1)
 
     if not force:
-        console.print(f"[yellow]This will delete all {status} tasks older than {days} days.[/yellow]")
+        console.print(
+            f"[yellow]This will delete all {status} tasks older than {days} days.[/yellow]"
+        )
         if not typer.confirm("Continue?", default=False):
             console.print("Cancelled.")
             raise typer.Exit(0)
