@@ -56,9 +56,9 @@ def create_asgi_app_with_lifespan(
         >>> asgi_app = create_asgi_app_with_lifespan(app)
         >>> # uvicorn can now serve asgi_app
     """
-    from myfy.core.kernel.errors import MyfyModuleNotFoundError  # noqa: PLC0415
+    from myfy.core.kernel.errors import MyfyModuleNotFoundError
 
-    from .module import WebModule  # noqa: PLC0415
+    from .module import WebModule
 
     # Ensure application is initialized (safe to call multiple times)
     application.initialize()
@@ -106,7 +106,7 @@ def _extend_asgi_app(app: "Starlette", application: "Application") -> None:
         app: The Starlette ASGI application
         application: The Application with modules to check
     """
-    from .extensions import IWebExtension  # noqa: PLC0415
+    from .extensions import IWebExtension
 
     # Use public API to get modules implementing the protocol
     extensions = application.get_modules_implementing(IWebExtension)

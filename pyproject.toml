@@ -14,6 +14,7 @@ members = [
   "packages/myfy-web",
   "packages/myfy-cli",
   "packages/myfy-data",
+  "packages/myfy-tasks",
   "packages/myfy-frontend",
   "packages/myfy",
   "website",
@@ -23,6 +24,7 @@ members = [
 myfy-core = { workspace = true }
 myfy-web = { workspace = true }
 myfy-data = { workspace = true }
+myfy-tasks = { workspace = true }
 myfy = { workspace = true }
 myfy-frontend = { workspace = true }
 myfy-cli = { workspace = true, editable = true }
@@ -95,8 +97,20 @@ ignore = [
     "PLR0913", # Too many arguments
     "PLR0912", # Too many branches
     "PLR2004", # Magic value in comparison
+    "PLR0915", # Too many statements
     "N818",    # Exception name should end in Error
     "A003",    # Class attribute shadows Python builtin
+    "TC001",   # Move application import into type-checking block
+    "TC002",   # Move import into type-checking block (third-party)
+    "TC003",   # Move import into type-checking block (stdlib)
+    "UP047",   # Generic function/class should use type parameters (ParamSpec compatibility)
+    "UP046",   # Generic class should use type parameters (Generic[T] compatibility)
+    "PLC0415", # Import not at top of file (intentional for lazy/circular imports)
+    "PT028",   # Test function parameter has default argument (testing utilities)
+    "PLW0603", # Using global statement (needed for module-level state)
+    "ASYNC109",# Async function with timeout parameter (different from asyncio.timeout)
+    "SIM102",  # Use single if instead of nested (sometimes nested is more readable)
+    "SIM105",  # contextlib.suppress vs try/except/pass (sometimes try is clearer)
 ]
 
 # Allow autofix for all enabled rules

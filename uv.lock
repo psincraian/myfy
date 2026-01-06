@@ -9,6 +9,7 @@ members = [
     "myfy-core",
     "myfy-data",
     "myfy-frontend",
+    "myfy-tasks",
     "myfy-web",
     "myfy-website",
     "myfy-workspace",
@@ -700,6 +701,21 @@ requires-dist = [
     { name = "starlette", specifier = ">=0.27.0" },
 ]
 provides-extras = ["dev"]
+
+[[package]]
+name = "myfy-tasks"
+version = "0.1.0"
+source = { editable = "packages/myfy-tasks" }
+dependencies = [
+    { name = "myfy-core" },
+    { name = "myfy-data" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "myfy-core", editable = "packages/myfy-core" },
+    { name = "myfy-data", editable = "packages/myfy-data" },
+]
 
 [[package]]
 name = "myfy-web"

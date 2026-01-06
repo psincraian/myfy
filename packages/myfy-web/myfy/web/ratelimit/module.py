@@ -70,7 +70,7 @@ class RateLimitModule:
     @property
     def requires(self) -> list[type]:
         # Depends on WebModule for middleware integration
-        from ..module import WebModule  # noqa: PLC0415
+        from ..module import WebModule
 
         return [WebModule]
 
@@ -80,7 +80,7 @@ class RateLimitModule:
 
     def configure(self, container: "Container") -> None:
         """Register rate limit services in DI container."""
-        from myfy.core.di.types import ProviderKey  # noqa: PLC0415
+        from myfy.core.di.types import ProviderKey
 
         # Load or use provided settings
         settings = self._settings
@@ -128,7 +128,7 @@ class RateLimitModule:
 
     def get_middleware(self) -> list[Middleware]:
         """Return rate limit middleware for ASGI stack."""
-        from .middleware import RateLimitMiddleware  # noqa: PLC0415
+        from .middleware import RateLimitMiddleware
 
         # Middleware will get store and settings from DI container
         # We need to return a factory that the ASGI builder can use

@@ -80,7 +80,7 @@ class FrontendModule:
 
         This ensures WebModule is loaded and initialized before FrontendModule.
         """
-        from myfy.web import WebModule  # noqa: PLC0415
+        from myfy.web import WebModule
 
         return [WebModule]
 
@@ -91,7 +91,7 @@ class FrontendModule:
 
         This allows it to extend the ASGI application during finalization.
         """
-        from myfy.web import IWebExtension  # noqa: PLC0415
+        from myfy.web import IWebExtension
 
         return [IWebExtension]
 
@@ -107,7 +107,7 @@ class FrontendModule:
         Note: In nested settings pattern (ADR-0007), FrontendSettings is registered
         by Application. Otherwise, load standalone FrontendSettings.
         """
-        from myfy.core.di.types import ProviderKey  # noqa: PLC0415
+        from myfy.core.di.types import ProviderKey
 
         # Store container reference for start()
         self._container = container
@@ -184,7 +184,7 @@ class FrontendModule:
 
         Note: In CLI/factory contexts, extend_asgi_app() is used instead.
         """
-        from myfy.web import ASGIApp  # noqa: PLC0415
+        from myfy.web import ASGIApp
 
         asgi_app = container.get(ASGIApp)
         self._mount_static_files(asgi_app.app, container)
@@ -266,7 +266,7 @@ class FrontendModule:
         Returns:
             True if npm is available, False otherwise
         """
-        import shutil  # noqa: PLC0415
+        import shutil
 
         return shutil.which("npm") is not None
 
@@ -281,8 +281,8 @@ class FrontendModule:
         Returns:
             True if server is healthy, False otherwise
         """
-        import time  # noqa: PLC0415
-        from urllib.parse import urlparse  # noqa: PLC0415
+        import time
+        from urllib.parse import urlparse
 
         start_time = time.time()
         attempt = 0

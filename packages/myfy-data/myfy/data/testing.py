@@ -65,7 +65,7 @@ async def test_database(
                     assert len(users) == 1
         ```
     """
-    from myfy.core.di import Container  # noqa: PLC0415
+    from myfy.core.di import Container
 
     settings = DatabaseSettings(database_url=database_url, echo=echo)
     module = DataModule(settings=settings)

@@ -104,7 +104,7 @@ class AuthModule:
     @property
     def requires(self) -> list[type]:
         """Module dependencies."""
-        from myfy.web.module import WebModule  # noqa: PLC0415
+        from myfy.web.module import WebModule
 
         return [WebModule]
 

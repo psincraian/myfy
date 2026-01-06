@@ -109,7 +109,7 @@ class ProcessManager:
             self._logger.error(f"Failed to start {self.name}: {e}")
             return False
 
-    async def stop(self, timeout: float = 5.0) -> None:  # noqa: ASYNC109
+    async def stop(self, timeout: float = 5.0) -> None:
         """
         Stop the subprocess gracefully.
 

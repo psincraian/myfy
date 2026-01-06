@@ -25,7 +25,7 @@ from rich.table import Table
 from myfy.core import Application
 from myfy.core.config import load_settings
 from myfy.web.config import WebSettings
-from myfy_cli.commands import data_app, frontend_app
+from myfy_cli.commands import data_app, frontend_app, tasks_app
 from myfy_cli.version import __version__
 
 klyne.init(
@@ -44,6 +44,7 @@ console = Console()
 # Register command groups
 app.add_typer(data_app, name="data")
 app.add_typer(frontend_app, name="frontend")
+app.add_typer(tasks_app, name="tasks")
 
 
 def find_application(search_dir: Path | None = None):
@@ -488,7 +489,7 @@ def _run_with_gunicorn(app_path: str, host: str, port: int, workers: int):
         workers: Number of worker processes
     """
     try:
-        import gunicorn.app.base  # noqa: F401, PLC0415  # pyright: ignore[reportMissingModuleSource]
+        import gunicorn.app.base  # noqa: F401  # pyright: ignore[reportMissingModuleSource]
     except ImportError:
         console.print("[red]Error: gunicorn not installed[/red]")
         console.print("Install with: pip install gunicorn")

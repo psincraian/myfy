@@ -81,7 +81,7 @@ class WebModule:
         Note: In nested settings pattern (ADR-0007), WebSettings is registered
         by Application. Otherwise, load standalone WebSettings.
         """
-        from myfy.core.di.types import ProviderKey  # noqa: PLC0415
+        from myfy.core.di.types import ProviderKey
 
         # Check if WebSettings already registered (from nested app settings)
         key = ProviderKey(WebSettings)

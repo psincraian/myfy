@@ -57,7 +57,7 @@ class HandlerExecutor:
         if not self._protected_registry_checked:
             self._protected_registry_checked = True
             try:
-                from myfy.web.auth.registry import ProtectedTypesRegistry  # noqa: PLC0415
+                from myfy.web.auth.registry import ProtectedTypesRegistry
 
                 self._protected_registry = self.container.get(ProtectedTypesRegistry)
             except Exception:
@@ -73,7 +73,7 @@ class HandlerExecutor:
         if not self._rate_limit_store_checked:
             self._rate_limit_store_checked = True
             try:
-                from myfy.web.ratelimit.store import RateLimitStore  # noqa: PLC0415
+                from myfy.web.ratelimit.store import RateLimitStore
 
                 self._rate_limit_store = self.container.get(RateLimitStore)
             except Exception:
