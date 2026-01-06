@@ -9,9 +9,9 @@ from __future__ import annotations
 import logging
 import uuid
 from datetime import UTC, datetime, timedelta
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
-from sqlalchemy import and_, select, update
+from sqlalchemy import CursorResult, and_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import TaskRecord, TaskStatus
@@ -304,7 +304,7 @@ class TaskQueue:
         result = await session.execute(stmt)
         await session.commit()
 
-        cancelled = result.rowcount > 0  # type: ignore[union-attr]
+        cancelled = cast("CursorResult[Any]", result).rowcount > 0
         if cancelled:
             logger.info(f"Task {task_id} cancelled")
         return cancelled
@@ -395,7 +395,7 @@ class TaskQueue:
         result = await session.execute(stmt)
         await session.commit()
 
-        count = result.rowcount  # type: ignore[union-attr]
+        count = cast("CursorResult[Any]", result).rowcount
         if count > 0:
             logger.info(f"Reclaimed {count} stale task(s)")
         return count

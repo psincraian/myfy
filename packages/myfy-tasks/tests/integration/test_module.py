@@ -1,11 +1,16 @@
 """Integration tests for TasksModule lifecycle."""
 
+import importlib
+
 import pytest
 from sqlalchemy import text
 
 from myfy.tasks import TasksModule, TasksSettings
 from myfy.tasks.errors import TasksModuleNotConfiguredError
 from myfy.tasks.task import _get_queue, _get_session_factory
+
+# Import the task module itself to access module-level globals for testing
+_task_module = importlib.import_module("myfy.tasks.task")
 
 
 class TestTasksModuleLifecycle:
@@ -116,17 +121,12 @@ class TestTasksModuleNotConfigured:
 
     def test_get_queue_before_module_start_raises(self):
         """Test that _get_queue() raises before module is started."""
-        import sys
-
-        # Access the actual module (not the decorator function)
-        task_py = sys.modules["myfy.tasks.task"]
-
         # Save current state
-        old_queue = task_py._task_queue  # type: ignore[attr-defined]
+        old_queue = _task_module._task_queue
 
         try:
             # Clear the queue reference
-            task_py._task_queue = None  # type: ignore[attr-defined]
+            _task_module._task_queue = None
 
             with pytest.raises(TasksModuleNotConfiguredError) as exc:
                 _get_queue()
@@ -134,21 +134,16 @@ class TestTasksModuleNotConfigured:
             assert "TaskQueue" in str(exc.value)
         finally:
             # Restore state
-            task_py._task_queue = old_queue  # type: ignore[attr-defined]
+            _task_module._task_queue = old_queue
 
     def test_get_session_factory_before_module_start_raises(self):
         """Test that _get_session_factory() raises before module is started."""
-        import sys
-
-        # Access the actual module (not the decorator function)
-        task_py = sys.modules["myfy.tasks.task"]
-
         # Save current state
-        old_sf = task_py._session_factory  # type: ignore[attr-defined]
+        old_sf = _task_module._session_factory
 
         try:
             # Clear the session factory reference
-            task_py._session_factory = None  # type: ignore[attr-defined]
+            _task_module._session_factory = None
 
             with pytest.raises(TasksModuleNotConfiguredError) as exc:
                 _get_session_factory()
@@ -156,7 +151,7 @@ class TestTasksModuleNotConfigured:
             assert "SessionFactory" in str(exc.value)
         finally:
             # Restore state
-            task_py._session_factory = old_sf  # type: ignore[attr-defined]
+            _task_module._session_factory = old_sf
 
 
 class TestTasksModuleSettings:

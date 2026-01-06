@@ -104,14 +104,9 @@ def worker(
 
     # Override settings if provided via CLI
     if concurrency is not None:
-        # Create a copy with updated concurrency
-        config = settings.model_dump()
-        config["worker_concurrency"] = concurrency
-        settings = TasksSettings(**config)  # type: ignore[arg-type]
+        settings = settings.model_copy(update={"worker_concurrency": concurrency})
     if worker_id is not None:
-        config = settings.model_dump()
-        config["worker_id"] = worker_id
-        settings = TasksSettings(**config)  # type: ignore[arg-type]
+        settings = settings.model_copy(update={"worker_id": worker_id})
 
     # Get dependencies
     from myfy.data import SessionFactory
@@ -199,7 +194,8 @@ def list_tasks(
 
     for name, task_def in tasks.items():
         func = task_def.func
-        func_name = f"{func.__module__}.{func.__qualname__}"  # type: ignore[union-attr]
+        func_qualname = getattr(func, "__qualname__", None) or getattr(func, "__name__", "unknown")
+        func_name = f"{func.__module__}.{func_qualname}"
         table.add_row(
             name,
             func_name,
