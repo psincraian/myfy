@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Email{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-base-200 py-12 px-4">
+  <div class="card w-full max-w-md bg-base-100 shadow-xl">
+    <div class="card-body text-center">
+      {% if verified %}
+      <!-- Success state -->
+      <div class="mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h2 class="card-title text-2xl font-bold justify-center mb-2">Email Verified!</h2>
+      <p class="text-base-content/70 mb-6">
+        Your email address has been successfully verified.
+      </p>
+      <a href="/login" class="btn btn-primary">Continue to Login</a>
+
+      {% elif error %}
+      <!-- Error state -->
+      <div class="mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h2 class="card-title text-2xl font-bold justify-center mb-2">Verification Failed</h2>
+      <p class="text-base-content/70 mb-6">
+        {{ error }}
+      </p>
+      <div class="space-y-2">
+        <form method="POST" action="/resend-verification" class="w-full">
+          <input type="hidden" name="email" value="{{ email or '' }}" />
+          <button type="submit" class="btn btn-primary w-full">Resend Verification Email</button>
+        </form>
+        <a href="/login" class="btn btn-outline w-full">Back to Login</a>
+      </div>
+
+      {% else %}
+      <!-- Pending state (shown before verification) -->
+      <div class="mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-info animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <h2 class="card-title text-2xl font-bold justify-center mb-2">Check Your Email</h2>
+      <p class="text-base-content/70 mb-6">
+        We've sent a verification link to your email address. Click the link to verify your account.
+      </p>
+      <div class="space-y-2">
+        <form method="POST" action="/resend-verification" class="w-full">
+          <input type="hidden" name="email" value="{{ email or '' }}" />
+          <button type="submit" class="btn btn-outline w-full">Resend Verification Email</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

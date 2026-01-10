@@ -13,7 +13,8 @@ dependencies = [
 web = ["myfy-web~=0.1.2"]
 frontend = ["myfy-frontend~=0.1.0"]
 data = ["myfy-data~=0.1.2"]
-all = ["myfy-web~=0.1.2", "myfy-frontend~=0.1.0", "myfy-data~=0.1.2"]
+user = ["myfy-user~=0.1.2"]
+all = ["myfy-web~=0.1.2", "myfy-frontend~=0.1.0", "myfy-data~=0.1.2", "myfy-user~=0.1.2"]
 
 [build-system]
 requires = ["hatchling"]

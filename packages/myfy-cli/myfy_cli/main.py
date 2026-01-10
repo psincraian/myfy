@@ -26,7 +26,7 @@ from rich.table import Table
 from myfy.core import Application
 from myfy.core.config import load_settings
 from myfy.web.config import WebSettings
-from myfy_cli.commands import app_commands, data_app, frontend_app, tasks_app
+from myfy_cli.commands import app_commands, data_app, frontend_app, tasks_app, user_app
 from myfy_cli.version import __version__
 
 klyne.init(
@@ -47,6 +47,7 @@ app.add_typer(app_commands, name="app")
 app.add_typer(data_app, name="data")
 app.add_typer(frontend_app, name="frontend")
 app.add_typer(tasks_app, name="tasks")
+app.add_typer(user_app, name="user")
 
 
 def find_application(search_dir: Path | None = None):
