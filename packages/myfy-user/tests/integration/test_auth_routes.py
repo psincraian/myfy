@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+from pydantic import SecretStr
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from starlette.testclient import TestClient
 
@@ -94,7 +95,7 @@ def router():
 def test_settings():
     """Create test user settings."""
     return UserSettings(
-        secret_key="test-secret-key-for-testing-only-32chars!",
+        secret_key=SecretStr("test-secret-key-for-testing-only-32chars!"),
         password_min_length=8,
         password_algorithm="argon2",
         session_lifetime=3600,
@@ -266,7 +267,7 @@ class TestLoginSubmit:
 
         # Create settings that require email verification
         settings = UserSettings(
-            secret_key="test-secret-key-for-testing-only-32chars!",
+            secret_key=SecretStr("test-secret-key-for-testing-only-32chars!"),
             require_email_verification=True,
             session_secure=False,
         )
@@ -375,7 +376,7 @@ class TestRegistrationPage:
         router = Router()
 
         settings = UserSettings(
-            secret_key="test-secret-key-for-testing-only-32chars!",
+            secret_key=SecretStr("test-secret-key-for-testing-only-32chars!"),
             allow_registration=False,  # Disabled
             session_secure=False,
         )
@@ -481,7 +482,7 @@ class TestRegistrationSubmit:
         router = Router()
 
         settings = UserSettings(
-            secret_key="test-secret-key-for-testing-only-32chars!",
+            secret_key=SecretStr("test-secret-key-for-testing-only-32chars!"),
             allow_registration=False,  # Disabled
             session_secure=False,
         )
@@ -528,7 +529,7 @@ class TestRegistrationSubmit:
         router = Router()
 
         settings = UserSettings(
-            secret_key="test-secret-key-for-testing-only-32chars!",
+            secret_key=SecretStr("test-secret-key-for-testing-only-32chars!"),
             require_email_verification=True,
             session_secure=False,
         )

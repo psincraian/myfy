@@ -5,7 +5,7 @@ Session management for cookie-based authentication.
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from starlette.requests import Request
@@ -48,7 +48,7 @@ class SessionManager:
         lifetime: int = 604800,  # 7 days
         secure: bool = True,
         httponly: bool = True,
-        samesite: str = "lax",
+        samesite: Literal["lax", "strict", "none"] = "lax",
     ) -> None:
         """
         Initialize session manager.

@@ -136,6 +136,7 @@ class PasswordHasher:
             self.validate_password(password)
 
         if self._algorithm == "argon2":
+            assert self._hasher is not None
             return self._hasher.hash(password)
         # bcrypt
         import bcrypt
@@ -156,6 +157,7 @@ class PasswordHasher:
         """
         try:
             if self._algorithm == "argon2":
+                assert self._hasher is not None
                 self._hasher.verify(hashed, password)
                 return True
             # bcrypt
@@ -176,6 +178,7 @@ class PasswordHasher:
             True if hash should be regenerated, False otherwise
         """
         if self._algorithm == "argon2":
+            assert self._hasher is not None
             return self._hasher.check_needs_rehash(hashed)
         # bcrypt doesn't have a native needs_rehash, so we don't rehash
         return False

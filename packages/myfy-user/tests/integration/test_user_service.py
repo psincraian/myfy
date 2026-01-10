@@ -7,12 +7,10 @@ import pytest
 from myfy.user.errors import (
     InvalidCredentialsError,
     PasswordTooWeakError,
-    TokenExpiredError,
     TokenInvalidError,
     UserAlreadyExistsError,
     UserNotFoundError,
 )
-from myfy.user.models.base import DefaultUser
 
 
 class TestUserServiceCreate:

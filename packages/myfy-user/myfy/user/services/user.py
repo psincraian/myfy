@@ -428,9 +428,10 @@ class UserService(Generic[T]):
 
         # Verify user's email
         user = await self.get_by_id(token_obj.user_id)
-        if user:
-            user.email_verified = True
+        if not user:
+            raise TokenInvalidError("verification")
 
+        user.email_verified = True
         await self._session.commit()
         return user
 
@@ -494,9 +495,10 @@ class UserService(Generic[T]):
 
         # Update password
         user = await self.get_by_id(token_obj.user_id)
-        if user:
-            user.password_hash = self._hasher.hash(new_password)
+        if not user:
+            raise TokenInvalidError("password reset")
 
+        user.password_hash = self._hasher.hash(new_password)
         await self._session.commit()
         return user
 
@@ -531,7 +533,7 @@ class UserService(Generic[T]):
                 EmailVerificationToken.expires_at < now
             )
         )
-        count += result.rowcount or 0
+        count += getattr(result, "rowcount", 0) or 0
 
         # Delete expired/used password reset tokens
         result = await self._session.execute(
@@ -541,7 +543,7 @@ class UserService(Generic[T]):
                 | (PasswordResetToken.invalidated == True)  # noqa: E712
             )
         )
-        count += result.rowcount or 0
+        count += getattr(result, "rowcount", 0) or 0
 
         await self._session.commit()
         return count

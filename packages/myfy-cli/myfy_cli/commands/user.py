@@ -266,10 +266,9 @@ def list_users(
         user_service = _get_user_service(application)
 
         async def _list_users():
-            return await user_service.list_users(
-                is_superuser=True if admins_only else None,
-                limit=limit,
-            )
+            if admins_only:
+                return await user_service.list_admins(limit=limit)
+            return await user_service.list_users(limit=limit)
 
         users = asyncio.run(_list_users())
 
@@ -363,6 +362,7 @@ def reset_password(
                 console.print(f"[red]x User not found: {email}[/red]")
                 sys.exit(1)
 
+            assert user is not None  # Type narrowing after sys.exit
             await user_service.set_password(user.id, password)
             console.print(f"[green]v[/green] Password reset for: {email}")
 
@@ -416,6 +416,7 @@ def deactivate(
                 console.print(f"[red]x User not found: {email}[/red]")
                 sys.exit(1)
 
+            assert user is not None  # Type narrowing after sys.exit
             if not user.is_active:
                 console.print(f"[yellow]! User is already deactivated: {email}[/yellow]")
                 return
@@ -469,6 +470,7 @@ def activate(
                 console.print(f"[red]x User not found: {email}[/red]")
                 sys.exit(1)
 
+            assert user is not None  # Type narrowing after sys.exit
             if user.is_active:
                 console.print(f"[yellow]! User is already active: {email}[/yellow]")
                 return
@@ -522,6 +524,7 @@ def verify_email(
                 console.print(f"[red]x User not found: {email}[/red]")
                 sys.exit(1)
 
+            assert user is not None  # Type narrowing after sys.exit
             if user.email_verified:
                 console.print(f"[yellow]! Email already verified: {email}[/yellow]")
                 return

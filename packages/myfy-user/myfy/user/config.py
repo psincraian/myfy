@@ -7,6 +7,7 @@ Each module defines its own settings for modularity (ADR-0002).
 from __future__ import annotations
 
 import secrets
+from typing import Literal
 
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import SettingsConfigDict
@@ -92,7 +93,7 @@ class UserSettings(BaseSettings):
         default=True,
         description="Whether session cookie is HTTP-only",
     )
-    session_samesite: str = Field(
+    session_samesite: Literal["strict", "lax", "none"] = Field(
         default="lax",
         description="SameSite cookie attribute (strict, lax, none)",
     )
@@ -221,14 +222,14 @@ class UserSettings(BaseSettings):
 
     @field_validator("session_samesite")
     @classmethod
-    def validate_samesite(cls, v: str) -> str:
+    def validate_samesite(cls, v: str) -> Literal["strict", "lax", "none"]:
         """Validate SameSite attribute."""
-        valid = ["strict", "lax", "none"]
+        valid: list[Literal["strict", "lax", "none"]] = ["strict", "lax", "none"]
         v_lower = v.lower()
         if v_lower not in valid:
             msg = f"Invalid SameSite value: {v}. Valid options: {', '.join(valid)}"
             raise ValueError(msg)
-        return v_lower
+        return v_lower  # type: ignore[return-value]
 
     @field_validator("jwt_algorithm")
     @classmethod

@@ -12,7 +12,7 @@ Provides complete user authentication and management with:
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING
 
 from myfy.core.config import load_settings
@@ -347,7 +347,7 @@ class UserModule:
 
     # Public methods for integration
 
-    def get_authenticated_provider(self) -> Callable[..., Authenticated | None]:
+    def get_authenticated_provider(self) -> Callable[..., Awaitable[Authenticated | None]]:
         """
         Get the authenticated_provider for AuthModule integration.
 

@@ -3,6 +3,7 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from pydantic import SecretStr
 
 from myfy.user.errors import (
     OAuthProviderNotConfiguredError,
@@ -258,9 +259,9 @@ class TestOAuthProviderRegistry:
 
         # Create settings without OAuth config
         settings = UserSettings(
-            secret_key="test-secret-key-32-characters-long",
+            secret_key=SecretStr("test-secret-key-32-characters-long"),
             oauth_google_client_id="",  # Empty = not configured
-            oauth_google_client_secret="",
+            oauth_google_client_secret=SecretStr(""),
         )
 
         registry = OAuthProviderRegistry(settings)

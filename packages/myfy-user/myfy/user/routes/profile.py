@@ -44,7 +44,7 @@ def register_routes(router: Router, settings: UserSettings) -> None:
         request: Request,
         user: UserAuthenticated,
         user_service: UserService,
-    ) -> dict:
+    ) -> dict | JSONResponse:
         """
         Get current user's profile.
 

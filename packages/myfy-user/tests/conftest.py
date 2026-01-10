@@ -8,13 +8,12 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import pytest_asyncio
+from pydantic import SecretStr
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from myfy.user.config import UserSettings
-from myfy.user.models.base import BaseUser, DefaultUser
-from myfy.user.models.oauth import OAuthConnection
-from myfy.user.models.token import EmailVerificationToken, PasswordResetToken
+from myfy.user.models.base import DefaultUser
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncEngine
@@ -24,7 +23,7 @@ if TYPE_CHECKING:
 def user_settings() -> UserSettings:
     """Create test user settings."""
     return UserSettings(
-        secret_key="test-secret-key-for-testing-only-32chars!",
+        secret_key=SecretStr("test-secret-key-for-testing-only-32chars!"),
         password_min_length=8,
         password_algorithm="argon2",
         session_lifetime=3600,
@@ -34,9 +33,9 @@ def user_settings() -> UserSettings:
         jwt_refresh_token_lifetime=86400,
         require_email_verification=False,
         oauth_google_client_id="test-google-client-id",
-        oauth_google_client_secret="test-google-client-secret",
+        oauth_google_client_secret=SecretStr("test-google-client-secret"),
         oauth_github_client_id="test-github-client-id",
-        oauth_github_client_secret="test-github-client-secret",
+        oauth_github_client_secret=SecretStr("test-github-client-secret"),
     )
 
 
@@ -146,35 +145,32 @@ async def user_service(
 @pytest_asyncio.fixture
 async def test_user(user_service) -> DefaultUser:
     """Create a test user."""
-    user = await user_service.create(
+    return await user_service.create(
         email="test@example.com",
         password="password123",
         email_verified=True,
     )
-    return user
 
 
 @pytest_asyncio.fixture
 async def unverified_user(user_service) -> DefaultUser:
     """Create an unverified test user."""
-    user = await user_service.create(
+    return await user_service.create(
         email="unverified@example.com",
         password="password123",
         email_verified=False,
     )
-    return user
 
 
 @pytest_asyncio.fixture
 async def admin_user(user_service) -> DefaultUser:
     """Create an admin test user."""
-    user = await user_service.create(
+    return await user_service.create(
         email="admin@example.com",
         password="adminpass123",
         email_verified=True,
         is_superuser=True,
     )
-    return user
 
 
 @pytest.fixture
@@ -209,5 +205,4 @@ def oauth_registry(user_settings: UserSettings):
 @pytest.fixture
 def mock_httpx_client():
     """Create a mock httpx AsyncClient for OAuth testing."""
-    client = AsyncMock()
-    return client
+    return AsyncMock()

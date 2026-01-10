@@ -1,11 +1,15 @@
 """Unit tests for SessionManager."""
 
+from typing import Literal
 from unittest.mock import MagicMock
 
 import pytest
 
 from myfy.user.auth.session import SessionManager
 from myfy.user.errors import SessionInvalidError
+
+# Type for samesite options
+SameSiteOption = Literal["lax", "strict", "none"]
 
 
 class TestSessionManager:
@@ -169,7 +173,8 @@ class TestSessionManager:
     @pytest.mark.asyncio
     async def test_session_samesite_options(self, user_settings):
         """Test session manager with different samesite options."""
-        for samesite in ["lax", "strict", "none"]:
+        samesite_options: list[SameSiteOption] = ["lax", "strict", "none"]
+        for samesite in samesite_options:
             manager = SessionManager(
                 secret_key=user_settings.secret_key.get_secret_value(),
                 cookie_name="session",
@@ -271,4 +276,5 @@ class TestSessionManagerFromSettings:
         mock_request.cookies = {user_settings.session_cookie_name: cookie_value}
 
         result = await manager.get_session(mock_request)
+        assert result is not None
         assert result["user_id"] == "test"

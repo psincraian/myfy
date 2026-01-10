@@ -4,7 +4,7 @@ Authenticated provider for AuthModule integration.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -37,7 +37,7 @@ class UserAuthenticated(Authenticated):
 
 def create_authenticated_provider(
     user_model: type[BaseUser],  # noqa: ARG001 - Reserved for future type-based queries
-) -> Callable[..., Authenticated | None]:
+) -> Callable[..., Awaitable[Authenticated | None]]:
     """
     Create an authenticated_provider function for AuthModule.
 

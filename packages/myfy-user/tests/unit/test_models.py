@@ -5,8 +5,6 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock
 
-import pytest
-
 from myfy.user.models.base import BaseUser, DefaultUser
 from myfy.user.models.token import EmailVerificationToken, PasswordResetToken
 

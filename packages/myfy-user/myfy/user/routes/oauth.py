@@ -178,6 +178,12 @@ def register_routes(
             oauth_connection.avatar_url = user_info.avatar_url
 
             user = await user_service.get_by_id(oauth_connection.user_id)
+            if not user:
+                # User was deleted but OAuth connection still exists
+                return JSONResponse(
+                    {"error": "User account not found"},
+                    status_code=404,
+                )
 
         else:
             # Check if user with email exists
