@@ -16,6 +16,7 @@ members = [
   "packages/myfy-data",
   "packages/myfy-tasks",
   "packages/myfy-frontend",
+  "packages/myfy-user",
   "packages/myfy",
   "website",
 ]
@@ -25,6 +26,7 @@ myfy-core = { workspace = true }
 myfy-web = { workspace = true }
 myfy-data = { workspace = true }
 myfy-tasks = { workspace = true }
+myfy-user = { workspace = true }
 myfy = { workspace = true }
 myfy-frontend = { workspace = true }
 myfy-cli = { workspace = true, editable = true }
@@ -111,6 +113,7 @@ ignore = [
     "ASYNC109",# Async function with timeout parameter (different from asyncio.timeout)
     "SIM102",  # Use single if instead of nested (sometimes nested is more readable)
     "SIM105",  # contextlib.suppress vs try/except/pass (sometimes try is clearer)
+    "RUF022",  # __all__ is not sorted (we organize by category, not alphabetically)
 ]
 
 # Allow autofix for all enabled rules
@@ -120,6 +123,10 @@ unfixable = []
 [tool.ruff.lint.per-file-ignores]
 # Allow unused imports in __init__.py files
 "__init__.py" = ["F401"]
+# Route handlers often have unused arguments due to DI pattern
+"**/routes/**/*.py" = [
+    "ARG001",   # Unused function arguments (DI pattern requires specific signatures)
+]
 # Test files have different requirements
 "**/tests/**/*.py" = [
     "ARG001",   # Unused function arguments (common in test fixtures)
