@@ -103,7 +103,7 @@ We use a **single unified workflow** (`.github/workflows/publish.yml`) that hand
 3. Type checks with ty
 4. Calculates alpha version: `{base_version}a{commit_count}`
 5. Updates all version files
-6. Builds all 5 packages in dependency order
+6. Builds all 7 packages in dependency order
 7. Publishes to PyPI using trusted publishing
 8. Validates installation across Python versions
 9. **No git commits, tags, or GitHub releases created**
@@ -174,7 +174,7 @@ For each package, you need to configure PyPI:
 
 ### Configuration per Package
 
-Configure **one trusted publisher per package** (5 total):
+Configure **one trusted publisher per package** (7 total):
 
 #### myfy-core
 - **PyPI Project:** `myfy-core`
@@ -192,6 +192,20 @@ Configure **one trusted publisher per package** (5 total):
 
 #### myfy-cli
 - **PyPI Project:** `myfy-cli`
+- **Owner:** `{your-github-username-or-org}`
+- **Repository:** `myfy`
+- **Workflow:** `publish.yml`
+- **Environment:** (leave empty)
+
+#### myfy-data
+- **PyPI Project:** `myfy-data`
+- **Owner:** `{your-github-username-or-org}`
+- **Repository:** `myfy`
+- **Workflow:** `publish.yml`
+- **Environment:** (leave empty)
+
+#### myfy-user
+- **PyPI Project:** `myfy-user`
 - **Owner:** `{your-github-username-or-org}`
 - **Repository:** `myfy`
 - **Workflow:** `publish.yml`

@@ -136,6 +136,7 @@ jobs:
               'packages/myfy-web/pyproject.toml',
               'packages/myfy-cli/pyproject.toml',
               'packages/myfy-data/pyproject.toml',
+              'packages/myfy-user/pyproject.toml',
               'packages/myfy-frontend/pyproject.toml',
               'packages/myfy/pyproject.toml'
           ]
@@ -158,6 +159,7 @@ jobs:
               'packages/myfy-web/myfy/web/version.py',
               'packages/myfy-cli/myfy_cli/version.py',
               'packages/myfy-data/myfy/data/version.py',
+              'packages/myfy-user/myfy/user/version.py',
               'packages/myfy-frontend/myfy/frontend/version.py',
               'packages/myfy/myfy/version.py'
           ]
@@ -174,6 +176,7 @@ jobs:
               'packages/myfy-web/pyproject.toml',
               'packages/myfy-cli/pyproject.toml',
               'packages/myfy-data/pyproject.toml',
+              'packages/myfy-user/pyproject.toml',
               'packages/myfy-frontend/pyproject.toml',
               'packages/myfy/pyproject.toml'
           ]
@@ -191,6 +194,7 @@ jobs:
               content = re.sub(r'myfy-core[~=]=?[0-9a-z.]+', f'myfy-core{constraint}', content)
               content = re.sub(r'myfy-web[~=]=?[0-9a-z.]+', f'myfy-web{constraint}', content)
               content = re.sub(r'myfy-cli[~=]=?[0-9a-z.]+', f'myfy-cli{constraint}', content)
+              content = re.sub(r'myfy-data[~=]=?[0-9a-z.]+', f'myfy-data{constraint}', content)
               with open(file, 'w') as f:
                   f.write(content)
 
@@ -223,6 +227,9 @@ jobs:
           echo "Building myfy-data..."
           uv build --package myfy-data --out-dir packages/myfy-data/dist
 
+          echo "Building myfy-user..."
+          uv build --package myfy-user --out-dir packages/myfy-user/dist
+
           echo "Building myfy-frontend..."
           uv build --package myfy-frontend --out-dir packages/myfy-frontend/dist
 
@@ -244,6 +251,9 @@ jobs:
 
           echo -e "\nmyfy-data:"
           ls -lh packages/myfy-data/dist/
+
+          echo -e "\nmyfy-user:"
+          ls -lh packages/myfy-user/dist/
 
           echo -e "\nmyfy-frontend:"
           ls -lh packages/myfy-frontend/dist/
@@ -274,6 +284,8 @@ jobs:
           echo "- myfy-core $VERSION" >> release_notes.md
           echo "- myfy-web $VERSION" >> release_notes.md
           echo "- myfy-cli $VERSION" >> release_notes.md
+          echo "- myfy-data $VERSION" >> release_notes.md
+          echo "- myfy-user $VERSION" >> release_notes.md
           echo "- myfy-frontend $VERSION" >> release_notes.md
           echo "- myfy $VERSION" >> release_notes.md
 
@@ -291,6 +303,7 @@ jobs:
             packages/myfy-web/dist/*
             packages/myfy-cli/dist/*
             packages/myfy-data/dist/*
+            packages/myfy-user/dist/*
             packages/myfy-frontend/dist/*
             packages/myfy/dist/*
 
@@ -316,6 +329,12 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: packages/myfy-data/dist/
+          verbose: true
+
+      - name: Publish myfy-user to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/myfy-user/dist/
           verbose: true
 
       - name: Publish myfy-frontend to PyPI
@@ -366,6 +385,15 @@ jobs:
               data_version = None
               print('myfy-data: not installed (optional)')
 
+          # myfy.user is optional - import if available
+          try:
+              import myfy.user
+              user_version = myfy.user.__version__
+              print(f'myfy-user version: {user_version}')
+          except ImportError:
+              user_version = None
+              print('myfy-user: not installed (optional)')
+
           print(f'myfy version: {myfy.__version__}')
           print(f'myfy-core version: {myfy.core.__version__}')
           print(f'myfy-web version: {myfy.web.__version__}')
@@ -376,6 +404,8 @@ jobs:
           versions = [myfy.__version__, myfy.core.__version__, myfy.web.__version__, myfy_cli.__version__, myfy.frontend.__version__]
           if data_version:
               versions.append(data_version)
+          if user_version:
+              versions.append(user_version)
           assert len(set(versions)) == 1, f'Version mismatch: {versions}'
           print('✓ All versions match')
           "
