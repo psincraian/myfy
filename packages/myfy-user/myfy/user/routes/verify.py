@@ -46,10 +46,12 @@ def register_routes(router: Router, settings: UserSettings) -> None:
             )
 
         # Redirect to login or return success
-        return JSONResponse({
-            "message": "Your email has been verified. You can now log in.",
-            "verified": True,
-        })
+        return JSONResponse(
+            {
+                "message": "Your email has been verified. You can now log in.",
+                "verified": True,
+            }
+        )
 
     @router.post("/resend-verification", name="user:resend_verification")
     async def resend_verification(
@@ -79,22 +81,28 @@ def register_routes(router: Router, settings: UserSettings) -> None:
         user = await user_service.get_by_email(email)
         if not user:
             # Don't reveal if user exists
-            return JSONResponse({
-                "message": "If an account exists with that email, "
-                "a verification link has been sent.",
-            })
+            return JSONResponse(
+                {
+                    "message": "If an account exists with that email, "
+                    "a verification link has been sent.",
+                }
+            )
 
         if user.email_verified:
-            return JSONResponse({
-                "message": "Email is already verified.",
-            })
+            return JSONResponse(
+                {
+                    "message": "Email is already verified.",
+                }
+            )
 
         # Create new verification token
         await user_service.create_verification_token(user.id)
 
         # TODO: Send email via EmailService/TasksModule
 
-        return JSONResponse({
-            "message": "If an account exists with that email, "
-            "a verification link has been sent.",
-        })
+        return JSONResponse(
+            {
+                "message": "If an account exists with that email, "
+                "a verification link has been sent.",
+            }
+        )

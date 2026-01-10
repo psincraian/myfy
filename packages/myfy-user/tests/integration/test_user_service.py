@@ -348,12 +348,8 @@ class TestUserServiceList:
     @pytest.mark.asyncio
     async def test_list_users_active_only(self, user_service):
         """Test listing only active users."""
-        user1 = await user_service.create(
-            email="active@example.com", password="pass12345"
-        )
-        user2 = await user_service.create(
-            email="inactive@example.com", password="pass12345"
-        )
+        user1 = await user_service.create(email="active@example.com", password="pass12345")
+        user2 = await user_service.create(email="inactive@example.com", password="pass12345")
         await user_service.deactivate(user2.id)
 
         active_users = await user_service.list_users(active_only=True)
@@ -474,9 +470,7 @@ class TestUserServicePasswordResetTokens:
             await user_service.reset_password_with_token(token, "anotherpass123")
 
     @pytest.mark.asyncio
-    async def test_password_change_invalidates_reset_tokens(
-        self, user_service, test_user
-    ):
+    async def test_password_change_invalidates_reset_tokens(self, user_service, test_user):
         """Test that changing password invalidates existing reset tokens."""
         token = await user_service.create_password_reset_token(test_user.email)
 

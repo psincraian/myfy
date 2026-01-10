@@ -193,9 +193,7 @@ class TestLoginSubmit:
     """Tests for POST /login endpoint."""
 
     @pytest.mark.asyncio
-    async def test_login_success(
-        self, client, async_session, password_hasher, test_settings
-    ):
+    async def test_login_success(self, client, async_session, password_hasher, test_settings):
         """Test successful login."""
         # First create a user directly using the session
         user_service = UserService(
@@ -369,9 +367,7 @@ class TestRegistrationPage:
         assert "oauth_providers" in data
 
     @pytest.mark.asyncio
-    async def test_register_page_redirects_when_disabled(
-        self, async_engine, password_hasher
-    ):
+    async def test_register_page_redirects_when_disabled(self, async_engine, password_hasher):
         """Test registration page redirects when registration is disabled."""
         router = Router()
 

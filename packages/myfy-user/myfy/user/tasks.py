@@ -49,9 +49,6 @@ except ImportError:
         """Stub TaskContext when myfy-tasks is not installed."""
 
 
-
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -247,9 +244,7 @@ async def cleanup_expired_tokens(
 
         # Delete expired verification tokens
         verification_result = await session.execute(
-            delete(EmailVerificationToken).where(
-                EmailVerificationToken.expires_at < cutoff_date
-            )
+            delete(EmailVerificationToken).where(EmailVerificationToken.expires_at < cutoff_date)
         )
         verification_count = verification_result.rowcount
 
@@ -262,8 +257,7 @@ async def cleanup_expired_tokens(
         await session.commit()
 
         logger.info(
-            f"Cleaned up tokens: {verification_count} verification, "
-            f"{reset_count} password reset"
+            f"Cleaned up tokens: {verification_count} verification, {reset_count} password reset"
         )
 
         return {

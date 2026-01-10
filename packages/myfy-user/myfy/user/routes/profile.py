@@ -97,9 +97,11 @@ def register_routes(router: Router, settings: UserSettings) -> None:
         if updates:
             await user_service.update(user.id, **updates)
 
-        return JSONResponse({
-            "message": "Profile updated successfully",
-        })
+        return JSONResponse(
+            {
+                "message": "Profile updated successfully",
+            }
+        )
 
     @router.post("/profile/change-password", name="user:change_password")
     async def change_password(
@@ -130,8 +132,7 @@ def register_routes(router: Router, settings: UserSettings) -> None:
 
         if not full_user.has_password():
             return JSONResponse(
-                {"error": "Account does not have a password set. "
-                 "Use 'Set Password' instead."},
+                {"error": "Account does not have a password set. Use 'Set Password' instead."},
                 status_code=400,
             )
 
@@ -155,9 +156,11 @@ def register_routes(router: Router, settings: UserSettings) -> None:
                 status_code=400,
             )
 
-        return JSONResponse({
-            "message": "Password changed successfully",
-        })
+        return JSONResponse(
+            {
+                "message": "Password changed successfully",
+            }
+        )
 
     @router.post("/profile/set-password", name="user:set_password")
     async def set_password(
@@ -209,6 +212,8 @@ def register_routes(router: Router, settings: UserSettings) -> None:
                 status_code=400,
             )
 
-        return JSONResponse({
-            "message": "Password set successfully",
-        })
+        return JSONResponse(
+            {
+                "message": "Password set successfully",
+            }
+        )

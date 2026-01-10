@@ -67,9 +67,7 @@ class OAuthProviderRegistry:
         """
         if name not in self._provider_classes:
             available = ", ".join(self._provider_classes.keys())
-            raise OAuthProviderNotFoundError(
-                f"{name}. Available providers: {available}"
-            )
+            raise OAuthProviderNotFoundError(f"{name}. Available providers: {available}")
 
         if not self._settings.is_oauth_provider_configured(name):
             raise OAuthProviderNotConfiguredError(name)

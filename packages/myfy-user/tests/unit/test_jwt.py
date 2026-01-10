@@ -138,7 +138,11 @@ class TestJWTService:
 
         assert "iat" in payload
         # iat is a datetime in the payload, convert to timestamp for comparison
-        iat_ts = int(payload["iat"].timestamp()) if hasattr(payload["iat"], "timestamp") else int(payload["iat"])
+        iat_ts = (
+            int(payload["iat"].timestamp())
+            if hasattr(payload["iat"], "timestamp")
+            else int(payload["iat"])
+        )
         assert before <= iat_ts <= after + 1
 
     def test_access_vs_refresh_token_type(self, jwt_service):
@@ -168,8 +172,16 @@ class TestJWTService:
         refresh_payload = service.decode_refresh_token(refresh_token)
 
         # Get exp as timestamp
-        access_exp = access_payload["exp"].timestamp() if hasattr(access_payload["exp"], "timestamp") else access_payload["exp"]
-        refresh_exp = refresh_payload["exp"].timestamp() if hasattr(refresh_payload["exp"], "timestamp") else refresh_payload["exp"]
+        access_exp = (
+            access_payload["exp"].timestamp()
+            if hasattr(access_payload["exp"], "timestamp")
+            else access_payload["exp"]
+        )
+        refresh_exp = (
+            refresh_payload["exp"].timestamp()
+            if hasattr(refresh_payload["exp"], "timestamp")
+            else refresh_payload["exp"]
+        )
 
         # Refresh token expiration should be later
         assert refresh_exp > access_exp

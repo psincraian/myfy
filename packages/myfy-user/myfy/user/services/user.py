@@ -138,9 +138,7 @@ class UserService(Generic[T]):
             User instance or None if not found
         """
         result = await self._session.execute(
-            select(self._user_model).where(
-                self._user_model.email == email.lower().strip()
-            )
+            select(self._user_model).where(self._user_model.email == email.lower().strip())
         )
         return result.scalar_one_or_none()
 
@@ -408,9 +406,7 @@ class UserService(Generic[T]):
         from myfy.user.errors import TokenExpiredError, TokenInvalidError
 
         result = await self._session.execute(
-            select(EmailVerificationToken).where(
-                EmailVerificationToken.token == token
-            )
+            select(EmailVerificationToken).where(EmailVerificationToken.token == token)
         )
         token_obj = result.scalar_one_or_none()
 
@@ -529,9 +525,7 @@ class UserService(Generic[T]):
 
         # Delete expired verification tokens
         result = await self._session.execute(
-            delete(EmailVerificationToken).where(
-                EmailVerificationToken.expires_at < now
-            )
+            delete(EmailVerificationToken).where(EmailVerificationToken.expires_at < now)
         )
         count += getattr(result, "rowcount", 0) or 0
 

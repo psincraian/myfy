@@ -223,9 +223,7 @@ class UserModule:
                 if settings.is_oauth_provider_configured(provider_name):
                     registry.register_provider(provider_name)
                 else:
-                    logger.warning(
-                        f"OAuth provider '{provider_name}' requested but not configured"
-                    )
+                    logger.warning(f"OAuth provider '{provider_name}' requested but not configured")
             self._oauth_registry = registry
             return registry
 
@@ -333,7 +331,6 @@ class UserModule:
             return
 
         from sqlalchemy.ext.asyncio import AsyncEngine
-
 
         engine = self._container.get(AsyncEngine)
 

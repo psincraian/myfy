@@ -184,10 +184,12 @@ def register_routes(router: Router, settings: UserSettings) -> None:
         if user_settings.require_email_verification:
             await user_service.create_verification_token(user.id)
             # TODO: Send email via EmailService/TasksModule
-            return JSONResponse({
-                "message": "Please check your email to verify your account",
-                "user_id": user.id,
-            })
+            return JSONResponse(
+                {
+                    "message": "Please check your email to verify your account",
+                    "user_id": user.id,
+                }
+            )
 
         # If no verification required, redirect to login or after_register_url
         return RedirectResponse(

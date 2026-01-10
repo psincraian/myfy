@@ -102,9 +102,7 @@ class PasswordHasher:
             PasswordTooWeakError: If password doesn't meet requirements
         """
         if len(password) < self._min_length:
-            raise PasswordTooWeakError(
-                f"Password must be at least {self._min_length} characters"
-            )
+            raise PasswordTooWeakError(f"Password must be at least {self._min_length} characters")
 
         if self._require_uppercase and not re.search(r"[A-Z]", password):
             raise PasswordTooWeakError("Password must contain at least one uppercase letter")

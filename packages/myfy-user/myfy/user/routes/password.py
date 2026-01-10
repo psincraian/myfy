@@ -74,10 +74,12 @@ def register_routes(router: Router, settings: UserSettings) -> None:
             pass
 
         # Always return success to prevent email enumeration
-        return JSONResponse({
-            "message": "If an account exists with that email, "
-            "a password reset link has been sent.",
-        })
+        return JSONResponse(
+            {
+                "message": "If an account exists with that email, "
+                "a password reset link has been sent.",
+            }
+        )
 
     @router.get("/reset-password/{token}", name="user:reset_password")
     async def reset_password_page(
@@ -131,6 +133,8 @@ def register_routes(router: Router, settings: UserSettings) -> None:
                 status_code=400,
             )
 
-        return JSONResponse({
-            "message": "Your password has been reset. You can now log in.",
-        })
+        return JSONResponse(
+            {
+                "message": "Your password has been reset. You can now log in.",
+            }
+        )

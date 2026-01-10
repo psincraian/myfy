@@ -155,7 +155,6 @@ def register_routes(
 
         # Find or create user
 
-
         # Check if OAuth connection exists
         oauth_connection = await _find_oauth_connection(
             user_service,
