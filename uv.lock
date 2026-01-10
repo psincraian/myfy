@@ -621,6 +621,7 @@ version = "0.1.2"
 source = { editable = "packages/myfy-cli" }
 dependencies = [
     { name = "klyne" },
+    { name = "myfy-commands" },
     { name = "myfy-core" },
     { name = "rich" },
     { name = "typer" },
@@ -639,6 +640,7 @@ production = [
 requires-dist = [
     { name = "gunicorn", marker = "extra == 'production'", specifier = ">=22.0.0" },
     { name = "klyne", specifier = ">=0.3.0" },
+    { name = "myfy-commands", editable = "packages/myfy-commands" },
     { name = "myfy-core", editable = "packages/myfy-core" },
     { name = "myfy-data", marker = "extra == 'data'", editable = "packages/myfy-data" },
     { name = "rich", specifier = ">=13.0" },
