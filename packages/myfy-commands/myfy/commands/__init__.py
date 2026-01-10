@@ -80,6 +80,7 @@ from .executor import CommandExecutor
 from .module import CliModule, cli_module
 from .registry import CommandRegistry
 from .router import CliRouter, cli
+from .version import __version__
 
 __all__ = [
     # Main API
@@ -103,4 +104,6 @@ __all__ = [
     "CommandExecutionError",
     # Module instance for entry points
     "cli_module",
+    # Version
+    "__version__",
 ]

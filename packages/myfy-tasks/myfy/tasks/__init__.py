@@ -66,9 +66,8 @@ from .queue import TaskQueue
 from .registry import TaskRegistry
 from .result import TaskResult
 from .task import Task
+from .version import __version__
 from .worker import TaskWorker
-
-__version__ = "0.1.0"
 
 __all__ = [
     "ITaskProvider",

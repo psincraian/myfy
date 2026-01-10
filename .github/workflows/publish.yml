@@ -135,7 +135,9 @@ jobs:
               'packages/myfy-core/pyproject.toml',
               'packages/myfy-web/pyproject.toml',
               'packages/myfy-cli/pyproject.toml',
+              'packages/myfy-commands/pyproject.toml',
               'packages/myfy-data/pyproject.toml',
+              'packages/myfy-tasks/pyproject.toml',
               'packages/myfy-user/pyproject.toml',
               'packages/myfy-frontend/pyproject.toml',
               'packages/myfy/pyproject.toml'
@@ -158,7 +160,9 @@ jobs:
               'packages/myfy-core/myfy/core/version.py',
               'packages/myfy-web/myfy/web/version.py',
               'packages/myfy-cli/myfy_cli/version.py',
+              'packages/myfy-commands/myfy/commands/version.py',
               'packages/myfy-data/myfy/data/version.py',
+              'packages/myfy-tasks/myfy/tasks/version.py',
               'packages/myfy-user/myfy/user/version.py',
               'packages/myfy-frontend/myfy/frontend/version.py',
               'packages/myfy/myfy/version.py'
@@ -175,7 +179,9 @@ jobs:
           dep_files = [
               'packages/myfy-web/pyproject.toml',
               'packages/myfy-cli/pyproject.toml',
+              'packages/myfy-commands/pyproject.toml',
               'packages/myfy-data/pyproject.toml',
+              'packages/myfy-tasks/pyproject.toml',
               'packages/myfy-user/pyproject.toml',
               'packages/myfy-frontend/pyproject.toml',
               'packages/myfy/pyproject.toml'
@@ -194,7 +200,9 @@ jobs:
               content = re.sub(r'myfy-core[~=]=?[0-9a-z.]+', f'myfy-core{constraint}', content)
               content = re.sub(r'myfy-web[~=]=?[0-9a-z.]+', f'myfy-web{constraint}', content)
               content = re.sub(r'myfy-cli[~=]=?[0-9a-z.]+', f'myfy-cli{constraint}', content)
+              content = re.sub(r'myfy-commands[~=]=?[0-9a-z.]+', f'myfy-commands{constraint}', content)
               content = re.sub(r'myfy-data[~=]=?[0-9a-z.]+', f'myfy-data{constraint}', content)
+              content = re.sub(r'myfy-tasks[~=]=?[0-9a-z.]+', f'myfy-tasks{constraint}', content)
               with open(file, 'w') as f:
                   f.write(content)
 
@@ -224,8 +232,14 @@ jobs:
           echo "Building myfy-cli..."
           uv build --package myfy-cli --out-dir packages/myfy-cli/dist
 
+          echo "Building myfy-commands..."
+          uv build --package myfy-commands --out-dir packages/myfy-commands/dist
+
           echo "Building myfy-data..."
           uv build --package myfy-data --out-dir packages/myfy-data/dist
+
+          echo "Building myfy-tasks..."
+          uv build --package myfy-tasks --out-dir packages/myfy-tasks/dist
 
           echo "Building myfy-user..."
           uv build --package myfy-user --out-dir packages/myfy-user/dist
@@ -249,8 +263,14 @@ jobs:
           echo -e "\nmyfy-cli:"
           ls -lh packages/myfy-cli/dist/
 
+          echo -e "\nmyfy-commands:"
+          ls -lh packages/myfy-commands/dist/
+
           echo -e "\nmyfy-data:"
           ls -lh packages/myfy-data/dist/
+
+          echo -e "\nmyfy-tasks:"
+          ls -lh packages/myfy-tasks/dist/
 
           echo -e "\nmyfy-user:"
           ls -lh packages/myfy-user/dist/
@@ -284,7 +304,9 @@ jobs:
           echo "- myfy-core $VERSION" >> release_notes.md
           echo "- myfy-web $VERSION" >> release_notes.md
           echo "- myfy-cli $VERSION" >> release_notes.md
+          echo "- myfy-commands $VERSION" >> release_notes.md
           echo "- myfy-data $VERSION" >> release_notes.md
+          echo "- myfy-tasks $VERSION" >> release_notes.md
           echo "- myfy-user $VERSION" >> release_notes.md
           echo "- myfy-frontend $VERSION" >> release_notes.md
           echo "- myfy $VERSION" >> release_notes.md
@@ -302,7 +324,9 @@ jobs:
             packages/myfy-core/dist/*
             packages/myfy-web/dist/*
             packages/myfy-cli/dist/*
+            packages/myfy-commands/dist/*
             packages/myfy-data/dist/*
+            packages/myfy-tasks/dist/*
             packages/myfy-user/dist/*
             packages/myfy-frontend/dist/*
             packages/myfy/dist/*
@@ -325,10 +349,22 @@ jobs:
           packages-dir: packages/myfy-cli/dist/
           verbose: true
 
+      - name: Publish myfy-commands to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/myfy-commands/dist/
+          verbose: true
+
       - name: Publish myfy-data to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: packages/myfy-data/dist/
+          verbose: true
+
+      - name: Publish myfy-tasks to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/myfy-tasks/dist/
           verbose: true
 
       - name: Publish myfy-user to PyPI
@@ -385,6 +421,24 @@ jobs:
               data_version = None
               print('myfy-data: not installed (optional)')
 
+          # myfy.commands is optional - import if available
+          try:
+              import myfy.commands
+              commands_version = myfy.commands.__version__
+              print(f'myfy-commands version: {commands_version}')
+          except ImportError:
+              commands_version = None
+              print('myfy-commands: not installed (optional)')
+
+          # myfy.tasks is optional - import if available
+          try:
+              import myfy.tasks
+              tasks_version = myfy.tasks.__version__
+              print(f'myfy-tasks version: {tasks_version}')
+          except ImportError:
+              tasks_version = None
+              print('myfy-tasks: not installed (optional)')
+
           # myfy.user is optional - import if available
           try:
               import myfy.user
@@ -402,8 +456,12 @@ jobs:
 
           # Verify all versions match (excluding optional packages that aren't installed)
           versions = [myfy.__version__, myfy.core.__version__, myfy.web.__version__, myfy_cli.__version__, myfy.frontend.__version__]
+          if commands_version:
+              versions.append(commands_version)
           if data_version:
               versions.append(data_version)
+          if tasks_version:
+              versions.append(tasks_version)
           if user_version:
               versions.append(user_version)
           assert len(set(versions)) == 1, f'Version mismatch: {versions}'
