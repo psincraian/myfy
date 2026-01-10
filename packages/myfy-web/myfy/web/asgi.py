@@ -84,7 +84,7 @@ class ASGIApp:
             if web_settings.cors_enabled and web_settings.cors_allowed_origins:
                 middleware.append(
                     Middleware(
-                        CORSMiddleware,
+                        CORSMiddleware,  # type: ignore[arg-type]
                         allow_origins=web_settings.cors_allowed_origins,
                         allow_credentials=web_settings.cors_allow_credentials,
                         allow_methods=web_settings.cors_allowed_methods,

@@ -97,7 +97,7 @@ def test_task_is_callable():
     # Should be able to call directly (for testing)
     import asyncio
 
-    result = asyncio.run(simple_task(5))
+    result = asyncio.run(simple_task(5))  # type: ignore[arg-type]
     assert result == 10
 
 
@@ -110,4 +110,4 @@ def test_task_preserves_function_metadata():
         return x
 
     assert documented_task.func.__doc__ == """This is the docstring."""
-    assert documented_task.func.__name__ == "documented_task"
+    assert documented_task.func.__name__ == "documented_task"  # type: ignore[attr-defined]

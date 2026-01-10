@@ -100,7 +100,7 @@ def rate_limit(
 
             @wraps(func)
             async def async_wrapper(*args: P.args, **kwargs: P.kwargs) -> Coroutine[Any, Any, R]:
-                return await func(*args, **kwargs)  # type: ignore[misc]
+                return await func(*args, **kwargs)
 
             setattr(async_wrapper, RATE_LIMIT_ATTR, config)
             return async_wrapper  # type: ignore[return-value]
@@ -110,7 +110,7 @@ def rate_limit(
             return func(*args, **kwargs)
 
         setattr(sync_wrapper, RATE_LIMIT_ATTR, config)
-        return sync_wrapper  # type: ignore[return-value]
+        return sync_wrapper
 
     return decorator
 

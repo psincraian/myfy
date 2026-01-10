@@ -74,7 +74,7 @@ def override[T: BaseSettings](settings_class: type[T], **overrides) -> type[T]:
         if field_name in settings_class.model_fields:
             field_info = settings_class.model_fields[field_name]
             # Add type annotation from base class
-            namespace["__annotations__"][field_name] = field_info.annotation
+            namespace["__annotations__"][field_name] = field_info.annotation  # type: ignore[index]
             # Set new default value
             namespace[field_name] = new_default
         else:
@@ -88,4 +88,4 @@ def override[T: BaseSettings](settings_class: type[T], **overrides) -> type[T]:
     class_name = f"{settings_class.__name__}_Override_{override_keys}"
 
     # Create and return the subclass
-    return type(class_name, (settings_class,), namespace)
+    return type(class_name, (settings_class,), namespace)  # type: ignore[return-value]

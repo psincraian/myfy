@@ -15,6 +15,7 @@ members = [
   "packages/myfy-cli",
   "packages/myfy-data",
   "packages/myfy-tasks",
+  "packages/myfy-commands",
   "packages/myfy-frontend",
   "packages/myfy-user",
   "packages/myfy",
@@ -26,6 +27,7 @@ myfy-core = { workspace = true }
 myfy-web = { workspace = true }
 myfy-data = { workspace = true }
 myfy-tasks = { workspace = true }
+myfy-commands = { workspace = true }
 myfy-user = { workspace = true }
 myfy = { workspace = true }
 myfy-frontend = { workspace = true }

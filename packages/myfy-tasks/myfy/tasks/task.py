@@ -289,9 +289,9 @@ class Task(Generic[P, R]):
                 session,
                 name=self._name,
                 args=task_args,
-                priority=priority,
-                max_retries=max_retries,
-                delay_seconds=delay,
+                priority=priority,  # type: ignore[arg-type]
+                max_retries=max_retries,  # type: ignore[arg-type]
+                delay_seconds=delay,  # type: ignore[arg-type]
             )
 
         logger.info(f"Dispatched task {self._name} (id={task_id})")

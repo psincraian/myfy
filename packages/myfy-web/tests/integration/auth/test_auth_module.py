@@ -119,7 +119,7 @@ class TestAnonymousType:
         response = await executor.execute_route(route, make_mock_request(), {})
 
         assert response.status_code == 200
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["type"] == "anonymous"
 
     @pytest.mark.asyncio
@@ -159,7 +159,7 @@ class TestAnonymousType:
         response = await executor.execute_route(route, make_mock_request(), {})
 
         assert response.status_code == 200
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["ip"] == "127.0.0.1"
 
 
@@ -213,7 +213,7 @@ class TestAuthenticatedType:
         response = await executor.execute_route(route, make_mock_request(), {})
 
         assert response.status_code == 401
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["detail"] == "Authentication required"
 
     @pytest.mark.asyncio
@@ -258,7 +258,7 @@ class TestAuthenticatedType:
         response = await executor.execute_route(route, make_mock_request(), {})
 
         assert response.status_code == 200
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["id"] == "123"
         assert body["email"] == "test@example.com"
 
@@ -315,7 +315,7 @@ class TestCustomProtectedTypes:
         response = await executor.execute_route(route, make_mock_request(), {})
 
         assert response.status_code == 403
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["detail"] == "Forbidden"
 
     @pytest.mark.asyncio
@@ -412,7 +412,7 @@ class TestNoAuthModule:
         # Without AuthModule, None passes through (no protection)
         # The handler receives None and would fail if it tries to use it
         assert response.status_code == 200
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["user_id"] is None
 
 
@@ -486,5 +486,5 @@ class TestPublicRoutes:
         response = await executor.execute_route(route, make_mock_request(), {})
 
         assert response.status_code == 200
-        body = json.loads(response.body.decode())
+        body = json.loads(response.body.decode())  # type: ignore[union-attr]
         assert body["status"] == "ok"

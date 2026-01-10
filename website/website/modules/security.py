@@ -144,7 +144,7 @@ class SecurityModule(Module, IWebExtension):
 
         # Add session middleware (required for CSRF)
         app.add_middleware(
-            SessionMiddleware,
+            SessionMiddleware,  # type: ignore[arg-type]
             secret_key=self._settings.secret_key,
             session_cookie="myfy_session",
             max_age=86400,  # 24 hours
@@ -153,7 +153,7 @@ class SecurityModule(Module, IWebExtension):
         )
 
         # Add security headers middleware with environment awareness
-        app.add_middleware(SecurityHeadersMiddleware, environment=environment)
+        app.add_middleware(SecurityHeadersMiddleware, environment=environment)  # type: ignore[arg-type]
 
         # Add trusted host middleware
         # In development, allow all hosts for Vite HMR WebSocket connections
@@ -162,7 +162,7 @@ class SecurityModule(Module, IWebExtension):
         else:
             allowed_hosts = self._settings.allowed_hosts.split(",")
         app.add_middleware(
-            TrustedHostMiddleware,
+            TrustedHostMiddleware,  # type: ignore[arg-type]
             allowed_hosts=allowed_hosts,
         )
 

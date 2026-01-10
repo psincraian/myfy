@@ -272,9 +272,9 @@ class TestPathParameterConversion:
             await executor.execute_route(route, make_mock_request(), {"user_id": "not_a_number"})
 
         exc = exc_info.value
-        assert exc.status_code == 400  # type: ignore[union-attr]
-        assert exc.detail is not None  # type: ignore[union-attr]
-        assert "expected int" in exc.detail.lower()  # type: ignore[union-attr]
+        assert exc.status_code == 400
+        assert exc.detail is not None
+        assert "expected int" in exc.detail.lower()
 
 
 # =============================================================================

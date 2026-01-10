@@ -95,7 +95,7 @@ class TestTaskDirectExecution:
         async def multiply(a: int, b: int) -> int:
             return a * b
 
-        result = asyncio.run(multiply(3, 4))
+        result = asyncio.run(multiply(3, 4))  # type: ignore[arg-type]
         assert result == 12
 
     def test_task_direct_call_with_context(self):

@@ -109,9 +109,9 @@ class TestTaskDispatchOptions:
             return name
 
         # Dispatch tasks in wrong order, but with priorities
-        await ordered_task.send(name="low", _priority=1)
-        await ordered_task.send(name="high", _priority=10)
-        await ordered_task.send(name="medium", _priority=5)
+        await ordered_task.send(name="low", _priority=1)  # type: ignore[call-arg]
+        await ordered_task.send(name="high", _priority=10)  # type: ignore[call-arg]
+        await ordered_task.send(name="medium", _priority=5)  # type: ignore[call-arg]
 
         # Process all
         await task_runner.process_pending()
@@ -152,7 +152,7 @@ class TestTaskContext:
                 await ctx.update_progress(current=i + 1, total=len(items))
             return len(items)
 
-        task_id = await progress_task.send(items=["a", "b", "c"])
+        task_id = await progress_task.send(items=["a", "b", "c"])  # type: ignore[call-arg]
         await task_runner.process_pending()
 
         # Check result includes progress info
@@ -172,7 +172,7 @@ class TestTaskContext:
             captured_id.append(ctx.task_id)
             return ctx.task_id
 
-        task_id = await capture_id_task.send()
+        task_id = await capture_id_task.send()  # type: ignore[call-arg]
         await task_runner.process_pending()
 
         assert len(captured_id) == 1
@@ -188,7 +188,7 @@ class TestTaskContext:
             captured_attempt.append(ctx.attempt)
             return ctx.attempt
 
-        await capture_attempt.send()
+        await capture_attempt.send()  # type: ignore[call-arg]
         await task_runner.process_pending()
 
         # First attempt should be 1
@@ -213,7 +213,7 @@ class TestTaskFailureAndRetry:
         result = await failing_task.get_result(task_id)
         assert result.is_failed
         assert result.status == TaskStatus.FAILED
-        assert "Expected failure" in result.error
+        assert "Expected failure" in result.error  # type: ignore[operator]
 
     @pytest.mark.asyncio
     async def test_task_failure_schedules_retry(self, task_runner):
