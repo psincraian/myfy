@@ -8,6 +8,7 @@ Provides commands for development and operations:
 - myfy modules: Show loaded modules
 - myfy data: Database and migration commands
 - myfy frontend: Frontend commands
+- myfy app: User-defined CLI commands
 """
 
 import importlib.util
@@ -25,7 +26,7 @@ from rich.table import Table
 from myfy.core import Application
 from myfy.core.config import load_settings
 from myfy.web.config import WebSettings
-from myfy_cli.commands import data_app, frontend_app, tasks_app
+from myfy_cli.commands import app_commands, data_app, frontend_app, tasks_app
 from myfy_cli.version import __version__
 
 klyne.init(
@@ -42,6 +43,7 @@ app = typer.Typer(
 console = Console()
 
 # Register command groups
+app.add_typer(app_commands, name="app")
 app.add_typer(data_app, name="data")
 app.add_typer(frontend_app, name="frontend")
 app.add_typer(tasks_app, name="tasks")
