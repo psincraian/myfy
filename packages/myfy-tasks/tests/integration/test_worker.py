@@ -315,7 +315,7 @@ class TestWorkerDependencyInjection:
             async def greet_user(name: str, service: GreetingService) -> str:
                 return service.greet(name)
 
-            task_id = await greet_user.send(name="World")
+            task_id = await greet_user.send(name="World")  # type: ignore[call-arg]
 
             queue = module.get_queue()
             worker = TaskWorker(

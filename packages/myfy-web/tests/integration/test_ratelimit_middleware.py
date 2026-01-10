@@ -76,7 +76,7 @@ class TestGlobalRateLimiting:
         # Add middleware manually for testing
         from myfy.web.ratelimit.middleware import RateLimitMiddleware
 
-        app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)
+        app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)  # type: ignore[arg-type]
 
         client = TestClient(app.app)
 
@@ -108,7 +108,7 @@ class TestGlobalRateLimiting:
 
         from myfy.web.ratelimit.middleware import RateLimitMiddleware
 
-        app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)
+        app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)  # type: ignore[arg-type]
 
         client = TestClient(app.app)
         response = client.get("/api/data")
@@ -134,7 +134,7 @@ class TestGlobalRateLimiting:
 
         from myfy.web.ratelimit.middleware import RateLimitMiddleware
 
-        app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)
+        app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)  # type: ignore[arg-type]
 
         client = TestClient(app.app)
 
@@ -167,7 +167,7 @@ class TestKeyStrategies:
 
         from myfy.web.ratelimit.middleware import RateLimitMiddleware
 
-        app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)
+        app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)  # type: ignore[arg-type]
 
         client = TestClient(app.app)
 
@@ -205,7 +205,7 @@ class TestKeyStrategies:
 
         from myfy.web.ratelimit.middleware import RateLimitMiddleware
 
-        app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)
+        app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)  # type: ignore[arg-type]
 
         client = TestClient(app.app)
 
@@ -286,7 +286,7 @@ class TestDecoratorIntegration:
 
         from myfy.web.ratelimit.middleware import RateLimitMiddleware
 
-        app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)
+        app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)  # type: ignore[arg-type]
 
         client = TestClient(app.app)
 
@@ -324,7 +324,7 @@ class TestRateLimitResponse:
 
         from myfy.web.ratelimit.middleware import RateLimitMiddleware
 
-        app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)
+        app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)  # type: ignore[arg-type]
 
         client = TestClient(app.app)
 

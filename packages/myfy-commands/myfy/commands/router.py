@@ -162,7 +162,7 @@ class CliRouter:
             default = param.default
 
             # Check if it's a Typer Argument
-            if isinstance(default, typer.models.ArgumentInfo):  # type: ignore[attr-defined]
+            if isinstance(default, typer.models.ArgumentInfo):
                 command.arguments.append(
                     CommandArg(
                         name=param_name,
@@ -174,7 +174,7 @@ class CliRouter:
                 )
 
             # Check if it's a Typer Option
-            elif isinstance(default, typer.models.OptionInfo):  # type: ignore[attr-defined]
+            elif isinstance(default, typer.models.OptionInfo):
                 # Extract short option if provided
                 short = None
                 if default.param_decls:

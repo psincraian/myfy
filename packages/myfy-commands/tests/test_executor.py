@@ -195,7 +195,7 @@ def test_execute_command_that_raises(executor):
     with pytest.raises(CommandExecutionError) as exc_info:
         executor.execute(command, {})
 
-    assert "Something went wrong" in str(exc_info.value.cause)  # type: ignore[attr-defined]
+    assert "Something went wrong" in str(exc_info.value.cause)
 
 
 @pytest.mark.asyncio

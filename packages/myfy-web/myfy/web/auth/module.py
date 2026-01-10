@@ -134,7 +134,7 @@ class AuthModule:
         if self._authenticated_provider:
             container.register(
                 type_=Authenticated,
-                factory=self._authenticated_provider,
+                factory=self._authenticated_provider,  # type: ignore[arg-type]
                 scope=REQUEST,
             )
 

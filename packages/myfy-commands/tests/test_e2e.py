@@ -436,7 +436,7 @@ class TestErrorHandling:
         with pytest.raises(CommandExecutionError) as exc_info:
             await cli_module.get_executor().execute_async(command, {})
 
-        assert "Intentional failure" in str(exc_info.value.cause)  # type: ignore[attr-defined]
+        assert "Intentional failure" in str(exc_info.value.cause)
 
 
 # =============================================================================

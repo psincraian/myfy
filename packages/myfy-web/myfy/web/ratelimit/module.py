@@ -142,7 +142,7 @@ class RateLimitModule:
 
         return [
             Middleware(
-                RateLimitMiddleware,
+                RateLimitMiddleware,  # type: ignore[arg-type]
                 store=store,
                 settings=settings,
             )
