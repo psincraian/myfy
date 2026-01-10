@@ -277,7 +277,7 @@ def _parse_cli_args(command: Any, extra_args: list[str]) -> dict[str, Any]:
             if opt_name.startswith("no-"):
                 actual_name = opt_name[3:].replace("-", "_")
                 opt = option_by_name.get(actual_name)
-                if opt and opt.type_hint == bool:
+                if opt and opt.type_hint is bool:
                     kwargs[actual_name] = False
                     i += 1
                     continue
@@ -285,7 +285,7 @@ def _parse_cli_args(command: Any, extra_args: list[str]) -> dict[str, Any]:
             opt_name_normalized = opt_name.replace("-", "_")
             opt = option_by_name.get(opt_name) or option_by_name.get(opt_name_normalized)
 
-            if opt and opt.type_hint == bool:
+            if opt and opt.type_hint is bool:
                 # Boolean flag
                 kwargs[opt.name] = True
             elif i + 1 < len(extra_args) and not extra_args[i + 1].startswith("-"):
@@ -303,19 +303,18 @@ def _parse_cli_args(command: Any, extra_args: list[str]) -> dict[str, Any]:
             opt = option_by_short.get(short_name)
 
             if opt:
-                if opt.type_hint == bool:
+                if opt.type_hint is bool:
                     kwargs[opt.name] = True
                 elif i + 1 < len(extra_args):
                     value = extra_args[i + 1]
                     kwargs[opt.name] = _convert_value(value, opt.type_hint)
                     i += 1
 
-        else:
+        elif arg_idx < len(command.arguments):
             # Positional argument
-            if arg_idx < len(command.arguments):
-                cmd_arg = command.arguments[arg_idx]
-                kwargs[cmd_arg.name] = _convert_value(arg, cmd_arg.type_hint)
-                arg_idx += 1
+            cmd_arg = command.arguments[arg_idx]
+            kwargs[cmd_arg.name] = _convert_value(arg, cmd_arg.type_hint)
+            arg_idx += 1
 
         i += 1
 
@@ -329,10 +328,10 @@ def _parse_cli_args(command: Any, extra_args: list[str]) -> dict[str, Any]:
 
 def _convert_value(value: str, type_hint: type) -> Any:
     """Convert string value to target type."""
-    if type_hint == int:
+    if type_hint is int:
         return int(value)
-    if type_hint == float:
+    if type_hint is float:
         return float(value)
-    if type_hint == bool:
+    if type_hint is bool:
         return value.lower() in ("true", "1", "yes", "y")
     return value

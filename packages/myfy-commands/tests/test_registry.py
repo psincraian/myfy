@@ -114,7 +114,7 @@ def test_get_all():
     registry.register(command2)
 
     all_cmds = registry.get_all()
-    assert len(all_cmds) == 2
+    assert len(all_cmds) == 2  # noqa: PLR2004
     assert "cmd1" in all_cmds
     assert "cmd2" in all_cmds
 
@@ -143,7 +143,7 @@ def test_grouped_commands():
     groups = registry.get_groups()
 
     assert "db" in groups
-    assert len(groups["db"]) == 2
+    assert len(groups["db"]) == 2  # noqa: PLR2004
     assert "__default__" in groups
     assert len(groups["__default__"]) == 1
 

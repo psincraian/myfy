@@ -80,7 +80,8 @@ class CliRouter:
 
         def decorator(handler: Callable[..., Any]) -> Callable[..., Any]:
             # Derive command name from function name if not provided
-            cmd_name = name or handler.__name__.replace("_", "-")
+            handler_name = getattr(handler, "__name__", "command")
+            cmd_name = name or handler_name.replace("_", "-")
             cmd_help = help or handler.__doc__
             cmd_group = group or self._current_group
 
@@ -161,7 +162,7 @@ class CliRouter:
             default = param.default
 
             # Check if it's a Typer Argument
-            if isinstance(default, typer.models.ArgumentInfo):
+            if isinstance(default, typer.models.ArgumentInfo):  # type: ignore[attr-defined]
                 command.arguments.append(
                     CommandArg(
                         name=param_name,
@@ -173,7 +174,7 @@ class CliRouter:
                 )
 
             # Check if it's a Typer Option
-            elif isinstance(default, typer.models.OptionInfo):
+            elif isinstance(default, typer.models.OptionInfo):  # type: ignore[attr-defined]
                 # Extract short option if provided
                 short = None
                 if default.param_decls:

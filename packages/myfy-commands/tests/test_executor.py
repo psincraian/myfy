@@ -91,7 +91,7 @@ def test_execute_command_with_cli_args(executor):
     assert result == "test: 5"
 
 
-def test_execute_command_with_dependency_injection(executor, container):
+def test_execute_command_with_dependency_injection(executor, container):  # noqa: ARG001
     """Test executing command with DI dependencies."""
     async def my_command(user_service: UserService):
         return user_service.get_users()
@@ -108,7 +108,7 @@ def test_execute_command_with_dependency_injection(executor, container):
     assert result == ["user1", "user2"]
 
 
-def test_execute_command_with_mixed_params(executor, container):
+def test_execute_command_with_mixed_params(executor, container):  # noqa: ARG001
     """Test executing command with both CLI args and DI."""
     async def my_command(user_service: UserService, limit: int):
         users = user_service.get_users()
@@ -188,7 +188,7 @@ def test_execute_command_that_raises(executor):
     with pytest.raises(CommandExecutionError) as exc_info:
         executor.execute(command, {})
 
-    assert "Something went wrong" in str(exc_info.value.cause)
+    assert "Something went wrong" in str(exc_info.value.cause)  # type: ignore[attr-defined]
 
 
 @pytest.mark.asyncio
@@ -206,7 +206,7 @@ async def test_execute_async_method(executor):
 
 
 @pytest.mark.asyncio
-async def test_execute_async_with_dependencies(executor, container):
+async def test_execute_async_with_dependencies(executor, container):  # noqa: ARG001
     """Test async execution with DI."""
     async def my_command(user_service: UserService):
         return len(user_service.get_users())
@@ -220,4 +220,4 @@ async def test_execute_async_with_dependencies(executor, container):
 
     result = await executor.execute_async(command, {})
 
-    assert result == 2
+    assert result == 2  # noqa: PLR2004

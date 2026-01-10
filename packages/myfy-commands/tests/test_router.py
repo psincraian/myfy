@@ -69,7 +69,7 @@ def test_group_sub_router():
         pass
 
     commands = db.get_commands()
-    assert len(commands) == 2
+    assert len(commands) == 2  # noqa: PLR2004
     assert all(cmd.group == "db" for cmd in commands)
 
 
@@ -86,8 +86,8 @@ def test_primitive_type_as_option():
 
     assert len(cmd.options) == 1
     assert cmd.options[0].name == "count"
-    assert cmd.options[0].type_hint == int
-    assert cmd.options[0].default == 10
+    assert cmd.options[0].type_hint is int
+    assert cmd.options[0].default == 10  # noqa: PLR2004
 
 
 def test_primitive_type_without_default_as_argument():
@@ -103,7 +103,7 @@ def test_primitive_type_without_default_as_argument():
 
     assert len(cmd.arguments) == 1
     assert cmd.arguments[0].name == "filename"
-    assert cmd.arguments[0].type_hint == str
+    assert cmd.arguments[0].type_hint is str
     assert cmd.arguments[0].is_required is True
 
 
@@ -159,7 +159,7 @@ def test_typer_option_annotation():
 
     assert len(cmd.options) == 1
     assert cmd.options[0].name == "count"
-    assert cmd.options[0].default == 10
+    assert cmd.options[0].default == 10  # noqa: PLR2004
     assert cmd.options[0].help == "Number of items"
     assert cmd.options[0].short == "-c"
 
@@ -186,7 +186,7 @@ def test_mixed_parameters():
     assert "db" in cmd.dependencies
     assert len(cmd.arguments) == 1
     assert cmd.arguments[0].name == "file"
-    assert len(cmd.options) == 2
+    assert len(cmd.options) == 2  # noqa: PLR2004
     option_names = {opt.name for opt in cmd.options}
     assert "batch_size" in option_names
     assert "dry_run" in option_names

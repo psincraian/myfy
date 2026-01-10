@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 
 from myfy.core.config import load_settings
 from myfy.core.di import SINGLETON
+from myfy.core.di.types import ProviderKey
 
 from .config import CliSettings
 from .executor import CommandExecutor
@@ -110,8 +111,6 @@ class CliModule:
         Args:
             container: DI container to register services in
         """
-        from myfy.core.di.types import ProviderKey
-
         logger.debug("Configuring CliModule...")
 
         self._container = container
