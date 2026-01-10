@@ -168,6 +168,7 @@ def test_clear_registry():
 
 def test_full_name_with_group():
     """Test full_name property with group."""
+
     async def handler():
         pass
 
@@ -177,6 +178,7 @@ def test_full_name_with_group():
 
 def test_full_name_without_group():
     """Test full_name property without group."""
+
     async def handler():
         pass
 
@@ -186,6 +188,7 @@ def test_full_name_without_group():
 
 def test_command_repr():
     """Test command string representation."""
+
     async def my_handler():
         pass
 

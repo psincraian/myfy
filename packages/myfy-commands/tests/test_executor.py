@@ -45,6 +45,7 @@ def executor(container):
 
 def test_compile_command(executor):
     """Test compiling a command creates an execution plan."""
+
     async def my_command():
         pass
 
@@ -73,6 +74,7 @@ def test_execute_simple_command(executor):
 
 def test_execute_command_with_cli_args(executor):
     """Test executing command with CLI arguments."""
+
     async def my_command(count: int, name: str):
         return f"{name}: {count}"
 
@@ -93,6 +95,7 @@ def test_execute_command_with_cli_args(executor):
 
 def test_execute_command_with_dependency_injection(executor, container):  # noqa: ARG001
     """Test executing command with DI dependencies."""
+
     async def my_command(user_service: UserService):
         return user_service.get_users()
 
@@ -110,6 +113,7 @@ def test_execute_command_with_dependency_injection(executor, container):  # noqa
 
 def test_execute_command_with_mixed_params(executor, container):  # noqa: ARG001
     """Test executing command with both CLI args and DI."""
+
     async def my_command(user_service: UserService, limit: int):
         users = user_service.get_users()
         return users[:limit]
@@ -129,6 +133,7 @@ def test_execute_command_with_mixed_params(executor, container):  # noqa: ARG001
 
 def test_execute_sync_command(executor):
     """Test executing a synchronous command."""
+
     def my_sync_command(name: str):
         return f"Hello, {name}"
 
@@ -146,6 +151,7 @@ def test_execute_sync_command(executor):
 
 def test_execute_uncompiled_command_raises(executor):
     """Test that executing uncompiled command raises."""
+
     async def my_command():
         pass
 
@@ -179,6 +185,7 @@ def test_execute_command_with_missing_dependency_raises(executor):
 
 def test_execute_command_that_raises(executor):
     """Test that command exceptions are wrapped."""
+
     async def failing_command():
         raise ValueError("Something went wrong")
 
@@ -194,6 +201,7 @@ def test_execute_command_that_raises(executor):
 @pytest.mark.asyncio
 async def test_execute_async_method(executor):
     """Test the async execution method."""
+
     async def my_command():
         return "async result"
 
@@ -208,6 +216,7 @@ async def test_execute_async_method(executor):
 @pytest.mark.asyncio
 async def test_execute_async_with_dependencies(executor, container):  # noqa: ARG001
     """Test async execution with DI."""
+
     async def my_command(user_service: UserService):
         return len(user_service.get_users())
 
