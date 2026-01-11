@@ -1,0 +1,27 @@
+{
+  "name": "myfy-plugins",
+  "owner": {
+    "name": "myfy"
+  },
+  "metadata": {
+    "description": "Official myfy Claude Code plugins for Python framework development",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "myfy",
+      "source": "./plugins/claude-code",
+      "description": "Claude Code plugin for myfy Python framework development. Provides skills for patterns, agents for scaffolding, and commands for common operations.",
+      "version": "0.1.0",
+      "author": {
+        "name": "myfy"
+      },
+      "homepage": "https://myfy.dev",
+      "repository": "https://github.com/psincraian/myfy",
+      "license": "MIT",
+      "keywords": ["python", "framework", "web", "di", "scaffolding"],
+      "category": "frameworks",
+      "tags": ["python", "myfy", "web-framework", "dependency-injection"]
+    }
+  ]
+}
