@@ -1,0 +1,9 @@
+{
+  "name": "myfy",
+  "version": "0.1.0",
+  "description": "Claude Code plugin for myfy Python framework development. Helps developers build applications with myfy using skills for patterns, agents for scaffolding, and commands for common operations.",
+  "author": {
+    "name": "myfy"
+  },
+  "homepage": "https://myfy.dev"
+}
