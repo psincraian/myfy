@@ -753,6 +753,7 @@ class TestDependencyAnalysisEdgeCases:
         locally (inside configure()) and used as type annotations in factory
         functions defined in the same scope.
         """
+
         # Define types that will be registered
         class PasswordHasher:
             def hash(self, password: str) -> str:
