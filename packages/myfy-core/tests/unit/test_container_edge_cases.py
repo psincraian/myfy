@@ -745,3 +745,68 @@ class TestDependencyAnalysisEdgeCases:
 
         assert primary.name == "primary"
         assert replica.name == "replica"
+
+    def test_forward_reference_in_nested_factory(self, container: Container):
+        """Test that forward references in nested factory functions are resolved.
+
+        This simulates the pattern used in UserModule where types are imported
+        locally (inside configure()) and used as type annotations in factory
+        functions defined in the same scope.
+        """
+
+        # Define types that will be registered
+        class PasswordHasher:
+            def hash(self, password: str) -> str:
+                return f"hashed:{password}"
+
+        class UserSettings:
+            pass
+
+        class UserService:
+            def __init__(self, hasher: PasswordHasher, settings: UserSettings):
+                self.hasher = hasher
+                self.settings = settings
+
+        # Simulate the pattern from UserModule.configure():
+        # - Types are imported locally (not at module level)
+        # - Factory functions are defined with these types as annotations
+        def configure_like_user_module(c: Container):
+            # Register PasswordHasher first
+            c.register(
+                type_=PasswordHasher,
+                factory=lambda: PasswordHasher(),
+                scope=SINGLETON,
+            )
+
+            # Register UserSettings
+            c.register(
+                type_=UserSettings,
+                factory=lambda: UserSettings(),
+                scope=SINGLETON,
+            )
+
+            # Define factory with type annotations that reference
+            # the locally imported types
+            def create_user_service(
+                hasher: PasswordHasher,
+                settings: UserSettings,
+            ) -> UserService:
+                return UserService(hasher=hasher, settings=settings)
+
+            c.register(
+                type_=UserService,
+                factory=create_user_service,
+                scope=SINGLETON,
+            )
+
+        configure_like_user_module(container)
+
+        # Should compile without raising NameError for forward references
+        container.compile()
+
+        # Verify the services work correctly
+        service = container.get(UserService)
+        assert isinstance(service, UserService)
+        assert isinstance(service.hasher, PasswordHasher)
+        assert isinstance(service.settings, UserSettings)
+        assert service.hasher.hash("test") == "hashed:test"
