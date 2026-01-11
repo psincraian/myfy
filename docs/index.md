@@ -185,6 +185,14 @@ One file. No config. Just run.
 
     [:octicons-arrow-right-24: Learn More](core-concepts/dependency-injection.md)
 
+-   :material-robot:{ .lg .middle } __Claude Code Plugin__
+
+    ---
+
+    AI-assisted development with skills, agents, and commands
+
+    [:octicons-arrow-right-24: Install Plugin](https://code.claude.com/docs/en/discover-plugins)
+
 </div>
 
 ---

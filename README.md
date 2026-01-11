@@ -71,6 +71,24 @@ uv run myfy run
 
 ---
 
+## Claude Code Plugin
+
+myfy includes a [Claude Code plugin](https://code.claude.com/docs/en/discover-plugins) for AI-assisted development. Install the plugin to get:
+
+- **Skills** for common myfy patterns (routing, DI, modules)
+- **Agents** for scaffolding new projects and components
+- **Commands** for common operations
+
+```bash
+# Add the myfy marketplace
+/plugin marketplace add psincraian/myfy
+
+# Install the plugin
+/plugin install myfy@psincraian-myfy
+```
+
+---
+
 ## Learn More
 
 - [Examples](examples/) - Working applications in this repo
