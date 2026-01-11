@@ -770,11 +770,6 @@ class TestDependencyAnalysisEdgeCases:
         # - Types are imported locally (not at module level)
         # - Factory functions are defined with these types as annotations
         def configure_like_user_module(c: Container):
-            # These would normally be local imports:
-            # from .auth.password import PasswordHasher
-            # from .config import UserSettings
-            # from .services.user import UserService
-
             # Register PasswordHasher first
             c.register(
                 type_=PasswordHasher,

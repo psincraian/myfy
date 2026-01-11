@@ -469,7 +469,7 @@ class TestForwardReferenceHandling:
         # Simulate a handler that uses a forward reference to a type that
         # isn't available at runtime (e.g., imported under TYPE_CHECKING)
         async def handler_with_forward_ref(
-            service: "NonExistentService",  # noqa: F821 - intentionally undefined
+            service: "NonExistentService",  # type: ignore[unresolved-reference]  # noqa: F821
         ):
             return {}
 
@@ -490,7 +490,7 @@ class TestForwardReferenceHandling:
 
         async def mixed_handler(
             real: RealService,
-            fake: "FakeService",  # noqa: F821 - intentionally undefined
+            fake: "FakeService",  # type: ignore[unresolved-reference]  # noqa: F821
         ):
             return {}
 
