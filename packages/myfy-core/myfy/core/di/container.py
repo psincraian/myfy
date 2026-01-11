@@ -181,7 +181,17 @@ class Container:
         """Analyze the factory function to extract dependency requirements."""
         try:
             sig = signature(registration.factory)
-            hints = get_type_hints(registration.factory, include_extras=True)
+
+            # Build a namespace that includes all registered types.
+            # This allows forward references like "PasswordHasher" to be resolved
+            # even when the type is imported locally (inside configure()) rather
+            # than at module level.
+            globalns = dict(getattr(registration.factory, "__globals__", {}))
+            for key in self._providers:
+                if key.type.__name__ not in globalns:
+                    globalns[key.type.__name__] = key.type
+
+            hints = get_type_hints(registration.factory, globalns=globalns, include_extras=True)
 
             for param_name, param in sig.parameters.items():
                 if param_name == "self" or param.annotation == Parameter.empty:

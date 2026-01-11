@@ -172,7 +172,17 @@ class Router:
         4. DI dependencies (everything else - resolved from container)
         """
         sig = signature(route.handler)
-        hints = get_type_hints(route.handler)
+
+        # Try to get type hints, but handle forward reference errors gracefully.
+        # This can happen when handlers use TYPE_CHECKING imports or
+        # from __future__ import annotations with types that aren't available at runtime.
+        try:
+            hints = get_type_hints(route.handler)
+        except NameError:
+            # Fall back to raw annotations when forward references can't be resolved.
+            # For routing purposes, we mainly need to detect query params and body params.
+            # DI dependencies don't need the resolved type here - the container handles that.
+            hints = getattr(route.handler, "__annotations__", {})
 
         for param_name, param in sig.parameters.items():
             # Skip if it's a path parameter

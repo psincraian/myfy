@@ -445,3 +445,58 @@ class TestRouterState:
         assert route.path == "/direct"
         assert route.name == "direct"
         assert len(router.get_routes()) == 1
+
+
+# =============================================================================
+# Forward Reference Tests
+# =============================================================================
+
+
+class TestForwardReferenceHandling:
+    """Test handling of forward references in handler type annotations."""
+
+    def test_handler_with_unresolvable_forward_reference(self):
+        """Test that handlers with forward references that can't be resolved still work.
+
+        This simulates the pattern used in myfy-user where handlers use TYPE_CHECKING
+        imports with `from __future__ import annotations`. In this case, the type hints
+        are stored as strings and can't be resolved at runtime.
+
+        The router should gracefully handle this by falling back to raw annotations.
+        """
+        router = Router()
+
+        # Simulate a handler that uses a forward reference to a type that
+        # isn't available at runtime (e.g., imported under TYPE_CHECKING)
+        async def handler_with_forward_ref(
+            service: "NonExistentService",  # noqa: F821 - intentionally undefined
+        ):
+            return {}
+
+        # This should not raise NameError
+        route = router.add_route(
+            "/test", handler_with_forward_ref, HTTPMethod.GET, name="forward_ref_test"
+        )
+
+        # The parameter should be classified as a dependency (not path param or body)
+        assert "service" in route.dependencies
+
+    def test_handler_with_mixed_resolvable_and_unresolvable_refs(self):
+        """Test handler with both resolvable and unresolvable type hints."""
+        router = Router()
+
+        class RealService:
+            pass
+
+        async def mixed_handler(
+            real: RealService,
+            fake: "FakeService",  # noqa: F821 - intentionally undefined
+        ):
+            return {}
+
+        # Should not raise
+        route = router.add_route("/mixed", mixed_handler, HTTPMethod.GET)
+
+        # Both should be classified as dependencies
+        assert "real" in route.dependencies
+        assert "fake" in route.dependencies
