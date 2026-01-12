@@ -118,6 +118,53 @@ class TestGlobalRateLimiting:
         assert response.headers["X-RateLimit-Remaining"] == "9"
         assert "X-RateLimit-Reset" in response.headers
 
+    def test_rate_limit_resets_after_window_expires(self, router, store):
+        """After rate limit window expires, requests are allowed again."""
+        import time
+
+        # Use a very short window for fast testing
+        settings = RateLimitSettings(
+            enabled=True,
+            global_requests=2,
+            global_window_seconds=1,  # 1 second window
+            include_headers=True,
+        )
+
+        @router.get("/api/data")
+        async def get_data():
+            return {"data": "value"}
+
+        container = Container()
+        container.register(type_=Router, factory=lambda: router, scope=SINGLETON)
+        container.compile()
+
+        app = ASGIApp(container, router)
+
+        from myfy.web.ratelimit.middleware import RateLimitMiddleware
+
+        app.app.add_middleware(RateLimitMiddleware, store=store, settings=settings)
+
+        client = TestClient(app.app)
+
+        # Make requests until limit is reached
+        response1 = client.get("/api/data")
+        assert response1.status_code == 200, "First request should succeed"
+
+        response2 = client.get("/api/data")
+        assert response2.status_code == 200, "Second request should succeed"
+
+        # Third request should be rate limited
+        response3 = client.get("/api/data")
+        assert response3.status_code == 429, "Third request should be rate limited"
+        assert "Retry-After" in response3.headers
+
+        # Wait for the rate limit window to expire
+        time.sleep(1.1)
+
+        # Request should now succeed again
+        response4 = client.get("/api/data")
+        assert response4.status_code == 200, "Request after window expires should succeed"
+
     def test_rate_limiting_disabled(self, router, store):
         """Rate limiting can be disabled globally."""
         settings = RateLimitSettings(enabled=False)
