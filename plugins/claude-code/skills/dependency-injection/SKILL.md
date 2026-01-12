@@ -1,6 +1,6 @@
 ---
 name: dependency-injection
-description: myfy dependency injection with scopes (SINGLETON, REQUEST, TASK). Use when working with @provider decorator, DI container, scopes, or injection patterns.
+description: myfy dependency injection with scopes (SINGLETON, REQUEST, TASK). Use when working with @provider decorator, DI container, scopes, injection patterns, or understanding how WebModule, DataModule, FrontendModule, TasksModule, UserModule, CliModule, AuthModule, and RateLimitModule use dependency injection.
 ---
 
 # Dependency Injection in myfy

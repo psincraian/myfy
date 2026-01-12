@@ -1,11 +1,26 @@
 ---
 name: module-development
-description: myfy module protocol, lifecycle phases, and extension patterns. Use when creating new modules, working with configure/extend/finalize methods, or module dependencies.
+description: myfy module protocol, lifecycle phases, and extension patterns. Use when creating new modules, working with configure/extend/finalize methods, module dependencies, or using WebModule, DataModule, FrontendModule, TasksModule, UserModule, CliModule, AuthModule, or RateLimitModule.
 ---
 
 # Module Development in myfy
 
 Modules are the building blocks of myfy applications. Each module follows a protocol with lifecycle hooks.
+
+## Available Modules
+
+myfy provides these built-in modules:
+
+| Module | Package | Purpose |
+|--------|---------|---------|
+| WebModule | myfy.web | HTTP routing, ASGI, FastAPI-like decorators |
+| DataModule | myfy.data | SQLAlchemy async, migrations, sessions |
+| FrontendModule | myfy.frontend | Jinja2, Tailwind 4, DaisyUI 5, Vite |
+| TasksModule | myfy.tasks | Background jobs, SQL-based task queue |
+| UserModule | myfy.user | Auth, OAuth, user management |
+| CliModule | myfy.commands | Custom CLI commands |
+| AuthModule | myfy.web.auth | Type-based authentication, protected routes |
+| RateLimitModule | myfy.web.ratelimit | Rate limiting per IP or user |
 
 ## Module Protocol
 
