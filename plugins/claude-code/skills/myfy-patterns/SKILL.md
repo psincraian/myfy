@@ -1,6 +1,6 @@
 ---
 name: myfy-patterns
-description: Core myfy patterns and conventions for building applications. Use when working with myfy.core, Application, WebModule, DataModule, FrontendModule, TasksModule, or @route decorators.
+description: Core myfy patterns and conventions for building applications. Use when working with myfy.core, Application, WebModule, DataModule, FrontendModule, TasksModule, UserModule, CliModule, AuthModule, RateLimitModule, or @route decorators.
 ---
 
 # myfy Framework Patterns
@@ -27,6 +27,7 @@ from myfy.core import BaseSettings, BaseModule
 # Web
 from myfy.web import WebModule, route, Query, abort, errors
 from myfy.web import Authenticated, Anonymous, AuthModule
+from myfy.web.ratelimit import RateLimitModule, rate_limit
 
 # Data
 from myfy.data import DataModule, AsyncSession
@@ -39,6 +40,9 @@ from myfy.frontend import FrontendModule, render_template
 
 # User
 from myfy.user import UserModule
+
+# CLI Commands
+from myfy.commands import CliModule, cli
 ```
 
 ## Application Structure
@@ -68,6 +72,8 @@ app.add_module(WebModule())
 | TasksModule | myfy-tasks | Background jobs, SQL-based task queue |
 | UserModule | myfy-user | Auth, OAuth, user management |
 | CliModule | myfy-commands | Custom CLI commands |
+| AuthModule | myfy-web.auth | Type-based authentication, protected routes |
+| RateLimitModule | myfy-web.ratelimit | Rate limiting per IP or user |
 
 ## Key Conventions
 

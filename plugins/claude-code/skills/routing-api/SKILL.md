@@ -1,6 +1,6 @@
 ---
 name: routing-api
-description: myfy web routing with FastAPI-like decorators. Use when working with @route decorators, path parameters, query parameters, request bodies, authentication, or error handling.
+description: myfy web routing with FastAPI-like decorators. Use when working with WebModule, @route decorators, path parameters, query parameters, request bodies, AuthModule for authentication, RateLimitModule for rate limiting, or error handling.
 ---
 
 # Web Routing in myfy
